@@ -215,7 +215,7 @@ def test_counts_and_comparisons_are_computed_by_code(toolbox, catalog):
     ground = run(toolbox, tool="count_investigations", type="Ground")[0]
     assert "6 Ground investigations" in ground.text and ground.kind == "C"
     sims = run(toolbox, tool="count_investigations", method="simulation")[0]
-    assert "Only investigations whose method label was checked are counted" in sims.text
+    assert "method label was checked" in sims.text and "()" not in sims.text         # no empty list of unconfirmed investigations
     both = run(toolbox, tool="compare", psi_ids=["PSI-69", "PSI-117"])
     assert both[0].id == "C:compare:PSI-69+PSI-117" and "Type (differs): FLEX: Microgravity; PSI-117: Ground" in both[0].text
     from app.insights.tools import ToolError
@@ -357,7 +357,7 @@ def test_a_question_is_answered_checked_and_logged(make_client, tmp_path):
             {"text": "There is a fire in the BASS-II cabin.", "cites": [n]},                   # C-SCOPE
         ]}
     handler = make_ollama_fn(respond)
-    resp = ask(make_client(handler), "Tell me about carbon monoxide")             # names nothing and asks for nothing specific: the Investigator is used
+    resp = ask(make_client(handler), "Summarise PSI information on carbon monoxide")             # names nothing and asks for nothing specific: the Investigator is used
     assert resp.status_code == 200 and resp.headers["content-type"].startswith("text/event-stream")
     events = events_of(resp)
     assert [e["type"] for e in events][0] == "frame" and events[-1]["type"] == "done"
@@ -375,7 +375,7 @@ def test_a_question_is_answered_checked_and_logged(make_client, tmp_path):
     logs = list((tmp_path / "nimbus-runs").glob("insights-*.json"))
     assert len(logs) == 1
     log = json.loads(logs[0].read_text())
-    assert log["question"].startswith("Tell me about carbon") and log["raw_answer"]["sentences"] and log["verification"]["removed"] and log["spec_hash"]
+    assert log["question"].startswith("Summarise PSI information on carbon") and log["raw_answer"]["sentences"] and log["verification"]["removed"] and log["spec_hash"]
 
 
 def test_the_investigator_is_skipped_when_the_question_is_clear_and_used_when_it_is_open(make_client):
@@ -387,7 +387,7 @@ def test_the_investigator_is_skipped_when_the_question_is_clear_and_used_when_it
     assert [s["status"] for s in events if s["type"] == "stage" and s["stage"] == "investigator"] == ["skipped"]
     assert all(s["role"] != "investigator" for s in named.seen)                                # no model call to choose tools
     open_q = make_ollama_fn(respond)
-    events_of(ask(make_client(open_q), "Tell me about extinction"))
+    events_of(ask(make_client(open_q), "Summarise PSI information on extinction"))
     inv = next(s for s in open_q.seen if s["role"] == "investigator")["body"]
     assert inv["options"]["temperature"] == 0 and inv["options"]["num_predict"] == 160 and inv["keep_alive"] == "30m"
     tools_enum = inv["format"]["properties"]["calls"]["items"]["properties"]["tool"]["enum"]

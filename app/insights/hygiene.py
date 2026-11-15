@@ -1,7 +1,8 @@
 """Evidence hygiene: PSI text is data. A passage that reads like an instruction to the assistant is held back from the prompt.
 
-Fixed rules in code, no SI (OWASP LLM01 indirect prompt injection, LLM04 poisoned data). Every passage is also flattened to one line, so
-it cannot forge a numbered evidence entry or a chat role inside the prompt.
+Fixed rules in code, no SI (OWASP LLM01 indirect prompt injection, LLM04 poisoned data). A passage that imitates a numbered evidence entry or a chat role is held back
+too, so what remains cannot forge one. Control and invisible characters are removed; the layout of a passage (its line breaks) is kept,
+because the model reads test rows better that way.
 """
 
 from __future__ import annotations
@@ -29,7 +30,7 @@ RULES = [
 
 
 def scrub_evidence(items: list[Item]) -> tuple[list[Item], list[dict]]:
-    """(the items to use, a record of each passage held back). Surviving items have their text flattened to one line."""
+    """(the items to use, a record of each passage held back). Surviving items keep their layout."""
     kept, held = [], []
     for it in items:
         raw = INVISIBLE.sub("", CONTROL.sub(" ", it.text))
@@ -37,6 +38,5 @@ def scrub_evidence(items: list[Item]) -> tuple[list[Item], list[dict]]:
         if hit:
             held.append({"id": it.id, "rule": hit[0], "why": hit[1]})
             continue
-        flat = re.sub(r"\s+", " ", raw).strip()
-        kept.append(dataclasses.replace(it, text=flat) if flat != it.text else it)
+        kept.append(dataclasses.replace(it, text=raw) if raw != it.text else it)
     return kept, held

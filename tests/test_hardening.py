@@ -60,9 +60,9 @@ def test_a_passage_that_reads_like_an_instruction_is_held_back(text):
     assert [i.id for i in kept] == ["D:PSI-69:doc:1"] and held[0]["id"] == "D:PSI-69:doc:2"
 
 
-def test_an_ordinary_passage_is_kept_and_flattened_to_one_line():
-    kept, held = hygiene.scrub_evidence([item("Droplets burned.\nThe oxygen\tfraction was 0.21.\n\nTests ran at 1 atm.")])
-    assert not held and kept[0].text == "Droplets burned. The oxygen fraction was 0.21. Tests ran at 1 atm."
+def test_an_ordinary_passage_is_kept_with_its_layout_and_hidden_characters_removed():
+    kept, held = hygiene.scrub_evidence([item("Droplets burned.\nThe oxygen\u200b fraction was 0.21.\x07\nTests ran at 1 atm.")])
+    assert not held and kept[0].text == "Droplets burned.\nThe oxygen fraction was 0.21. \nTests ran at 1 atm."
 
 
 def test_no_real_psi_passage_is_held_back_so_the_rules_do_not_cost_answers():

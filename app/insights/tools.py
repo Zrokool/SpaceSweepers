@@ -250,7 +250,8 @@ class Toolbox:
         text = f"Counted by code over the 26 investigations in PSI's combustion search: {len(rows)} {what}" + (f": {listing}." if rows else ".")
         if c.method:
             unconfirmed = [i["id"] for i in self.catalog.ordered() if i["method"]["status"] not in ("verified", "team-confirmed")]
-            text += f" Only investigations whose method label was checked are counted; {len(unconfirmed)} are not confirmed yet ({', '.join(unconfirmed)})."
+            text += (f" Only investigations whose method label was checked are counted; {len(unconfirmed)} are not confirmed yet ({', '.join(unconfirmed)})." if unconfirmed
+                     else " Every investigation's method label was checked.")
         return [computed("count:" + re.sub(r"\W+", "_", what), text)]
 
 

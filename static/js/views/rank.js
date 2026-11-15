@@ -60,7 +60,7 @@ export async function render(root, state) {
             i.research_area, [i.fit.factor_reason]))),
         el("td", { text: i.hardware.join(", ") || "–" }),
         el("td", { text: i.fuel_classes.join(", ") + (i.solid_emulation ? " (emulates solids)" : "") || "–" }),
-        withTip(el("td", { class: "num", text: fmt(i.table_rows) }), "Test-table rows downloaded from PSI", [i.fit.components.data.why]),
+        withTip(el("td", { class: "num", text: fmt(i.table_rows) }), "Lines in the test tables downloaded from PSI (a line is not always one test)", [i.fit.components.data.why]),
         habitatOn && withTip(el("td", { class: "num" }, hab(prox.score == null ? "?" : fmt(prox.inside ?? 0))), "Tests in the habitat box", [prox.why]),
         el("td", {}, fitBar(i.fit, weights)),
         el("td", { class: "num" }, habitatOn ? hab(Math.round(score)) : Math.round(score)));
@@ -88,7 +88,7 @@ export async function render(root, state) {
       el("p", { class: "lede", text: `Each investigation gets a score from ${partsText}. Every part is computed from the PSI record or its test table, never by SI. Move the weights to see the ranking change; hover a bar to see why. These weights are our judgement, not NASA data.` })),
     el("div", { class: "card" }, el("div", { class: "weights" }, sliders),
       el("div", { class: "legend" },
-        el("label", { class: "key" }, el("input", { type: "checkbox", onchange: (e) => { measuredOnly = e.target.checked; drawRows(); } }), "Measured work only (hide simulations and data analysis)"),
+        el("label", { class: "key" }, el("input", { type: "checkbox", onchange: (e) => { measuredOnly = e.target.checked; drawRows(); } }), "Measured work only (hide simulations)"),
         el("button", { class: "btn-ghost", type: "button", text: "Reset weights",
           onclick: () => {
             weights = { ...data.weights };
@@ -99,7 +99,7 @@ export async function render(root, state) {
         el("summary", {}, el("strong", { text: `Condition match unknown for ${unknown} of ${data.investigations.filter((i) => i.is_combustion).length} ` }), "(no placeable tests) · why?"),
         el("p", { class: "muted", text: "Their test tables haven't been mapped yet (or PSI lists none), or they record oxygen without pressure, so their oxygen and pressure values can't be placed. Unknown is drawn hatched and counted as zero, not as \"never tested\"." }))),
     el("div", { class: "table-wrap" }, el("table", {},
-      el("thead", {}, el("tr", {}, ...[["#", "num"], ["Investigation"], ["Type and method"], ["Hardware"], ["Fuel"], ["Test rows", "num"], habitatOn && ["In box", "num"], ["Mission fit"], ["Score", "num"]]
+      el("thead", {}, el("tr", {}, ...[["#", "num"], ["Investigation"], ["Type and method"], ["Hardware"], ["Fuel"], ["Table lines", "num"], habitatOn && ["In box", "num"], ["Mission fit"], ["Score", "num"]]
         .filter(Boolean).map(([t, c]) => el("th", { class: [c, habitatOn && ["In box", "Mission fit", "Score"].includes(t) ? "hab-h" : null].filter(Boolean).join(" ") || null, text: t })))),
       tbody)),
   );

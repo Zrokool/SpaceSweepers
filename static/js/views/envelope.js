@@ -83,7 +83,7 @@ export async function render(root, state) {
       data.points.length > 0 && el("p", { text: `Where the oxygen value comes from: ${count("o2_role", { ambient: "room air", oxidizer_stream: "burner stream" })}` }),
       data.points.length > 0 && el("p", { text: `Fuel: ${count("fuel_class", {})}` }),
       stream > 0 && el("div", { class: "note", text: `${stream} of these tests give the oxygen of the gas leaving the burner, not of the air around the flame. They are drawn hollow and must not be read as room-air oxygen.` }),
-      withoutTables > 0 && el("div", { class: "note", text: `${withoutTables} of the combustion investigations have no test data on this chart yet (their tables aren't mapped yet, or PSI lists none). An empty part of the chart means "not in the data we hold", not "never tested".` }));
+      withoutTables > 0 && el("div", { class: "note", text: `${withoutTables} of the combustion investigations have no plotted tests on this chart yet (their tables aren't mapped yet, or PSI lists none). An empty part of the chart means "not in the data we hold", not "never tested".` }));
     holder.replaceChildren(
       el("div", { class: "split" },
         el("div", {},
@@ -107,7 +107,7 @@ export async function render(root, state) {
             el("ul", { class: "plain" }, ...Object.entries(byInv).map(([id, v]) => el("li", {},
               el("a", { href: "#", text: `${v.name} (${id})`, onclick: (e) => { e.preventDefault(); openDetail(id); } }),
               ` — ${v.n} tests · `, el("a", { href: `/api/investigations/${id}/tests.csv`, text: "CSV with sources" })))),
-            Object.keys(data.skipped).length > 0 && el("p", { class: "muted", text: `Left out: ${Object.entries(data.skipped).map(([k, n]) => `${n} ${k}`).join("; ")}.` })))));
+            Object.keys(data.skipped).length > 0 && el("p", { class: "muted", text: `Left out: ${Object.entries(data.skipped).map(([k, n]) => `${n} ${k}`).join("; ")}.${(data.left_out_by || []).length ? " Mostly from " + data.left_out_by.slice(0, 4).map((x) => `${x.investigation} (${x.tests}${x.plotted ? "" : ", none plotted"})`).join(", ") + "." : ""}` })))));
   }
   root.append(
     el("div", {}, el("p", { class: "eyebrow", text: "Flammability envelope" }), el("h1", { text: "Where has NASA tested, and where does the data stop?" }),

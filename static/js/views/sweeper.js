@@ -179,6 +179,8 @@ function skillCard(data) {
 }
 
 export async function render(root, state) {
+  const want = state.params.get("family");
+  if (["droplet_end_state", "gas_ignition", "droplet_reignition", "solid_burn"].includes(want)) sel = { family: want, fuel: state.params.get("fuel") || "", diluent: state.params.get("diluent") || "", cell: null };
   const habitatOn = state.habitatView;
   sel.cell = null;
   const holder = el("div");
