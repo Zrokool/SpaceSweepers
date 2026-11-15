@@ -6,6 +6,13 @@ The idea in one line: **SI proposes, PSI data decides.** A local SI model reads 
 
 Data: NASA Physical Sciences Informatics (PSI). SpaceSweepers is not affiliated with or endorsed by NASA.
 
+**Live demo:** <https://zrokool.github.io/SpaceSweepers/>, a static copy of the dashboard on GitHub Pages (no SI model).
+
+| Branch | What it is |
+|---|---|
+| `demo` (default) | The static GitHub Pages demo. This branch. Merge `production` into it to refresh the demo. |
+| `production` | The full app: the dashboard plus the SI chat, run locally with the SI model. |
+
 ---
 
 ## Status
@@ -77,7 +84,7 @@ docker run --rm -p 8000:8000 -e 'SS_ALLOWED_HOSTS=["localhost","127.0.0.1","your
 - **Updating the data:** run `python -m app.psi.sync` (and `python -m app.nimbus.method`, `app.nimbus.tables`, `app.nimbus.pillars` as needed), review the tables it prints, commit `data/`, push. The pipeline rebuilds the image from the committed data. The SI parts that need Granite (chat, Micro-Flame explanations) work only where Ollama is reachable at `SS_OLLAMA_URL`; everything else works without it.
 
 ### GitHub Pages (static demo, `demo` branch)
-The static demo lives on the **`demo` branch**. `main` is the full app that runs locally with the SI model and contains none of this. Merge `main` into `demo` to refresh the demo after a change.
+The static demo lives on the **`demo` branch**. `production` is the full app that runs locally with the SI model and contains none of this. Merge `production` into `demo` to refresh the demo after a change.
 
 GitHub Pages serves files only, so it can't run the Python server or the local SI model. The exporter therefore runs the app once, in-process, and writes every answer of its API to a file. `python -m app.static_export --publish` writes `index.html`, `api/` and `.nojekyll` at the repository root, next to `static/` (which the page uses as is). Pages set to **Deploy from a branch → `demo` → `/ (root)`** serves them; no workflow or environment setting is needed. A test fails if those files are out of date, so run `--publish` and commit after any change to the data or the dashboard. The dashboard views (Overview, Fire Safety, Rank, Correlation, Envelope, Flame Sweeper, References and the investigation panels) are the same data and the same calculations as the live app, for each habitat, pillar and Flame Sweeper selection the page offers. Two things differ:
 
