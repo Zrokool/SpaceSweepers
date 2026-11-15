@@ -298,14 +298,16 @@ def simulation_strips(catalog, fam: dict) -> list[dict]:
     return out
 
 
-def sweep(catalog, family: str, habitat: dict, fuel: str | None = None, diluent: str | None = None) -> dict:
+def sweep(catalog, family: str, habitat: dict | None, fuel: str | None = None, diluent: str | None = None) -> dict:
     fam = FAMILIES[family]
     rows, dropped = collect(catalog, family, fuel, diluent)
     out = {"family": family, "label": fam["label"], "definition": fam["definition"], "sustained_label": fam["sustained_label"],
            "simulations": simulation_strips(catalog, fam),
            "gone_label": fam["gone_label"], "tests": len(rows), "dropped": dropped,
            "investigations": sorted({r["psi"] for r in rows}, key=lambda s: int(s.split("-")[1])), "filters": {"fuel": fuel, "diluent": diluent},
-           "habitat": {"label": habitat.get("label"), "o2": habitat["o2"], "p_atm": [habitat["pressure_psi"][0] / ATM_PSI, habitat["pressure_psi"][1] / ATM_PSI]}}
+           # With the Habitat view off no habitat is used anywhere in this result: no box, no habitat sentence, no habitat-weighted suggestions.
+           "habitat": ({"label": habitat.get("label"), "o2": habitat["o2"], "p_atm": [habitat["pressure_psi"][0] / ATM_PSI, habitat["pressure_psi"][1] / ATM_PSI]}
+                       if habitat else None)}
     if not rows:
         return {**out, "axes": None, "cells": [], "skill": {"passes": False, "reason": "No usable tests for this selection."}, "patterns": [], "next": []}
     axes = _axes(rows)
@@ -354,7 +356,7 @@ def sweep(catalog, family: str, habitat: dict, fuel: str | None = None, diluent:
 
 
 # ------------------------------------------------------------------ patterns and suggestions, all computed
-def patterns(rows: list[dict], fam: dict, habitat: dict) -> list[dict]:
+def patterns(rows: list[dict], fam: dict, habitat: dict | None) -> list[dict]:
     """Plain facts read straight off the tests. Each has an id so a sentence can cite it."""
     modelled = [(r, label(r, fam)) for r in rows if label(r, fam) is not None]
     out = []
@@ -401,17 +403,18 @@ def patterns(rows: list[dict], fam: dict, habitat: dict) -> list[dict]:
                     "text": (f"At {level:g} atm or less, the outcome was \"{fam['sustained_label']}\" in none of {len(low)} tests; above {level:g} atm it was in "
                              f"{sum(high)} of {len(high)}."),
                     "numbers": {"p_atm": level, "below": len(low), "above_yes": sum(high), "above": len(high)}})
-    h = {"o2": habitat["o2"], "pressure_psi": habitat["pressure_psi"]}
-    box = [(r, y) for r, y in modelled if in_box(h, r["o2"], r["p_atm"] * ATM_PSI)]
-    near = [(r, y) for r, y in modelled if (r, y) not in box and h["o2"][0] - NEAR_O2 <= r["o2"] <= h["o2"][1] + NEAR_O2
-            and h["pressure_psi"][0] - NEAR_PSI <= r["p_atm"] * ATM_PSI <= h["pressure_psi"][1] + NEAR_PSI]
-    text = f"{len(box)} of {n} usable tests lie inside the selected habitat's oxygen and pressure box"
-    text += f"; the outcome was \"{fam['sustained_label']}\" in {sum(y for _, y in box)} of them" if box else ""
-    if near:
-        nearest = sorted(r["p_atm"] * ATM_PSI for r, _ in near)
-        text += (f". {len(near)} more lie within {NEAR_O2:g} oxygen and {NEAR_PSI:g} psi of it (their pressures run {nearest[0]:.1f} to {nearest[-1]:.1f} psi); "
-                 f"the outcome was \"{fam['sustained_label']}\" in {sum(y for _, y in near)} of those")
-    out.append({"id": "P4", "kind": "habitat", "text": text + ".", "numbers": {"inside": len(box), "near": len(near), "tests": n}})
+    if habitat is not None:                      # with the Habitat view off there is no habitat sentence at all
+        h = {"o2": habitat["o2"], "pressure_psi": habitat["pressure_psi"]}
+        box = [(r, y) for r, y in modelled if in_box(h, r["o2"], r["p_atm"] * ATM_PSI)]
+        near = [(r, y) for r, y in modelled if (r, y) not in box and h["o2"][0] - NEAR_O2 <= r["o2"] <= h["o2"][1] + NEAR_O2
+                and h["pressure_psi"][0] - NEAR_PSI <= r["p_atm"] * ATM_PSI <= h["pressure_psi"][1] + NEAR_PSI]
+        text = f"{len(box)} of {n} usable tests lie inside the selected habitat's oxygen and pressure box"
+        text += f"; the outcome was \"{fam['sustained_label']}\" in {sum(y for _, y in box)} of them" if box else ""
+        if near:
+            nearest = sorted(r["p_atm"] * ATM_PSI for r, _ in near)
+            text += (f". {len(near)} more lie within {NEAR_O2:g} oxygen and {NEAR_PSI:g} psi of it (their pressures run {nearest[0]:.1f} to {nearest[-1]:.1f} psi); "
+                     f"the outcome was \"{fam['sustained_label']}\" in {sum(y for _, y in near)} of those")
+        out.append({"id": "P4", "kind": "habitat", "text": text + ".", "numbers": {"inside": len(box), "near": len(near), "tests": n}})
     if fam.get("layer") == "document":
         yes = sum(y for _, y in modelled)
         out.append({"id": "P6", "kind": "document_layer",
@@ -421,10 +424,10 @@ def patterns(rows: list[dict], fam: dict, habitat: dict) -> list[dict]:
     return out
 
 
-def next_tests(grid: list[dict], axes: dict, habitat: dict, limit: int = 5) -> list[dict]:
+def next_tests(grid: list[dict], axes: dict, habitat: dict | None, limit: int = 5) -> list[dict]:
     """Untested cells worth testing: beside tested cells, preferably where neighbours disagree or inside the habitat box."""
     by = {(c["i"], c["j"]): c for c in grid}
-    h_o, h_p = habitat["o2"], [habitat["pressure_psi"][0] / ATM_PSI, habitat["pressure_psi"][1] / ATM_PSI]
+    h_o, h_p = (habitat["o2"], [habitat["pressure_psi"][0] / ATM_PSI, habitat["pressure_psi"][1] / ATM_PSI]) if habitat else (None, None)
     out = []
     for c in grid:
         if c["state"] != "fog":
@@ -435,7 +438,7 @@ def next_tests(grid: list[dict], axes: dict, habitat: dict, limit: int = 5) -> l
             continue
         mixed = min(x["share"] for x in seen) < 0.5 <= max(x["share"] for x in seen) or (max(x["share"] for x in seen) - min(x["share"] for x in seen) >= 0.5)
         mid_o, mid_p = sum(c["o2"]) / 2, sum(c["p_atm"]) / 2
-        inside = h_o[0] <= mid_o <= h_o[1] and h_p[0] <= mid_p <= h_p[1]
+        inside = bool(habitat) and h_o[0] <= mid_o <= h_o[1] and h_p[0] <= mid_p <= h_p[1]
         score = len(seen) + (2 if mixed else 0) + (3 if inside else 0)
         why = [f"{len(seen)} tested neighbouring cell{'s' if len(seen) != 1 else ''}"] + (["neighbours disagree"] if mixed else []) + (["inside the habitat box"] if inside else [])
         out.append({"i": c["i"], "j": c["j"], "o2": c["o2"], "p_atm": c["p_atm"], "score": score, "why": ", ".join(why)})

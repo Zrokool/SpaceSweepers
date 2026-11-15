@@ -210,3 +210,39 @@ def test_the_simulation_strip_is_metadata_for_the_same_fuel_only(catalog):
     assert sweeper.sweep(catalog, "droplet_end_state", HABITATS["moon"])["simulations"] == []                    # not offered where it isn't about the same experiment
     assert sweeper._pressure_span("0.5 - 3.0") == ("range", [0.5, 3.0]) and sweeper._pressure_span("0.5 and 5.0") == ("points", [0.5, 5.0])
     assert sweeper._pressure_span("~4.5") == ("point", [4.5]) and sweeper._pressure_span("") is None
+
+
+# ---------------------------------------------------------------- Rank: unknown is shown, not guessed
+def test_an_unknown_part_is_a_floor_with_a_ceiling_never_a_reweighted_score(catalog):
+    moon = HABITATS["moon"]
+    r25 = rank.score(catalog.get("PSI-25"), catalog.tests_for("PSI-25"), moon, None)
+    r69 = rank.score(catalog.get("PSI-69"), catalog.tests_for("PSI-69"), moon, None)
+    assert r25["unknown"] == ["proximity"] and r69["unknown"] == []
+    assert rank.total(r25) == 57.3 and rank.ceiling(r25) == 97.3                     # proven fit and what it could be if condition match were perfect
+    assert rank.total(r25) < rank.total(r69) and rank.ceiling(r69) == rank.total(r69)  # unknown never lifts an investigation above a proven one
+
+
+def test_no_fuel_word_is_unknown_not_a_zero_score(catalog):
+    for inv_id in ("PSI-47", "PSI-60", "PSI-108", "PSI-115", "PSI-181"):
+        f = rank.fuel(catalog.get(inv_id)["attributes"])
+        assert f["score"] is None and "unknown, not zero" in f["why"]
+    assert rank.fuel(catalog.get("PSI-26")["attributes"])["score"] == 1.0
+
+
+def test_analyzed_figures_add_data_credit_only_to_the_investigations_that_hold_them(catalog):
+    held = {i["id"]: len(i.get("analyzed") or []) for i in catalog.ordered() if i.get("analyzed")}
+    assert set(held) == {"PSI-117", "PSI-142"}
+    d117 = rank.data_richness(catalog.get("PSI-117"))
+    assert d117["figures"] == held["PSI-117"] and d117["score"] > 0.3 and "never condition evidence" in d117["why"]
+    assert rank.data_richness(catalog.get("PSI-69"))["score"] == pytest.approx(0.7)        # unchanged without figures
+
+
+def test_rank_floor_order_is_unchanged_and_the_api_explains_the_score(client):
+    body = client.get("/api/investigations").json()
+    ranked = [r["id"] for r in body["investigations"]]
+    totals = [r["fit"]["total"] for r in body["investigations"]]
+    assert totals == sorted(totals, reverse=True) and ranked[0] == "PSI-69"                # ranked by the proven fit
+    assert all(r["fit"]["ceiling"] >= r["fit"]["total"] for r in body["investigations"])
+    assert body["method"]["weights"] == body["weights"] and body["method"]["figure_credit"] == 0.2
+    assert body["stability"]["all"][ranked[0]] >= 0.8 and all(0 < v <= 1 for v in body["stability"]["all"].values())
+    assert body["stability"] == client.get("/api/investigations").json()["stability"]     # deterministic

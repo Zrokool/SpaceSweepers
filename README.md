@@ -110,7 +110,7 @@ Specs     Nimbus/agents/         SI agent prompts, schemas and check rules, load
 ### The data rules
 - **Scope:** only the 26 investigations PSI's search page returns for "combustion". Two of them (PSI-108, PSI-181) aren't combustion research; they're kept, labelled, and ranked low.
 - **Nothing is silently cleaned.** Every test value keeps its raw text, parsed number, unit, quality flag (`ok`, `approx`, `range`, `multi`, `missing`, `implausible`, `unparsed`), source file and row.
-- **Unknown is not zero.** A component that can't be computed is shown as unknown.
+- **Unknown is not zero, and not guessed.** A component that can't be computed is shown as unknown. The Rank score counts it as zero (the proven fit, which is what ranks the rows), and each row also shows "up to N", the score if the unknown part were perfect. Unknown parts are never re-weighted away, because that would rank an investigation with no condition evidence above one with proven tests.
 - **Oxygen has a role.** In CFI-G inverse flames the oxygen value is the gas leaving the burner, not the air around the flame. Such tests are drawn hollow and never counted as habitat air.
 - **Ground studies are traced to their flight data.** PSI's "Related Investigations" field names the flight investigation a ground study builds on.
 - **Contact details are removed** from PSI records before anything is saved. Raw data and video are never downloaded.
@@ -123,9 +123,9 @@ Four parts, each 0–1, weighted in the browser (defaults 40 / 25 / 20 / 15):
 | Condition match | Tests inside or near the habitat's oxygen and pressure box (room-air oxygen only) |
 | Fuel relevance | Fuels named in the record text and in each test table's own Fuel/Material column: solid 1.0, liquid 0.6, gas 0.4; a gas burner that emulates solids (ACME BRE) 0.8 |
 | Pillar match | Mentions of prevention, detection or suppression terms |
-| Data richness | Test-table rows downloaded (mapped or not, full marks at 100), publications (10) and documents read (5) |
+| Data richness | Test-table rows downloaded (mapped or not, full marks at 100), publications (10) and documents read (5); stored Analyzed Data figures add up to 20% extra (full at 5). Figures are data we hold, never condition evidence |
 
-Investigations outside Combustion Science are multiplied by 0.25.
+Investigations outside Combustion Science are multiplied by 0.25. The Rank page has a "How the score works" panel written from the same constants, and shows how often each investigation stays in the top five when the weights are varied at random (400 seeded runs).
 
 ### SI Insights (the chat)
 Open the **SI Insights** tab and ask a question, for example "What did FLEX find about extinction?", "Compare BASS and BASS-II" or "Which BASS-II tests recorded carbon monoxide?".

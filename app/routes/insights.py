@@ -212,7 +212,7 @@ class ExplainRequest(BaseModel):
     family: str = Field(max_length=30)
     fuel: str | None = Field(default=None, max_length=30)
     diluent: str | None = Field(default=None, pattern=r"^(nitrogen only|helium|carbon dioxide)$")
-    habitat: str = Field(default="moon", max_length=12)
+    habitat: str | None = Field(default="moon", max_length=12)      # null: the Habitat view is off, so no habitat is used
 
 
 @sweeper_router.post("/explain")
@@ -222,8 +222,8 @@ async def explain(request: Request, body: ExplainRequest, eng: Engine, settings:
     """Micro-Flame: a checked, at most three-sentence physical explanation of the Flame Sweeper patterns for one selection."""
     if body.family not in sweeper_mod.FAMILIES:
         raise HTTPException(404, f"unknown family {body.family!r}")
-    if body.habitat not in HABITATS:
+    if body.habitat is not None and body.habitat not in HABITATS:
         raise HTTPException(404, f"unknown habitat {body.habitat!r}")
     library, _, checker = eng
-    result = sweeper_mod.sweep(get_catalog(settings.data_dir), body.family, {"key": body.habitat, **HABITATS[body.habitat]}, body.fuel, body.diluent)
+    result = sweeper_mod.sweep(get_catalog(settings.data_dir), body.family, ({"key": body.habitat, **HABITATS[body.habitat]} if body.habitat else None), body.fuel, body.diluent)
     return (await micro_flame.explain(http, settings, library, checker, result)).as_dict()
