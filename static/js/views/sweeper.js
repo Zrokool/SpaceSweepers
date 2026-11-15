@@ -188,6 +188,7 @@ export async function render(root, state) {
   async function draw() {
     const q = new URLSearchParams(habitatQuery());
     q.set("family", sel.family);
+    if (!habitatOn) q.set("habitat_view", "off");
     if (sel.fuel) q.set("fuel", sel.fuel);
     if (sel.diluent) q.set("diluent", sel.diluent);
     const data = await api(`/api/sweeper?${q}`);
@@ -212,10 +213,10 @@ export async function render(root, state) {
           el("div", { class: "card" }, el("h3", { text: "What the data says" }),
             el("ul", { class: "facts" }, ...data.patterns.map((p) => el("li", p.kind === "habitat" ? {} : { text: p.text }, p.kind === "habitat" ? hab(p.text) : null))),
             el("p", { class: "muted", text: "Every sentence is computed by code from the tests shown. These are patterns in what NASA tested; they do not say what will happen in a real fire." }),
-            explainBlock(state.habitat)),
+            explainBlock(habitatOn ? state.habitat : null)),
           skillCard(data),
           el("div", { class: "card" }, el("h3", { text: "What to test next" }),
-            el("p", { class: "muted", text: "Untested cells beside tested ones, where neighbours disagree or that lie inside the habitat's atmosphere. A suggestion for experiment designers, not safety guidance." }),
+            el("p", { class: "muted", text: `Untested cells beside tested ones, where neighbours disagree${habitatOn ? " or that lie inside the habitat's atmosphere" : ""}. A suggestion for experiment designers, not safety guidance.` }),
             data.next.length ? el("ul", { class: "plain" }, ...data.next.map((n) => el("li", {}, el("button", { class: "btn-ghost", type: "button",
               text: `Oxygen ${n.o2[0].toFixed(2)}–${n.o2[1].toFixed(2)}, ${n.p_atm[0].toFixed(2)}–${n.p_atm[1].toFixed(2)} atm`,
               onclick: () => { sel.cell = data.cells.find((c) => c.i === n.i && c.j === n.j); draw(); } }), ` ${n.why}`))) : el("p", { text: "None found." })),

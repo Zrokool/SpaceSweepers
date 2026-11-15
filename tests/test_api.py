@@ -200,3 +200,13 @@ def test_envelope_counts_investigations_with_nothing_plotted_and_names_where_tes
     assert not set(e["gaps"]["investigations_without_tables"]) & plotted
     assert sum(x["tests"] for x in e["left_out_by"]) == e["skipped"].get("no usable oxygen or pressure value", 0)
     assert all(p["fuel_class"] for p in e["points"] if p["investigation"] == "PSI-10")
+
+
+def test_with_the_habitat_view_off_the_sweeper_uses_no_habitat_at_all(client):
+    on = client.get("/api/sweeper?habitat=eva").json()
+    off = client.get("/api/sweeper?habitat=eva&habitat_view=off").json()
+    assert on["habitat"] and any(p["kind"] == "habitat" for p in on["patterns"])
+    assert off["habitat"] is None and not any(p["kind"] == "habitat" for p in off["patterns"])
+    assert not any("habitat" in n["why"] for n in off["next"]) and off["tests"] == on["tests"]       # same tests, no habitat wording
+    iss = client.get("/api/sweeper?habitat=iss").json()
+    assert iss["habitat"]["o2"] != on["habitat"]["o2"]                                                 # a chosen habitat does change the result

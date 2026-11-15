@@ -468,3 +468,8 @@ th.hab-h { color: var(--ember-soft); }
 [data-mode="guided"] .msg.ai .sentence { font-size: 16px; }
 .chat-sources table { font-size: 13px; }
 .chat-sources th, .chat-sources td { padding: 7px 9px; }
+.ceil { display: block; font-size: 12px; font-weight: 400; }
+.method { margin-top: 18px; font-size: 14px; }
+.method > summary { cursor: pointer; }
+.method ul { margin: 10px 0; padding-left: 18px; color: var(--muted); }
+.method li { margin: 4px 0; }

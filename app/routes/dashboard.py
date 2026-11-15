@@ -121,9 +121,12 @@ async def investigations(request: Request, catalog: Cat, habitat: Habitat, pilla
     rows = []
     for inv in catalog.ordered():
         result = rank.score(inv, catalog.tests_for(inv["id"]), habitat, pillar)
-        rows.append({**_summary(inv), "fit": {**result, "total": rank.total(result)}})
-    rows.sort(key=lambda r: -r["fit"]["total"])
-    return {"habitat": habitat, "pillar": pillar, "weights": rank.DEFAULT_WEIGHTS, "investigations": rows}
+        rows.append({**_summary(inv), "fit": {**result, "total": rank.total(result), "ceiling": rank.ceiling(result)}})
+    rows.sort(key=lambda r: (-r["fit"]["total"], r["id"]))
+    results = {r["id"]: r["fit"] for r in rows}
+    three = tuple(k for k in rank.DEFAULT_WEIGHTS if k != "proximity")
+    return {"habitat": habitat, "pillar": pillar, "weights": rank.DEFAULT_WEIGHTS, "investigations": rows, "method": rank.method(),
+            "stability": {"all": rank.stability(results), "without_proximity": rank.stability(results, three)}}
 
 
 @router.get("/investigations/{psi_id}")
@@ -194,11 +197,14 @@ _sweeper_cache: dict = {}
 @limiter.limit(lambda: get_settings().api_rate_limit)
 async def sweeper(request: Request, catalog: Cat, habitat: Habitat, family: Annotated[str, Query(max_length=30)] = "droplet_end_state",
                   fuel: Annotated[str | None, Query(max_length=30)] = None,
-                  diluent: Annotated[Literal["nitrogen only", "helium", "carbon dioxide"] | None, Query()] = None) -> dict:
+                  diluent: Annotated[Literal["nitrogen only", "helium", "carbon dioxide"] | None, Query()] = None,
+                  habitat_view: Annotated[Literal["on", "off"], Query()] = "on") -> dict:
     """Flame Sweeper: the oxygen x pressure field for one experiment family, with the skill check and what to test next."""
     if family not in sweeper_mod.FAMILIES:
         raise HTTPException(404, f"unknown family {family!r}")
-    key = (id(catalog), family, fuel, diluent, tuple(habitat["o2"]), tuple(habitat["pressure_psi"]))
+    if habitat_view == "off":                       # the Habitat view is off: nothing in the result may depend on a habitat
+        habitat = None
+    key = (id(catalog), family, fuel, diluent) + ((tuple(habitat["o2"]), tuple(habitat["pressure_psi"])) if habitat else ())
     if key not in _sweeper_cache:
         if len(_sweeper_cache) > 64:
             _sweeper_cache.clear()
