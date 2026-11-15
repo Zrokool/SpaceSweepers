@@ -1,13 +1,13 @@
 # syntax=docker/dockerfile:1
 # SpaceSweepers production image: small, non-root, no build tools or test deps.
 
-FROM python:3.14-slim AS build
+FROM python:3.15-slim AS build
 ENV PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
 WORKDIR /src
 COPY requirements.txt .
 RUN pip install --prefix=/install -r requirements.txt
 
-FROM python:3.14-slim
+FROM python:3.15-slim
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     SS_CACHE_DIR=/tmp/spacesweepers
