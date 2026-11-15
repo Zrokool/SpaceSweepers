@@ -185,3 +185,18 @@ def test_the_cfi_overlay_uses_real_cfi_tests_under_stated_conditions(client):
     assert o["tests"] == 38 and "C12H26" in o["conditions"] and {s["kind"] for s in o["series"]} == {"experiment-cfi"}
     table = (Path(__file__).resolve().parent.parent / "data" / "snapshot" / "tables" / "PSI-39" / "PSI-39_Workbook table_CFI Data Summary.csv").read_bytes().decode("utf-8-sig")
     assert all(re.search(rf"^{re.search(r'test (\d+[A-Za-z]?)', p[2]).group(1)},", table, re.M) for s in o["series"] for p in s["points"])      # each point is a real CFI test
+
+
+def test_envelope_counts_investigations_with_nothing_plotted_and_names_where_tests_were_left_out():
+    from collections import Counter
+    from app.analysis.envelope import envelope
+    from app.analysis.habitats import HABITATS
+    from app.catalog import load_catalog
+    from pathlib import Path
+    cat = load_catalog(Path(__file__).resolve().parent.parent / "data")
+    hab = next(iter(HABITATS.values())) if isinstance(HABITATS, dict) else HABITATS[0]
+    e = envelope(cat, hab)
+    plotted = {p["investigation"] for p in e["points"]}
+    assert not set(e["gaps"]["investigations_without_tables"]) & plotted
+    assert sum(x["tests"] for x in e["left_out_by"]) == e["skipped"].get("no usable oxygen or pressure value", 0)
+    assert all(p["fuel_class"] for p in e["points"] if p["investigation"] == "PSI-10")

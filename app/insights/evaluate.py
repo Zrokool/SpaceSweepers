@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import re
 import logging
 import time
 from datetime import UTC, datetime
@@ -52,10 +53,26 @@ def judge(case: dict, report: dict) -> list[str]:
     return problems
 
 
-async def main(only: list[int] | None) -> None:
+def judge_scenario(case: dict, report: dict, seconds: float) -> list[str]:
+    """A scenario answer must be the right kind, contain its expected numbers, be quick, and never present a range as a limit."""
+    problems, text = [], " ".join(s["text"] for s in report["answer"])
+    goal = (report.get("analysis") or {}).get("goal")
+    if goal != case["goal"]:
+        problems.append(f"expected a {case['goal']} answer, got {goal or report['mode']}")
+    for phrase in case.get("must_include", []):
+        if phrase.lower() not in text.lower() and phrase.lower() not in json.dumps(report.get("analysis") or {}).lower():
+            problems.append(f"answer does not contain {phrase!r}")
+    if seconds > case.get("seconds", 3):
+        problems.append(f"took {seconds:.0f}s (allowed {case.get('seconds', 3)}s)")
+    if case["goal"] == "threshold" and re.search(r"\d+(\.\d+)? to \d+(\.\d+)?%? (mole fraction|oxygen)", report["answer"][0]["text"]):
+        problems.append("a range is presented as a limit")
+    return problems
+
+
+async def main(only: list[int] | None, scenarios: bool = False) -> None:
     logging.disable(logging.CRITICAL)
     settings = get_settings()
-    cases = yaml.safe_load((settings.data_dir / "insights_eval.yaml").read_text(encoding="utf-8"))["questions"]
+    cases = yaml.safe_load((settings.data_dir / ("scenario_eval.yaml" if scenarios else "insights_eval.yaml")).read_text(encoding="utf-8"))["questions"]
     engine = get_engine(settings.data_dir)
     rows = []
     async with httpx.AsyncClient() as http:
@@ -67,7 +84,7 @@ async def main(only: list[int] | None) -> None:
                 continue
             start = time.time()
             report = await ask_once(http, settings, engine, case["q"])
-            problems = judge(case, report)
+            problems = judge_scenario(case, report, time.time() - start) if scenarios else judge(case, report)
             rows.append({"n": n, "question": case["q"], "mode": report["mode"], "seconds": round(time.time() - start),
                          "kept": report["stats"]["kept"], "removed": report["stats"]["removed"], "evidence": report["stats"]["evidence"],
                          "answer": [s["text"] for s in report["answer"]], "removed_sentences": report["removed"], "problems": problems})
@@ -93,4 +110,6 @@ async def main(only: list[int] | None) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--only", nargs="*", type=int)
-    asyncio.run(main(parser.parse_args().only))
+    parser.add_argument("--scenarios", action="store_true", help="run data/scenario_eval.yaml (questions from the target audience) instead of the general set")
+    args = parser.parse_args()
+    asyncio.run(main(args.only, args.scenarios))

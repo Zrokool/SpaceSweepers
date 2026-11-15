@@ -12,9 +12,12 @@ const STAGES = [
 ];
 const STORE = "spacesweepers.insights";
 const MAX_QUESTION = 500;
+const EXPERT_NOTICE = "Research context only. SI Insights never declares a fire or an emergency and does not replace spacecraft fire-detection and emergency procedures.";
 
 // The conversation outlives tab switches (module state) and page reloads (sessionStorage).
-const chat = { turns: [], active: null, selected: null, running: null, status: null, warm: "idle", nextId: 1 };
+const MODE_KEY = "spacesweepers.chatMode";
+function storedMode() { try { return localStorage.getItem(MODE_KEY) === "expert" ? "expert" : "guided"; } catch { return "guided"; } }
+const chat = { mode: storedMode(), turns: [], active: null, selected: null, running: null, status: null, warm: "idle", nextId: 1 };
 
 function save() {
   try {
@@ -33,9 +36,9 @@ function restore() {
 }
 
 // ---------- talking to the server ----------
-async function askStream(question, history, onEvent, signal) {
+async function askStream(question, history, scenario, onEvent, signal, extra = {}) {
   const resp = await fetch("/api/insights/ask", { method: "POST", signal, headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ question, history }) });
+    body: JSON.stringify({ question, history, ...(scenario ? { scenario } : {}), ...extra }) });
   if (!resp.ok) {
     let detail = resp.statusText;
     try { const j = await resp.json(); detail = typeof j.detail === "string" ? j.detail : JSON.stringify(j.detail); } catch { /* not JSON */ }
@@ -54,6 +57,12 @@ async function askStream(question, history, onEvent, signal) {
       for (const line of block.split("\n")) if (line.startsWith("data: ")) onEvent(JSON.parse(line.slice(6)));
     }
   }
+}
+
+// Guided only: the conditions of the previous answer, so "what about heptane?" can build on it.
+function lastSlots() {
+  const prev = [...chat.turns].reverse().find((t) => t.report);
+  return prev?.report?.scenario || null;
 }
 
 function aboutIds(turn) { return (turn.chips || []).filter((c) => c.kind === "about").map((c) => c.psi); }
@@ -117,7 +126,22 @@ function verification(r) {
       el("p", { class: "muted", text: r.model ? `Sentences written by ${r.model} on this computer; every one checked by fixed rules. Run ${r.run_id}.` : "No SI was used." })));
 }
 
-const PROVENANCE = { computed: "Computed by code from PSI data", si: "SI reading, verified against its sources" };
+// A scenario answer: the key numbers, the tests behind them (each with its file and row), and what the answer does not tell you.
+function analysisCard(a) {
+  const go = (l) => navigate("sweeper", { ...(l.family ? { family: l.family } : {}), ...(l.fuel ? { fuel: l.fuel } : {}), ...(l.diluent ? { diluent: l.diluent } : {}) });
+  const t = a.table, q = a.quote;
+  return el("div", { class: "analysis" },
+    q && el("blockquote", { class: "quote" }, el("p", { text: q.text }), el("footer", { text: q.where })),
+    a.quote2 && el("blockquote", { class: "quote" }, el("p", { class: "eyebrow", text: a.quote2.label }), el("p", { text: a.quote2.text }), el("footer", { text: a.quote2.where })),
+    a.metrics.length > 0 && el("div", { class: "metrics" }, ...a.metrics.map((m) => el("div", { class: "metric" }, el("div", { class: "value", text: m.value }), el("div", { class: "label", text: m.label })))),
+    t && el("div", { class: "table-wrap" }, el("table", {}, el("thead", {}, el("tr", {}, ...t.columns.map((c) => el("th", { text: c })))),
+      el("tbody", {}, ...t.rows.map((row, i) => el("tr", { class: t.psi[i] ? "clickable" : null, onclick: t.psi[i] ? () => openDetail(t.psi[i]) : null }, ...row.map((cell, j) => el("td", { class: j === row.length - 1 && t.psi.length ? "mono" : null, text: cell}))))))),
+    t && t.total > t.shown && el("p", { class: "tiny", text: `Showing ${t.shown} of ${t.total} tests.` }),
+    a.links.length > 0 && el("div", { class: "chips next-links" }, ...a.links.map((l) => el("button", { class: "btn-ghost", type: "button", text: `${l.label} →`, onclick: () => go(l) }))),
+    a.caveats.length > 0 && el("details", { class: "verify" }, el("summary", { text: "What this does not tell you" }), el("ul", { class: "facts" }, ...a.caveats.map((c) => el("li", { text: c })))));
+}
+
+const PROVENANCE = { computed: "Computed by code from the PSI tests listed below", si: "SI reading, verified against its sources" };
 
 function reportBlock(turn) {
   const r = turn.report;
@@ -130,6 +154,7 @@ function reportBlock(turn) {
       : el("p", { class: `sentence${computed ? " headline" : ""}` }, x.text, " ", ...citeButtons(turn, x.cites)))));
     if (r.mode !== "no_answer") kids.push(el("p", { class: "tiny provenance", text: PROVENANCE[computed ? "computed" : "si"] }));
   }
+  if (r.analysis) kids.push(analysisCard(r.analysis));
   if (r.table) kids.push(tableBlock(r.table));
   else if (r.facts) kids.push(tableBlock(r.facts));
   if (r.list) kids.push(listBlock(r.list));
@@ -145,6 +170,7 @@ function reportBlock(turn) {
 }
 
 function turnView(turn) {
+  if (chat.mode === "guided") return guidedTurn(turn);
   const running = chat.running && chat.running.turn === turn;
   const ai = el("div", { class: `msg ai${chat.active === turn.id ? " active" : ""}` },
     el("div", { class: "who", text: "SI Insights" }), turn.chips && turn.chips.length > 0 && chipRow(turn.chips),
@@ -169,11 +195,51 @@ function renderAll(scroll = true) {
 }
 
 const EXAMPLES = [
-  ["Find research by topic", "Which investigations study smoke detection?"],
-  ["Compare two investigations", "Compare BASS and BASS-II"],
-  ["Where does extinction happen?", "What did FLEX find about extinction?"],
+  ["Closest tested conditions to your design", "We are designing a cabin at 34% oxygen and 8.2 psi. Which tested conditions are closest and what happened?"],
+  ["A limit you need", "What is the lowest oxygen concentration at which methanol droplets burned in FLEX?"],
+  ["Compare two suppressants", "How does carbon dioxide compare with helium as a suppressant in FLEX?"],
 ];
+// The Scenario builder: choose conditions instead of phrasing a question. It runs the same analysis as a typed question.
+const WANTS = [
+  { key: "nearest", label: "Which tested conditions are closest to mine?", goal: "nearest", needs: ["o2", "p"] },
+  { key: "outcomes", label: "What happened in these tests?", goal: "outcomes" },
+  { key: "lowO2", label: "What is the lowest oxygen where it burned?", goal: "threshold", target: "burn", variable: "o2" },
+  { key: "reig", label: "At what pressure did the flame reignite?", goal: "threshold", target: "reignite", variable: "p" },
+  { key: "effect", label: "How does oxygen change whether it burned?", goal: "profile", target: "burn", variable: "o2" },
+  { key: "gases", label: "Compare helium, carbon dioxide and nitrogen", goal: "compare", target: "extinguish" },
+];
+function scenarioForm() {
+  const f = {};
+  const field = (label, node) => el("label", { class: "field" }, el("span", { class: "eyebrow", text: label }), node);
+  f.fuel = el("select", { "aria-label": "Fuel or material" }, el("option", { value: "", text: "Any fuel or material" }));
+  f.gas = el("select", { "aria-label": "Gas mixed with oxygen" }, el("option", { value: "", text: "Any gas" }));
+  f.o2 = el("input", { type: "number", min: "1", max: "100", step: "0.1", placeholder: "e.g. 34", "aria-label": "Oxygen percent" });
+  f.p = el("input", { type: "number", min: "0.01", step: "0.1", placeholder: "e.g. 8.2", "aria-label": "Pressure" });
+  f.unit = el("select", { "aria-label": "Pressure unit" }, ...["psi", "atm", "kpa"].map((u) => el("option", { value: u, text: u })));
+  f.want = el("select", { "aria-label": "What do you want to know" }, ...WANTS.map((w) => el("option", { value: w.key, text: w.label })));
+  f.note = el("p", { class: "tiny", role: "status" });
+  api("/api/insights/scenario-options").then((o) => {
+    f.fuel.append(...o.fuels.map((x) => el("option", { value: x.name, text: `${x.name} (${x.tests} tests)` })));
+    f.gas.append(...o.diluents.map((x) => el("option", { value: x.name, text: `${x.name} (${x.tests} tests)` })));
+    f.o2.placeholder = `${o.o2_percent[0]} to ${o.o2_percent[1]}`; f.p.placeholder = `${o.pressure_psi[0]} to ${o.pressure_psi[1]} psi`;
+  }).catch(() => {});
+  const submit = () => {
+    const want = WANTS.find((w) => w.key === f.want.value), o2 = f.o2.value ? Number(f.o2.value) : null, p = f.p.value ? Number(f.p.value) : null;
+    if ((want.needs || []).includes("o2") && o2 == null || (want.needs || []).includes("p") && p == null) { f.note.textContent = "That question needs both an oxygen % and a pressure."; return; }
+    f.note.textContent = "";
+    const scenario = { goal: want.goal, ...(want.target ? { target: want.target } : {}), ...(want.variable ? { variable: want.variable } : {}), ...(f.fuel.value ? { fuel: f.fuel.value } : {}),
+      ...(f.gas.value ? { diluent: f.gas.value } : {}), ...(o2 != null ? { o2_percent: o2 } : {}), ...(p != null ? { pressure: p, pressure_unit: f.unit.value } : {}) };
+    const bits = [f.fuel.value, f.gas.value, o2 != null ? `${o2}% oxygen` : "", p != null ? `${p} ${f.unit.value}` : ""].filter(Boolean).join(", ");
+    send(`Scenario${bits ? ` (${bits})` : ""}: ${want.label}`, scenario);
+  };
+  return el("details", { class: "scenario", open: chat.turns.length === 0 }, el("summary", { text: "Describe a scenario: fuel, gas, oxygen, pressure" }),
+    el("div", { class: "scenario-grid" }, field("Fuel or material", f.fuel), field("Gas mixed with oxygen", f.gas), field("Oxygen (%)", f.o2),
+      field("Pressure", el("span", { class: "pair" }, f.p, f.unit)), field("What do you want to know", f.want)),
+    el("div", { class: "composer-row" }, f.note, el("span", { class: "grow" }), el("button", { class: "btn", type: "button", text: "Analyse this scenario", onclick: submit })));
+}
+
 function introView() {
+  if (chat.mode === "guided") return guidedIntro();
   return el("div", { class: "intro" }, el("h2", { text: "Ask the PSI combustion research" }),
     el("p", { class: "muted", text: "Short answers with PSI's own words and sources. Every sentence is checked by code against the data." }),
     el("div", { class: "examples" }, ...EXAMPLES.map(([title, q]) => el("button", { class: "example", type: "button", onclick: () => send(q) },
@@ -183,7 +249,7 @@ function introView() {
 function renderStatus() {
   if (!ui.status) return;
   const s = chat.status;
-  const text = !s ? "checking SI…" : !s.available ? "SI unavailable" : chat.warm === "loading" ? `${s.model} · loading model…` : `${s.model} · ready`;
+  const text = chat.mode === "guided" ? (!s ? "checking SI…" : !s.available ? "SI unavailable" : "SI ready") : !s ? "checking SI…" : !s.available ? "SI unavailable" : chat.warm === "loading" ? `${s.model} · loading model…` : `${s.model} · ready`;
   ui.status.className = `pill ${!s ? "" : !s.available ? "off" : chat.warm === "loading" ? "wait" : "ok"}`;
   ui.status.textContent = `${!s ? "…" : !s.available ? "○" : chat.warm === "loading" ? "◔" : "●"} ${text}`;
   ui.status.title = s && !s.available ? s.message : "";
@@ -218,6 +284,7 @@ function sourceCard(s, turn) {
 
 function renderSources() {
   if (!ui.sources) return;
+  if (chat.mode === "guided") return renderGuidedDetails();
   const turn = chat.turns.find((t) => t.id === chat.active);
   const sources = turn?.report?.sources || turn?.evidence || [];
   ui.sources.replaceChildren(...[
@@ -232,7 +299,7 @@ function renderSources() {
 }
 
 // ---------- asking ----------
-async function send(question) {
+async function send(question, scenario = null) {
   question = (question || ui.input.value).trim();
   if (!question || chat.running) return;
   const turn = { id: chat.nextId++, q: question, chips: null, stages: {}, evidence: null, report: null, error: null };
@@ -244,7 +311,7 @@ async function send(question) {
   renderAll(); renderSources();
   const history = chat.turns.filter((t) => t.report).slice(-3).map((t) => ({ psi_ids: aboutIds(t) }));
   try {
-    await askStream(question, history, (ev) => {
+    await askStream(question, history, scenario, (ev) => {
       if (ev.type === "frame") turn.chips = ev.chips;
       else if (ev.type === "stage") turn.stages[ev.stage] = { status: ev.status, detail: ev.detail };
       else if (ev.type === "evidence") { turn.evidence = ev.sources; renderSources(); }
@@ -252,7 +319,7 @@ async function send(question) {
       else if (ev.type === "report") turn.report = ev.report;
       renderAll();
       if (ev.type === "report") renderSources();
-    }, controller.signal);
+    }, controller.signal, chat.mode === "guided" ? { audience: "guided", ...(lastSlots() ? { context: lastSlots() } : {}) } : {});
     if (!turn.report && !turn.error) turn.error = "The answer ended before it was finished.";
   } catch (e) {
     turn.error = e.name === "AbortError" ? "Stopped." : e.message;
@@ -299,16 +366,19 @@ export async function render(root, state) {
   ui.stop = el("button", { class: "btn", type: "button", text: "Stop", hidden: true, onclick: () => chat.running?.controller.abort() });
   ui.exportBtn = el("button", { class: "btn-ghost", type: "button", text: "Export chat", onclick: download });
   ui.starters = el("div", { class: "chips starters" });
+  ui.scenario = scenarioForm();
   ui.input.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } });
   ui.input.addEventListener("input", () => { ui.count.textContent = `${ui.input.value.length} / ${MAX_QUESTION}`; });
 
   root.append(
     el("div", { class: "insights-head" }, el("div", {}, el("p", { class: "eyebrow", text: "SI Insights" }),
-      el("h1", { text: "Ask the PSI combustion data" })), el("div", { class: "head-actions" }, ui.status,
+      el("h1", { text: "Ask the PSI combustion data" })), el("div", { class: "head-actions" }, modeSwitch(), ui.status,
       el("button", { class: "btn-ghost", type: "button", text: "New chat", onclick: () => { if (!chat.running) { chat.turns = []; chat.active = chat.selected = null; save(); renderAll(); renderSources(); } } }), ui.exportBtn)),
-    el("div", { class: "notice", text: "Research context only. SI Insights never declares a fire or an emergency and does not replace spacecraft fire-detection and emergency procedures." }),
-    el("div", { class: "insights" }, el("div", { class: "chat" }, ui.log,
-      el("div", { class: "composer" }, ui.starters, ui.input, el("div", { class: "composer-row" }, ui.count, el("span", { class: "grow" }), ui.stop, ui.send))), ui.sources));
+    (ui.notice = el("div", { class: "notice", text: EXPERT_NOTICE })),
+    (ui.modeHint = el("p", { class: "tiny mode-hint" }, "You are in Guided mode: a plain chat with the PSI evidence beside it. ", el("button", { class: "btn-ghost", type: "button", text: "Switch to Expert for tables, checks and the Scenario form", onclick: () => setMode("expert") }))),
+    (ui.insights = el("div", { class: "insights" }, el("div", { class: "chat" }, ui.log,
+      el("div", { class: "composer" }, ui.scenario, ui.starters, ui.input, el("div", { class: "composer-row" }, ui.count, el("span", { class: "grow" }), ui.stop, ui.send))), ui.sources)));
+  applyMode();
   renderAll(); renderSources(); renderStatus();
 
   // A link like #/insights?q=What did FLEX find about extinction? asks that question when the page opens.
@@ -326,4 +396,116 @@ async function warm() {
   try { const r = await api("/api/insights/warm", { method: "POST" }); chat.warm = r.ready ? "ready" : "failed"; if (!r.ready) chat.status = { ...chat.status, available: false, message: r.message }; }
   catch { chat.warm = "failed"; }
   renderStatus();
+}
+
+// ---------- Guided mode: a plain chat on the left, the PSI details behind each answer on the right ----------
+// Expert mode (everything above) is untouched. Guided shows the same report data, composed more simply.
+const GUIDED_STARTERS = [
+  "What is the lowest oxygen concentration at which methanol droplets burned in FLEX?",
+  "How does carbon dioxide compare with helium as a suppressant in FLEX?",
+  "What is a cool flame and why does it matter for spacecraft fire safety?",
+];
+
+function guidedIntro() {
+  return el("div", { class: "intro" }, el("h2", { text: "Ask the PSI combustion research" }),
+    el("p", { class: "muted", text: "Answers come only from NASA's PSI data. The evidence behind each answer appears on the right." }),
+    el("div", { class: "examples" }, ...GUIDED_STARTERS.map((q) => el("button", { class: "example", type: "button", onclick: () => send(q) }, el("span", { text: q })))));
+}
+
+function guidedTurn(turn) {
+  const running = chat.running && chat.running.turn === turn;
+  const ai = el("div", { class: `msg ai${chat.active === turn.id ? " active" : ""}` },
+    (running || !turn.report) && !turn.error && el("p", { class: "status-line", role: "status", text: "Thinking…" }),
+    turn.error && el("div", { class: "note", text: turn.error }),
+    turn.report && guidedAnswer(turn),
+    turn.report && el("button", { class: "btn-ghost show-sources", type: "button", text: "Show the PSI details",
+      onclick: () => { chat.active = turn.id; chat.selected = null; renderSources(); renderAll(false); } }));
+  return [el("div", { class: "msg user" }, el("p", { text: turn.q })), ai];
+}
+
+function guidedAnswer(turn) {
+  const r = turn.report;
+  const kids = r.notes.filter((n) => !/^Answered (directly|earlier)/.test(n)).map((n) => el("div", { class: "note", text: n }));
+  if (r.analysis?.context_note) kids.push(el("p", { class: "tiny", text: r.analysis.context_note }));
+  if (["si", "no_answer", "computed"].includes(r.mode)) {
+    kids.push(...r.answer.map((x) => (x.note
+      ? el("p", { class: "sentence", text: x.text })
+      : el("p", { class: "sentence" }, x.text, " ", ...citeButtons(turn, x.cites)))));
+  }
+  if (r.mode === "sources_only") kids.push(el("p", { class: "muted", text: "SI is not available right now. The PSI details on the right show what was found for your question." }));
+  if (r.followups.length) {
+    kids.push(el("div", { class: "chips followups" }, el("span", { class: "muted", text: "You could ask:" }),
+      ...r.followups.slice(0, 3).map((f) => el("button", { class: "chip", type: "button", text: f.label, onclick: () => send(f.question) }))));
+  }
+  return kids;
+}
+
+function guidedTests(a) {
+  const t = a.table;
+  return t && el("div", {}, el("div", { class: "table-wrap" }, el("table", {}, el("thead", {}, el("tr", {}, ...t.columns.map((c) => el("th", { text: c })))),
+    el("tbody", {}, ...t.rows.map((row, i) => el("tr", { class: t.psi[i] ? "clickable" : null, onclick: t.psi[i] ? () => openDetail(t.psi[i]) : null }, ...row.map((cell) => el("td", { text: cell }))))))),
+    t.total > t.shown && el("p", { class: "tiny", text: `Showing ${t.shown} of ${t.total} tests.` }),
+    a.links?.[0] && el("button", { class: "btn-ghost", type: "button", text: `${a.links[0].label} →`,
+      onclick: () => navigate("sweeper", { ...(a.links[0].family ? { family: a.links[0].family } : {}), ...(a.links[0].fuel ? { fuel: a.links[0].fuel } : {}), ...(a.links[0].diluent ? { diluent: a.links[0].diluent } : {}) }) }));
+}
+
+function guidedSource(s) {
+  const detail = el("div", { class: "src-detail", hidden: true });
+  const more = el("button", { class: "btn-ghost", type: "button", text: "Show surrounding text", hidden: s.computed, onclick: async () => {
+    if (!detail.hidden) { detail.hidden = true; more.textContent = "Show surrounding text"; return; }
+    more.textContent = "Loading…";
+    try {
+      const p = await api(`/api/insights/passage/${encodeURIComponent(s.id)}`);
+      detail.replaceChildren(el("blockquote", { text: p.text.slice(0, 1500) }));
+      detail.hidden = false; more.textContent = "Hide surrounding text";
+    } catch (e) { detail.replaceChildren(el("p", { class: "muted", text: e.message })); detail.hidden = false; more.textContent = "Show surrounding text"; }
+  } });
+  return el("div", { class: `src${chat.selected === s.n ? " selected" : ""}`, id: `src-${s.n}` },
+    el("div", { class: "src-head" }, el("span", { class: "src-n", text: String(s.n) }), el("strong", { text: s.computed ? "PSI test data" : s.label })),
+    el("div", { class: "src-links" }, s.psi && el("a", { href: "#", text: "Open investigation", onclick: (e) => { e.preventDefault(); openDetail(s.psi); } }),
+      s.doi && el("a", { href: `https://doi.org/${s.doi}`, target: "_blank", rel: "noopener", text: `DOI ${s.doi}` }),
+      s.url && el("a", { href: s.url, target: "_blank", rel: "noopener", text: "PSI page" }), more), detail);
+}
+
+function renderGuidedDetails() {
+  const turn = chat.turns.find((t) => t.id === chat.active);
+  const r = turn?.report, a = r?.analysis;
+  const words = a?.quote ? [a.quote, ...(a.quote2 ? [{ text: a.quote2.text, where: a.quote2.where, label: a.quote2.label }] : [])]
+    : (r?.sources || []).filter((s) => !s.computed).slice(0, 3).map((s) => ({ text: excerpt(s.text), where: s.label, n: s.n }));
+  const keep = a?.caveats?.length ? a.caveats : (r?.not_covered || []);
+  const section = (title, ...kids) => { const k = kids.filter(Boolean); return k.length ? el("section", { class: "gd-section" }, el("p", { class: "eyebrow", text: title }), ...k) : null; };
+  ui.sources.replaceChildren(...[
+    el("h3", { text: "PSI details" }),
+    !r && el("p", { class: "muted", text: turn ? "Looking up PSI data…" : "Ask a question. The PSI evidence behind the answer appears here: PSI's own words, the tests, and the sources." }),
+    r && section("In PSI's words", ...words.map((q) => el("blockquote", { class: "quote" }, q.label && el("p", { class: "eyebrow", text: q.label }), el("p", { text: q.text }), el("footer", { text: q.where })))),
+    r && a && section("The tests", guidedTests(a)),
+    r && section("Keep in mind", el("ul", { class: "facts" }, ...keep.map((c) => el("li", { text: c })))),
+    r && section("Sources", ...r.sources.map(guidedSource)),
+  ].filter(Boolean));
+  const picked = chat.selected && ui.sources.querySelector(`#src-${chat.selected}`);
+  if (picked) picked.scrollIntoView({ block: "nearest", behavior: "smooth" });
+}
+
+// The mode switch: Guided (plain chat, details on the right) or Expert (the full screen).
+function setMode(mode) {
+  chat.mode = mode;
+  try { localStorage.setItem(MODE_KEY, mode); } catch { /* the choice just is not remembered */ }
+  applyMode();
+  renderAll(false); renderSources(); renderStatus();
+}
+
+function applyMode() {
+  const guided = chat.mode === "guided";
+  if (ui.scenario) ui.scenario.hidden = guided;
+  if (ui.starters) ui.starters.hidden = guided;
+  if (ui.modeHint) ui.modeHint.hidden = !guided;
+  if (ui.notice) ui.notice.textContent = guided ? "Answers come only from NASA PSI data. Research context only: this does not replace spacecraft emergency procedures." : EXPERT_NOTICE;
+  for (const b of ui.modeButtons || []) b.setAttribute("aria-checked", String(b.dataset.mode === chat.mode));
+  if (ui.insights) ui.insights.dataset.mode = chat.mode;
+}
+
+function modeSwitch() {
+  ui.modeButtons = [["guided", "Guided"], ["expert", "Expert"]].map(([key, label]) => el("button", { type: "button", role: "radio", "aria-checked": String(chat.mode === key),
+    dataset: { mode: key }, text: label, onclick: () => setMode(key) }));
+  return el("div", { class: "segmented mode-switch", role: "radiogroup", "aria-label": "Chat mode" }, ...ui.modeButtons);
 }

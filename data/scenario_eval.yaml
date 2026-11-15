@@ -1,0 +1,24 @@
+# Scenario questions from the target audience, checked by:  python -m app.insights.evaluate --scenarios
+# `goal` is the kind of answer expected (the analysis card's goal). `must_include` are phrases the answer must contain: the numbers
+# were checked against plain loops over the tests (see tests/test_scenario.py). `seconds` is the time allowed (code answers take under 2 s).
+questions:
+  - {who: grad, q: "What is the lowest oxygen concentration at which methanol droplets burned in FLEX?", goal: threshold, must_include: ["18% oxygen", "Below that, 0 of 54 tests burned"]}
+  - {who: grad, q: "What is the lowest oxygen level at which heptane droplets stayed burning in FLEX?", goal: threshold, must_include: ["lowest oxygen level"]}
+  - {who: researcher, q: "At what pressure do reignitions of dodecane cool flames start to occur?", goal: threshold, must_include: ["2 atm (29.4 psi)", "Below that, 0 of 88 tests reignited"]}
+  - {who: researcher, q: "At what pressure did cool flame reignition first appear in CFI?", goal: threshold, must_include: ["2 atm"]}
+  - {who: grad, q: "How does carbon dioxide compare with helium as a suppressant in FLEX?", goal: compare, must_include: ["helium: the flame went out by itself in 40 of 50 tests", "did not change one gas at a time"]}
+  - {who: professor, q: "Compare helium and nitrogen as diluents for FLEX flame extinction.", goal: compare, must_include: ["helium:", "nitrogen only:"]}
+  - {who: engineer, q: "We are designing a lunar habitat at 34% oxygen and 8.2 psi. Which tested conditions are closest and what happened to the fuels there?", goal: nearest, must_include: ["19 of the 1007 PSI tests"]}
+  - {who: engineer, q: "Our cabin will run at 30% oxygen and 10.2 psi. What has NASA tested near that?", goal: nearest, must_include: ["tests"]}
+  - {who: engineer, q: "Which tested conditions are closest to 21% oxygen and 14.7 psi?", goal: nearest, must_include: ["tests"]}
+  - {who: engineer, q: "Which materials burned in BASS at oxygen above 21%?", goal: outcomes, must_include: ["PMMA", "burned"]}
+  - {who: researcher, q: "Is there data on flame spread over PMMA at elevated oxygen?", goal: outcomes, must_include: ["do not cover elevated oxygen"]}
+  - {who: professor, q: "Summarize how oxygen concentration affects flame extinction in microgravity based on PSI data.", goal: profile, must_include: ["went out by itself in 185", "oxygen 10 to 15%"]}
+  - {who: professor, q: "How does oxygen affect whether methanol droplets burn?", goal: profile, must_include: ["Across"]}
+  - {who: grad, q: "I need data on droplet extinction in helium-diluted atmospheres at 2 atm. What does PSI have?", goal: none, must_include: ["No mapped PSI test matches all of: helium", "Without the pressure range condition"]}
+  - {who: grad, q: "What happened to propane flames at 21% oxygen?", goal: outcomes, must_include: ["propane"]}
+  - {who: researcher, q: "Did ethane flames ignite below 25% oxygen in CFI-G?", goal: outcomes, must_include: ["ethane"]}
+  - {who: undergrad, q: "What is a cool flame and why does it matter for spacecraft fire safety?", goal: definition, must_include: ["cool flame is one that burns", "Why PSI says it matters"], seconds: 40}
+  - {who: undergrad, q: "What is a diffusion flame?", goal: definition, must_include: ["Diffusion flames"], seconds: 40}
+  - {who: undergrad, q: "What is extinction in combustion?", goal: definition, must_include: ["extinction"], seconds: 40}
+  - {who: professor, q: "Define radiative extinction.", goal: definition, must_include: ["radiative"], seconds: 40}

@@ -15,7 +15,7 @@ export async function render(root, state) {
     return (m ? m[1] : text).trim();
   };
   root.append(
-    el("div", {}, el("p", { class: "eyebrow", text: "Earth benefits" }), el("h1", { text: "What does space fire research do for fire safety on Earth?" }),
+    el("div", {}, el("p", { class: "eyebrow", text: "Fire safety" }), el("h1", { text: "What does space fire research do for fire safety on Earth?" }),
       el("p", { class: "lede", text: "NASA technology has improved firefighters' air tanks, smoke detectors and protective clothing. Below, each investigation's own statement of its benefits, quoted from its PSI record." })),
     el("div", { class: "grid cols-3" }, ...spinoffs.map((s) => el("div", { class: "card" },
       el("p", { class: "eyebrow", text: `NASA spinoff · ${PILLAR_LABEL[s.pillar] || ""}` }), el("h3", { text: s.title }), el("p", { class: "muted", text: s.use }),
