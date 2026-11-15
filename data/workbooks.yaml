@@ -1,0 +1,37 @@
+# Spreadsheet workbooks in PSI's Science Documents folders and what the dashboard does with each.
+#
+# not_read   workbooks that are never stored or indexed, with the reason shown in the manifest. A workbook is listed
+#            here when it only repeats data held elsewhere (so a second copy would be counted or searched twice), or
+#            when it holds nothing the dashboard can use.
+#
+# Rule: one stored copy of every fact. (Recipes that turn a workbook into a table are added below as they are reviewed.)
+not_read:
+  "PSI-26_Science Documents_Planned_Test Matrix.xlsx": "a test plan, superseded by the as-run matrix; it also contained login details, which are never stored"
+  "BASS-II_Test.Matrices.xlsx": "the same 129 tests as the BASS-II Experimental table, split by investigator: a duplicate"
+
+# tables: a workbook whose sheets are joined, once, into ONE canonical table (a CSV in snapshot/tables/).
+#   sheets      the first is the base (one row per test); each other sheet is joined to it on `key`
+#   key         the column that identifies a test; the header row of a sheet is the first row that contains it
+#   key_pattern only rows whose key matches are tests (anything else, such as a "SETUP" row, is left out)
+#   supersedes  an existing CSV that this table fully contains. It stays in the manifest but is not mapped, so no test is counted twice
+tables:
+  - name: "PSI-39_Workbook table_CFI Data Summary.csv"
+    investigation: PSI-39
+    workbook: "PSI-39_Science Documents_CFI_DataSummary_Spreadsheet_Jan2021.xlsx"
+    key: "Flex Number"
+    key_pattern: '^\d+[A-Za-z]?$'          # 1274A is a real test: a letter marks a repeat
+    sheets: ["Master Sheet", "DATA", "Igniter", "Comments"]
+    supersedes: "PSI-39_Experimental table_CFI.csv"
+  - name: "PSI-26_Workbook table_BASS As Run.csv"
+    investigation: PSI-26
+    workbook: "PSI-26_Science Documents_As Run_Test Matrix.xlsx"
+    key: "As run test no."
+    key_pattern: '^\d+$'
+    sheets: ["as run matrix"]
+
+# simulations: a list of the data files behind a modelling study. Kept apart from tests; shown exactly as written.
+simulations:
+  - name: "PSI-117_Simulated data_List of Data.csv"
+    investigation: PSI-117
+    workbook: "PSI-117_Analyzed Data_ReadMe_List_of_Data.xlsx"
+    sheet: "Sheet1"

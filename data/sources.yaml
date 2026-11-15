@@ -1,0 +1,64 @@
+# The approved sources for the Flame in Freefall challenge (its Resources tab).
+# SpaceSweepers uses data from these only. `role: data` is what the dashboard
+# computes from; `role: background` is linked reading, never a source of numbers.
+sources:
+  - id: psi
+    title: "PSI Data Repository: Combustion Science"
+    url: "https://psi.nasa.gov/physci/repo/search?q=combustion&data_source=psi&data_type=investigation"
+    role: data
+    use: "The 26 investigations this dashboard is built on. Each is cited by its DOI."
+  - id: nasa-combustion-science
+    title: "NASA Combustion Science"
+    url: "https://www.nasa.gov/glenn/glenn-expertise-space-exploration/physical-sciences-program/combustion-science/"
+    role: background
+    use: "Basic information about most of the combustion investigations in PSI."
+  - id: sciencecasts
+    title: "NASA ScienceCasts: The Power of Studying Combustion on the ISS"
+    url: "https://www.youtube.com/watch?v=W1oXykoz9zg"
+    role: background
+    use: "A 3.6-minute introduction to combustion research on the ISS (2018)."
+  - id: researchers-guide
+    title: "A Researcher's Guide to International Space Station Combustion Science"
+    url: "https://www.nasa.gov/missions/station/a-researchers-guide-to-combustion-science/"
+    role: background
+    use: "A 2015 review of NASA's combustion research on, or planned for, the ISS."
+  - id: apollo-1
+    title: "Apollo 1"
+    url: "https://sma.nasa.gov/sma-disciplines/accllp/apollo-1"
+    role: background
+    topic: lesson
+    use: "The 1967 fire in an oxygen-filled spacecraft during a pre-launch test, and the lessons learned."
+  - id: apollo-13
+    title: "Apollo 13"
+    url: "https://sma.nasa.gov/sma-disciplines/accllp/apollo-13"
+    role: background
+    topic: lesson
+    use: "The oxygen tank explosion on the way to the Moon, the investigation and the lessons learned."
+  - id: mir-fire
+    title: "25 Years Ago: Fire Aboard Space Station Mir"
+    url: "https://www.nasa.gov/history/25-years-ago-fire-aboard-space-station-mir/"
+    role: background
+    topic: lesson
+    use: "The 1997 fire on Mir caused by an oxygen generator failure."
+  - id: spinoff-air-tanks
+    title: "Fireman's Air Tanks"
+    url: "https://spinoff.nasa.gov/node/9582"
+    role: background
+    topic: earth
+    pillar: suppression
+    use: "1970s spacesuit technology adapted to improve firefighters' air tanks and breathing gear."
+  - id: spinoff-fire-detector
+    title: "Fire Detector"
+    url: "https://spinoff.nasa.gov/node/9407"
+    role: background
+    topic: earth
+    pillar: detection
+    use: "A 1970s smoke detector developed for the shuttle that tells smoke from dust, giving fewer nuisance alarms."
+  - id: spinoff-fire-attire
+    title: "New Technology for the Fire Attire"
+    url: "https://spinoff.nasa.gov/node/9918"
+    role: background
+    topic: earth
+    pillar: prevention
+    use: "1980s spacesuit technology applied to improve firefighter clothing."
+notice: "NASA does not endorse any non-U.S. Government entity and is not responsible for information on non-U.S. Government websites."

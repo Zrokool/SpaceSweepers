@@ -1,0 +1,82 @@
+# Fixed vocabulary used to tag investigations from their PSI record text.
+# Tagging is plain word matching, done by code (no SI). Every tag shown in the
+# dashboard carries the sentence it was found in, so a reader can check it.
+# Edit this file to add or correct terms; nothing is hidden in code.
+
+fuels:   # term -> fuel class
+  gas: [methane, ethane, ethylene, propane, propylene, butane, n-butane, n-pentane, hydrogen, acetylene, gaseous fuel, gaseous fuels,
+        CH4, C2H4, C2H6, C3H8]
+  liquid: [heptane, n-heptane, methanol, ethanol, decane, n-decane, dodecane, n-dodecane, iso-dodecane, octane, n-octane, iso-octane,
+           n-alkane, methyl butanoate, dibutyl ether, fuel droplet, fuel droplets, droplet combustion, liquid fuel, liquid fuels]
+  # Not listed on purpose: bare "droplet" (SAME measures smoke droplets, not fuel), "candle" and
+  # "silicone" (a test fluid in STDCE-1). Each gave a wrong fuel tag on the real records.
+  solid: [PMMA, acrylic, cotton, fiberglass, fabric, fabrics, Sibal, Nomex, Kapton, Teflon, Pyrell, cellulose, paper, wax,
+          silicone rubber, lampwick, polyethylene, lamp wick, wire insulation, solid fuel, solid fuels, solids, solid material, solid materials]
+
+# Gaseous-fuel experiments that stand in for burning solids (the challenge names ACME BRE).
+solid_emulation: [Burning Rate Emulator]
+
+hardware:   # label -> terms
+  "CIR (Combustion Integrated Rack)": [Combustion Integrated Rack, CIR]
+  "MDCA (droplet apparatus)": [Droplet Combustion Apparatus, Droplet Combustion Appartatus, MDCA]
+  "ACME modules": [ACME, Advanced Combustion via Microgravity Experiments]
+  "MSG (Microgravity Science Glovebox)": [Microgravity Science Glovebox, Microgravity Glove Box, Glovebox, MSG]
+  "Fan-driven flow duct": [flow duct]
+  "Cygnus vehicle": [Cygnus]
+  "P-Trak particle counter": [P-Trak]
+  "Drop tower": [drop tower, drop towers]
+  "Space Shuttle": [Space Shuttle, USML-1]
+
+sensors:   # label -> terms
+  "Cameras / video": [camera, cameras, video, imaging]
+  "Radiometers": [radiometer, radiometers]
+  "Thermocouples": [thermocouple, thermocouples]
+  "Photomultiplier tubes": [photomultiplier, PMT, PMTs]
+  "Laser diagnostics (PLIF)": [PLIF]
+  "Pyrometry": [pyrometry, pyrometer]
+  "Particle counters": [P-Trak, particle counter, condensate nuclei counter, DustTrak]
+  "Smoke detectors": [smoke detector, smoke detectors, ionization detector]
+  "Anemometers": [anemometer, anemometers]
+  "Pressure sensors": [pressure transducer, pressure transducers]
+  "Gas sensors": [CO sensor, oxygen sensor, gas analyzer]
+
+# NASA's three parts of spacecraft fire safety. The cue words only find CANDIDATE sentences; a pillar is shown for an
+# investigation only when a candidate is verified as evidence (app/nimbus/pillars.py, Nimbus/agents/15-pillar-pointer.md).
+# Bare "material" is not a cue: it matched sample materials in work that has nothing to do with choosing materials.
+pillar_cues:
+  prevention: [flammability, flammability limit, flammability limits, flame spread, ignition, limiting oxygen, fire growth, fire prevention,
+               material selection, materials selection, screening, burning rate, spacecraft fire safety]
+  detection: [smoke, aerosol, aerosols, smoke detector, smoke detectors, fire detector, fire detectors, detection, particulate, particulates, smoldering, fire detection, combustion products]
+  # bare "detector(s)" is not a cue: it matched instrument detectors (thermopile detectors) that have nothing to do with fire detection
+  suppression: [extinguish, extinguishment, extinguishing, extinction, suppress, suppression, suppressant, suppressants,
+                water mist, fire suppression]
+  # "dilution" and "diluent" are not cues: they describe test gas mixtures (soot studies, flame stability), not suppression.
+
+# Phrases removed before cue words are matched: "smoke point" is a soot measurement (SPICE), and program or experiment names
+# (FPDS, BASS, FLEX) contain cue words without saying anything about what the research informs.
+pillar_cue_exclusions: ['smoke[- ]points?', 'Smoke Point in Coflow Experiment',
+                        'Fire Prevention, Detection,? and Suppression', 'Burning and Suppression of Solids', 'Flame Extinguishment (?:Experiment|\(FLEX\))']
+
+# Equipment and controls a record says its research informs. Plain word matching, each tag keeps its sentence.
+equipment:
+  "Smoke and fire detectors": [smoke detector, smoke detectors, fire detector, fire detectors, fire detection, smoke detection, detection systems,
+                               particle counter, combustion product monitor]
+  "Suppressant agents": [suppressant, suppressants, fire extinguisher, fire extinguishers, extinguisher, water mist, fire suppression]
+  "Material selection and screening": [material selection, materials selection, selecting materials, screening, flammability test, NASA-STD-6001]
+  "Atmosphere limits": [cabin atmosphere, spacecraft atmosphere, habitat atmosphere, limiting oxygen, oxygen concentration, atmosphere]
+  "Fire models and design tools": [predictive models, predictive tools, fire safety modeling, fire-safety modeling, hazard assessment, design tools]
+
+# Measured results that bear on a pillar, read from the harmonised tests and table families. Shown as the "data link".
+pillar_data_links:
+  - {pillar: suppression, outcome_kind: end_state, outcome: extinguished, text: "tests record whether the flame went out by itself (Test end: Extinction)"}
+  - {pillar: prevention, outcome_kind: ignition, outcome: ignited, text: "tests record whether a hot flame lit (Hot ignition)"}
+  - {pillar: prevention, family: solid_fuel_flammability, tiers: [A, B, C], text: "its test table records how solid samples burned"}
+  - {pillar: detection, family: smoke_aerosol, tiers: [A, B, C], text: "its test table records measured smoke-particle results"}
+
+# The challenge puts rocket and propellant fire safety out of scope.
+out_of_scope: [rocket, rockets, propellant, propellants, rocket engine]
+
+# Physical mechanisms. A sentence may name one only if a PSI document passage it cites mentions it (Nimbus rule C-MECH).
+# This keeps textbook physics out of the answers unless PSI's own documents say it.
+mechanisms: [radiative extinction, radiative heat loss, radiative loss, buoyancy, buoyant, Damköhler, Lewis number, chemical kinetics,
+             cool flame, cool flames, residence time, flame stretch, quenching, natural convection, diffusion-controlled, d2-law]

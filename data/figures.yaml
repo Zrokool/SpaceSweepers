@@ -1,0 +1,175 @@
+# Figure data drawn in the investigation detail panel. Reviewed by hand: every series names the file's own columns (`expect` is checked
+# against the header text at load time; a mismatch drops that series and says why, it never draws a guess).
+# kind: experiment (measured), simulation (computed), published (the file does not say which). Kinds come from the file's own labels.
+# style: points draws a series as separate points (discrete measurements); profiles are drawn as lines.
+# Columns are 0-based. `monotonic: true` drops a profile series whose x values are not in order (a header that disagrees with its values).
+PSI-117:
+  - file: "PSI-117_Analyzed Data_MST_2024_Dext.csv"
+    figure: "Fig. 5"
+    charts:
+      - title: "Extinction diameter against pressure, 0.5 to 1.5 atm"
+        x: "Pressure (atm)"
+        y: "Extinction diameter"
+        series:
+          - {name: "Model, hot flame", kind: simulation, group: "hot flame", x: 1, y: 3, expect: {0: "Model", 1: "Pressure", 3: "Dext_hot"}}
+          - {name: "Model, cool flame", kind: simulation, group: "cool flame", x: 1, y: 2, expect: {1: "Pressure", 2: "Dext_cool"}}
+          - {name: "Experiment, cool flame", kind: experiment, group: "cool flame", x: 6, y: 7, expect: {5: "Expt", 6: "Pressure", 7: "Dext_cool_Expt"}}
+  - file: "PSI-117_Analyzed Data_PROCI_2023_Alkane_Extinction_Diameter_1atm.csv"
+    figure: "Fig. 3"
+    charts:
+      - {title: "n-heptane: extinction diameter against initial droplet diameter, 1 atm", x: "Initial droplet diameter Do", y: "Extinction diameter", series: &c7
+          [{name: "Experiment, hot flame", kind: experiment, group: "hot flame", x: 1, y: 2, expect: {0: "C7", 1: "Do", 2: "Dext_HF"}},
+           {name: "Experiment, cool flame", kind: experiment, group: "cool flame", x: 1, y: 3, expect: {3: "Dext_CF"}},
+           {name: "Simulation, hot flame", kind: simulation, group: "hot flame", x: 6, y: 7, expect: {5: "C7", 6: "Do", 7: "Dext_HF"}},
+           {name: "Simulation, cool flame", kind: simulation, group: "cool flame", x: 6, y: 8, expect: {8: "Dext_CF"}}]}
+      - {title: "n-decane: extinction diameter against initial droplet diameter, 1 atm", x: "Initial droplet diameter Do", y: "Extinction diameter", series:
+          [{name: "Experiment, hot flame", kind: experiment, group: "hot flame", x: 11, y: 12, expect: {10: "C10", 11: "Do", 12: "Dext_HF"}},
+           {name: "Experiment, cool flame", kind: experiment, group: "cool flame", x: 11, y: 13, expect: {13: "Dext_CF"}},
+           {name: "Simulation, hot flame", kind: simulation, group: "hot flame", x: 16, y: 17, expect: {15: "C10", 16: "Do", 17: "Dext_HF"}},
+           {name: "Simulation, cool flame", kind: simulation, group: "cool flame", x: 16, y: 18, expect: {18: "Dext_CF"}}]}
+      - {title: "n-dodecane: extinction diameter against initial droplet diameter, 1 atm", x: "Initial droplet diameter Do", y: "Extinction diameter", series:
+          [{name: "Experiment, hot flame", kind: experiment, group: "hot flame", x: 21, y: 22, expect: {20: "C12", 21: "Do", 22: "Dext_HF"}},
+           {name: "Experiment, cool flame", kind: experiment, group: "cool flame", x: 21, y: 23, expect: {23: "Dext_CF"}},
+           {name: "Simulation, hot flame", kind: simulation, group: "hot flame", x: 26, y: 27, expect: {25: "C12", 26: "Do", 27: "Dext_HF"}},
+           {name: "Simulation, cool flame", kind: simulation, group: "cool flame", x: 26, y: 28, expect: {28: "Dext_CF"}}]}
+  - file: "PSI-117_Analyzed Data_MST_2024_Burning_history_Flame_diameter.csv"
+    figure: "Fig. 1"
+    charts:
+      - title: "Droplet diameter squared against time (n-dodecane, 4 mm, 1 atm)"
+        x: "Time"
+        y: "d² (mm²)"
+        series:
+          - {name: "Experiment", kind: experiment, group: "d²", x: 1, y: 2, expect: {1: "t", 2: "d^2"}}
+          - {name: "Model", kind: simulation, group: "d²", x: 13, y: 14, expect: {12: "Model", 13: "t", 14: "d^2"}}
+      - title: "Flame diameter against time"
+        x: "Time"
+        y: "Flame diameter (mm)"
+        series:
+          - {name: "Experiment", kind: experiment, group: "flame", x: 4, y: 5, expect: {4: "t", 5: "dflame"}}
+          - {name: "Model", kind: simulation, group: "flame", x: 13, y: 15, expect: {15: "dflame"}}
+      - title: "Radiance against time"
+        x: "Time"
+        y: "Radiance Q (W)"
+        series:
+          - {name: "Experiment, series 1", kind: experiment, group: "series 1", x: 7, y: 8, expect: {7: "time", 8: "Q (W)"}}
+          - {name: "Experiment, series 2", kind: experiment, group: "series 2", x: 9, y: 10, expect: {9: "time", 10: "Q (W)"}}
+          - {name: "Model", kind: simulation, group: "series 1", x: 18, y: 19, expect: {17: "Model", 18: "t", 19: "Q (W)"}}
+  - file: "PSI-117_Analyzed Data_MST_2024_Radiance_Flame_Diameter.csv"
+    figure: "Fig. 11"
+    charts:
+      - title: "Radiance against time, 0.5 and 5 atm"
+        x: "Time (s)"
+        y: "Radiance (W)"
+        series:
+          - {name: "Experiment, 0.5 atm", kind: experiment, group: "0.5 atm", x: 1, y: 2, expect: {1: "time", 2: "Radiance"}}
+          - {name: "Experiment, 5 atm", kind: experiment, group: "5 atm", x: 8, y: 9, expect: {8: "time", 9: "Radiance"}}
+          - {name: "Simulation, 0.5 atm", kind: simulation, group: "0.5 atm", x: 16, y: 17, expect: {14: "Simulation", 16: "time", 17: "Q"}}
+          - {name: "Simulation, 5 atm", kind: simulation, group: "5 atm", x: 20, y: 21, expect: {19: "Simulation", 20: "time", 21: "Q"}}
+      - title: "Flame diameter against time, 0.5 and 5 atm"
+        x: "Time (s)"
+        y: "Flame diameter (mm)"
+        series:
+          - {name: "Experiment, 0.5 atm", kind: experiment, group: "0.5 atm", x: 3, y: 4, expect: {3: "time", 4: "df"}}
+          - {name: "Experiment, 5 atm", kind: experiment, group: "5 atm", x: 10, y: 11, expect: {10: "time", 11: "df"}}
+          - {name: "Simulation, 0.5 atm", kind: simulation, group: "0.5 atm", x: 25, y: 26, expect: {24: "Simulation", 25: "Time", 26: "Dflame"}}
+          - {name: "Simulation, 5 atm", kind: simulation, group: "5 atm", x: 29, y: 30, expect: {28: "Simulation", 29: "Time", 30: "Dflame"}}
+      - title: "Peak temperature against time (simulation only)"
+        x: "Time (s)"
+        y: "T_max (K)"
+        series:
+          - {name: "Simulation, 0.5 atm", kind: simulation, group: "0.5 atm", x: 34, y: 35, expect: {33: "Simulation", 34: "Time", 35: "T_max"}}
+          - {name: "Simulation, 5 atm", kind: simulation, group: "5 atm", x: 38, y: 39, expect: {37: "Simulation", 38: "Time", 39: "T_max"}}
+  - file: "PSI-117_Analyzed Data_PROCI_C12_2019_Three_Stage.csv"
+    figure: "Fig. 7 (2019 paper)"
+    charts:
+      - title: "Three-stage cool flame: (D/Do)² against t/Do²"
+        x: "t/Do² (s/mm²)"
+        y: "(D/Do)²"
+        series:
+          - {name: "Experiment", kind: experiment, group: "(D/Do)²", x: 1, y: 2, expect: {1: "t/(Do)2", 2: "(D/Do)2"}}
+          - {name: "Simulation", kind: simulation, group: "(D/Do)²", x: 35, y: 36, expect: {27: "Simulations", 35: "t/do", 36: "(d/do)^2"}}
+      - title: "Three-stage cool flame: flame diameter against t/Do²"
+        x: "t/Do² (s/mm²)"
+        y: "Flame diameter (mm)"
+        series:
+          - {name: "Experiment", kind: experiment, group: "flame", x: 8, y: 9, expect: {8: "t/(Do)2", 9: "Dflame (mm)"}}
+          - {name: "Simulation", kind: simulation, group: "flame", x: 35, y: 37, expect: {37: "Dflame"}}
+      - title: "Three-stage cool flame: radiance against t/Do²"
+        x: "t/Do²"
+        y: "Flame radiance (W)"
+        series:
+          - {name: "Experiment, radiance I", kind: experiment, group: "I", x: 12, y: 13, expect: {11: "Flame Radiance I", 13: "Flame Radiance (W)"}}
+          - {name: "Experiment, radiance II", kind: experiment, group: "II", x: 16, y: 17, expect: {15: "Flame Radiance II", 17: "Flame Radiance (W)"}}
+          - {name: "Simulation", kind: simulation, group: "I", x: 39, y: 40, expect: {39: "t/do2", 40: "Radiance (W)"}}
+  - file: "PSI-117_Analyzed Data_PROCI_2019_Stable_Cool.csv"
+    figure: "Fig. 1"
+    charts:
+      - title: "n-heptane stable cool flame (simulation): (D/Do)² against time"
+        x: "Time (s)"
+        y: "(D/Do)²"
+        series: [{name: "Simulation", kind: simulation, group: "simulation", x: 0, y: 6, expect: {0: "Time", 6: "(D/Do)2"}}]
+      - title: "n-heptane stable cool flame (simulation): peak temperature against time"
+        x: "Time (s)"
+        y: "T_max (K)"
+        series: [{name: "Simulation", kind: simulation, group: "simulation", x: 0, y: 3, expect: {0: "Time", 3: "T_max"}}]
+  - file: "PSI-117_Analyzed Data_PROCI_2019_Oscillatory_Cool_Flame.csv"
+    figure: "Fig. 1"
+    charts:
+      - title: "n-heptane oscillatory cool flame (simulation): (D/Do)² against time"
+        x: "Time (s)"
+        y: "(D/Do)²"
+        series: [{name: "Simulation", kind: simulation, group: "simulation", x: 0, y: 6, expect: {0: "Time", 6: "(D/Do)2"}}]
+      - title: "n-heptane oscillatory cool flame (simulation): peak temperature against time"
+        x: "Time (s)"
+        y: "T_max (K)"
+        series: [{name: "Simulation", kind: simulation, group: "simulation", x: 0, y: 3, expect: {0: "Time", 3: "T_max"}}]
+PSI-142:
+  - file: "PSI-142_Analyzed Data_PSI data summary Princeton with links.xlsx"
+    figure: "Data IDs 1 to 8"
+    charts:
+      - title: "Extinction strain rate against fuel mass fraction, nC14 (Data IDs 1 to 3)"
+        x: "Fuel mass fraction Yf"
+        y: "Extinction strain rate (1/s)"
+        note: "Data ID 1: cool diffusion flame extinction limits, no ozone. Data ID 2: with ozone. Data ID 3: hot diffusion flame extinction limits, no ozone (descriptions as written in the workbook's summary sheet)."
+        series:
+          - {name: "Data ID 1: cool flame, no ozone", kind: published, style: points, group: "ID 1", sheet: "data ID 1", header_row: 4, x: 4, y: 5, expect: {4: "Yf", 5: "aCFE"}}
+          - {name: "Data ID 2: cool flame, with ozone", kind: published, style: points, group: "ID 2", sheet: "data ID 2", header_row: 3, x: 4, y: 5, expect: {4: "Yf", 5: "aCFE"}}
+          - {name: "Data ID 3: hot flame, no ozone", kind: published, style: points, group: "ID 3", sheet: "data ID 3", header_row: 3, x: 4, y: 5, expect: {4: "Yf", 5: "aHFE"}}
+      - title: "Premixed flame extinction limits (Data ID 4)"
+        x: "a"
+        y: "ϕ at extinction"
+        series:
+          - {name: "ϕ_HFE", kind: published, style: points, group: "HFE", sheet: "data ID 4", header_row: 3, x: 3, y: 4, expect: {3: "a", 4: "ϕ_HFE"}}
+          - {name: "ϕ_CFE", kind: published, style: points, group: "CFE", sheet: "data ID 4", header_row: 3, x: 3, y: 5, expect: {5: "ϕ_CFE"}}
+      - title: "CH2O PLIF signal against distance (Data ID 5)"
+        x: "Distance (cm)"
+        y: "PLIF signal (a.u.)"
+        series:
+          - {name: "O3 = 0.0 mol.%", kind: published, group: "O3 0.0", sheet: "data ID 5", header_row: 3, x: 3, y: 4, monotonic: true, expect: {2: "O3 = 0.0", 3: "distance", 4: "PLIF"}}
+          - {name: "O3 = 4.1 mol.%", kind: published, group: "O3 4.1", sheet: "data ID 5", header_row: 3, x: 7, y: 8, monotonic: true, expect: {6: "O3 = 4.1", 7: "distance", 8: "PLIF"}}
+      - title: "Temperature against location (Data ID 5)"
+        x: "Location (cm)"
+        y: "Temperature (K)"
+        series:
+          - {name: "O3 = 0.0 mol.%", kind: published, group: "O3 0.0", sheet: "data ID 5", header_row: 3, x: 11, y: 12, expect: {10: "O3 = 0.0", 11: "location", 12: "temperature"}}
+          - {name: "O3 = 4.5 mol.%", kind: published, group: "O3 4.5", sheet: "data ID 5", header_row: 3, x: 15, y: 16, expect: {14: "O3 = 4.5", 15: "location", 16: "temperature"}}
+      - title: "Alkane chemiluminescence against distance (Data ID 6)"
+        x: "Distance (cm)"
+        y: "Chemiluminescence signal (counts)"
+        note: "Only the nC12 block is drawn. In the nC10 and nC7 blocks the values under the 'distance' header are not in order, so the file's headers and values disagree there and those blocks are not drawn."
+        series:
+          - {name: "nC12", kind: published, group: "nC12", sheet: "data ID 6", header_row: 3, x: 4, y: 5, monotonic: true, expect: {3: "nC12", 4: "distance", 5: "chemi"}}
+          - {name: "nC10 (header and values disagree)", kind: published, group: "nC10", sheet: "data ID 6", header_row: 3, x: 8, y: 9, monotonic: true, expect: {7: "nC10", 8: "distance", 9: "chemi"}}
+          - {name: "nC7 (header and values disagree)", kind: published, group: "nC7", sheet: "data ID 6", header_row: 3, x: 12, y: 13, monotonic: true, expect: {11: "nC7", 12: "distance", 13: "chemi"}}
+      - title: "nC12 chemiluminescence against distance (Data ID 7)"
+        x: "Distance (cm)"
+        y: "Chemiluminescence signal (counts)"
+        series:
+          - {name: "Xf = 0.1", kind: published, group: "Xf 0.1", sheet: "data ID 7", header_row: 3, x: 4, y: 5, monotonic: true, expect: {3: "Xf = 0.1", 4: "distance", 5: "chemi"}}
+          - {name: "Xf = 0.042", kind: published, group: "Xf 0.042", sheet: "data ID 7", header_row: 3, x: 8, y: 9, monotonic: true, expect: {7: "Xf = 0.042", 8: "distance", 9: "chemi"}}
+          - {name: "Xf = 0.009", kind: published, group: "Xf 0.009", sheet: "data ID 7", header_row: 3, x: 12, y: 13, monotonic: true, expect: {11: "Xf = 0.009", 12: "distance", 13: "chemi"}}
+      - title: "nC12 peak temperature against fuel mole fraction (Data ID 8)"
+        x: "Fuel mole fraction Xf"
+        y: "T_max (K)"
+        series:
+          - {name: "550, O3", kind: published, style: points, group: "550, O3", sheet: "data ID 8", header_row: 4, x: 3, y: 4, expect: {3: "Xf", 4: "T_max"}}

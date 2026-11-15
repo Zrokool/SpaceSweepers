@@ -1,0 +1,41 @@
+# How the dashboard categorizes PSI test tables. Edit this file to change a rule; nothing is hidden in code.
+# A table's family comes from its own column headers first, then from its investigation's text.
+# Rules are tried in order; the first that matches wins. Every classification shows what it matched.
+
+families:
+  - key: not_a_test_table
+    label: "Not a test table"
+    what: "A summary, a sample list or non-combustion data (thermocapillary flow, solder samples)."
+    columns_any: ['^Data Description$', '^Heating Mode$', '^Free Surface', '^Composition$', '^Sample ID$']
+  - key: smoke_aerosol
+    label: "Smoke and aerosol (detection)"
+    what: "Smoke particles, aging and detector response."
+    columns_any: ['Rt/R0', 'Weight loss', 'aging', '^Session Name$']
+  - key: droplet_combustion
+    label: "Droplet combustion"
+    what: "A single burning fuel droplet: how it burns, how its flame ends."
+    columns_any: ['droplet', '^Test end$']
+    text_any: ['droplet']
+  - key: solid_fuel_flammability
+    label: "Solid-fuel flammability and flame spread"
+    what: "Samples of fabric, plastic or wax ignited and burned in a low-speed flow."
+    columns_any: ['Sample Thickness', 'Fuel Sample Material', 'Sample Length', 'Flow Direction', '^Material$']
+    text_any: ['flame spread']
+  - key: gas_diffusion_flame
+    label: "Gas diffusion flames"
+    what: "Flames from gas burners: ignition, extinction, soot, flame temperature."
+    columns_any: ['^XO2', 'Zst', 'Tad', 'Nozzle', 'Fuel Bottle', 'Flames? ignited', 'Fuel Rate', 'Hot ignition', '^Fuel Type$']
+    text_any: ['diffusion flame', 'burner']
+
+# Columns that hold a measured result as a number or amount (not a category). They make a table tier B.
+continuous_outcomes: ['burn time', 'burn length', 'spread', 'weight loss', 'Rt/R0', 'final CO', 'final O2', 'final CO2', 'extinction diameter', 'burning rate']
+# Columns that count flames per test day: the table is a test plan with a count, not one row per test.
+plan_counts: ['Flames? ignited']
+
+tiers:
+  A: "Outcome-ready: single-valued conditions and a categorical outcome for every test."
+  B: "Outcomes recorded: the table has measured results (burn time, spread rate…) but no mapped categorical outcome."
+  C: "Conditions only: oxygen and pressure are mapped, no outcome."
+  D: "Test plan: several values per cell, or a count of flames per test day. Not one row per test."
+  E: "No oxygen or pressure: lists samples, notes or other variables."
+  S: "Superseded: another table, built from the lab's own workbook, contains every test in this one."

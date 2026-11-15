@@ -1,0 +1,24 @@
+# Hand-reviewed mapping with document evidence (staged for review)
+investigation: PSI-25
+tables:
+- file: PSI-25_Experimental table_BASS-II.csv
+  sha256: 71e792bf6b5fb5ea620c5dd70fbbac05515992e12aefcf5dff47312caa48c042
+  label: BASS-II tests
+  fuel_class: solid
+  o2_role: ambient
+  o2_role_reason: The README says the initial oxygen reading is the ISS 'air' reading of the sensor, corrected to the ISS cabin value.
+  test_id: 'Test #'
+  columns:
+    fuel:
+      column: Fuel Sample Material
+      kind: text
+    o2_fraction:
+      column: 'Calibrated  initial O2 % by vol '
+      kind: number
+      unit: percent
+      min: 0
+      max: 1
+  evidence:
+  - file: PSI-25/PSI-25_Science Documents_BASS-II_ReadMe.docx.txt
+    page: ''
+    quote: the MCA ISS reading was used to correct the initial ISS ‘air’ reading of the sensor for the day via a constant offset

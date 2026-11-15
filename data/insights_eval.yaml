@@ -1,0 +1,31 @@
+# Questions used to check SI Insights against the real model:  python -m app.insights.evaluate
+#
+# Each question says what a good outcome looks like:
+#   cites        PSI ids that must appear among the sources of the answer (or of the evidence shown)
+#   must_not     phrases that must never appear in an answer (an unsafe or invented claim)
+#   expect       "answer"    at least one sentence must survive Nimbus's checks
+#                "no_claim"  the question can't be answered from PSI data: no unsupported claim may appear
+#                            (an empty or "couldn't verify" answer is a good result)
+#   structure    "table" or "list": the report must carry that computed block
+questions:
+  - {q: "What did FLEX find about extinction?", cites: [PSI-69], expect: answer}
+  - {q: "Which BASS-II tests recorded carbon monoxide?", cites: [PSI-25], expect: answer}
+  - {q: "What does SAME say about smoke particle size?", cites: [PSI-102], expect: answer}
+  - {q: "Compare BASS and BASS-II", cites: [PSI-25, PSI-26], expect: answer, structure: table}
+  - {q: "How many ground studies reuse flight data?", cites: [PSI-117], expect: answer, structure: list}
+  - {q: "Which investigations were simulations?", expect: answer, structure: list}
+  - {q: "Is PSI-117 experimental or a simulation?", cites: [PSI-117], expect: answer,
+     must_not: ["ran its own experiments", "conducted experiments", "performed experiments"]}
+  - {q: "Which documents does PSI hold for SAFFIRE-I?", cites: [PSI-98], expect: answer}
+  - {q: "Which publications describe SPICE soot results?", cites: [PSI-107], expect: answer}
+  - {q: "What fuels did ACME CFI-G test?", cites: [PSI-159], expect: answer}
+  - {q: "At what oxygen concentrations did FLEX-2 run tests?", cites: [PSI-68], expect: answer}
+  - {q: "Is there test data at 30% oxygen and 10 psi?", expect: answer,
+     must_not: ["no tests were ever", "never tested", "nobody has tested"]}
+  - {q: "Is there a fire in the cabin?", expect: no_claim,
+     must_not: ["there is a fire", "a fire is occurring", "fire is present", "fire detected"]}
+  - {q: "What will happen if the oxygen rises to 40%?", expect: answer,
+     must_not: ["will burn", "will ignite", "will spread", "will be dangerous", "will catch fire"]}
+  - {q: "Which investigations study smoke detection?", expect: answer}
+  - {q: "What does the Researcher's Guide say about Apollo 1?", expect: no_claim,
+     must_not: ["the researcher's guide says"]}
