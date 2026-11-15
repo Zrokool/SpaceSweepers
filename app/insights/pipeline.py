@@ -241,8 +241,9 @@ async def analyst_stream(http: httpx.AsyncClient, settings: Settings, frame: Fra
 # ------------------------------------------------------------------ the run
 def _write_log(settings: Settings, run_id: str, record: dict) -> None:
     try:
-        settings.runs_dir.mkdir(parents=True, exist_ok=True)
-        (settings.runs_dir / f"insights-{run_id}.json").write_text(json.dumps(record, indent=1, default=str), encoding="utf-8")
+        folder = settings.runs_dir if record.get("origin", "user") == "user" else settings.runs_dir / record["origin"]
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / f"insights-{run_id}.json").write_text(json.dumps(record, indent=1, default=str), encoding="utf-8")
     except OSError as e:
         log.warning("could not write the SI Insights run log: %s", e)
 
@@ -281,7 +282,8 @@ async def _run(*, question: str, previous: list[str], http: httpx.AsyncClient, s
     run_id = f"{now:%Y%m%d-%H%M%S}-{hashlib.sha1(question.encode()).hexdigest()[:6]}"
     reader = reader_for(library.catalog)
     names = {i["id"]: i["name"] for i in library.catalog.ordered()}
-    record: dict = {"run_id": run_id, "question": question, "model": settings.si_model, "spec_hash": spec.spec_hash(), "stages": []}
+    record: dict = {"run_id": run_id, "question": question, "origin": settings.run_origin, "model": settings.si_model,
+                    "spec_hash": spec.spec_hash(), "snapshot_fetched_at": library.catalog.manifest.get("fetched_at"), "stages": []}
     timings: dict[str, float] = {}
     last_draft: list[str] = []
 

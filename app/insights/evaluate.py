@@ -71,7 +71,7 @@ def judge_scenario(case: dict, report: dict, seconds: float) -> list[str]:
 
 async def main(only: list[int] | None, scenarios: bool = False) -> None:
     logging.disable(logging.CRITICAL)
-    settings = get_settings()
+    settings = get_settings().model_copy(update={"run_origin": "evaluation"})      # its run logs go to nimbus-runs/evaluation/, apart from real questions
     cases = yaml.safe_load((settings.data_dir / ("scenario_eval.yaml" if scenarios else "insights_eval.yaml")).read_text(encoding="utf-8"))["questions"]
     engine = get_engine(settings.data_dir)
     rows = []
@@ -98,12 +98,19 @@ async def main(only: list[int] | None, scenarios: bool = False) -> None:
     secs = sorted(r["seconds"] for r in rows)
     print(f"\nanswer time: median {secs[len(secs) // 2]}s · slowest {secs[-1]}s · total {sum(secs)}s · "
           f"{sum(r['mode'] == 'computed' for r in rows)} answered by code without SI")
+    by_rule: dict[str, int] = {}
+    for r in rows:
+        for x in r["removed_sentences"]:
+            for rule in x.get("rules", []):
+                by_rule[rule] = by_rule.get(rule, 0) + 1
+    print("removed by rule:", ", ".join(f"{k} {v}" for k, v in sorted(by_rule.items(), key=lambda kv: -kv[1])) or "none")
     print(f"{passed}/{len(rows)} questions passed · sentences: {kept} verified, {removed} removed by Nimbus "
           f"({removed / max(1, kept + removed):.0%} of what the model wrote)")
     out = settings.cache_dir / "insights-eval"
     out.mkdir(parents=True, exist_ok=True)
     path = out / f"{datetime.now(UTC):%Y%m%d-%H%M%S}.json"
-    path.write_text(json.dumps({"model": settings.si_model, "passed": passed, "total": len(rows), "rows": rows}, indent=1), encoding="utf-8")
+    path.write_text(json.dumps({"origin": "evaluation", "model": settings.si_model, "snapshot_fetched_at": engine[0].catalog.manifest.get("fetched_at"),
+                                  "question_set": "scenario_eval.yaml" if scenarios else "insights_eval.yaml", "removed_by_rule": by_rule, "passed": passed, "total": len(rows), "rows": rows}, indent=1), encoding="utf-8")
     print(f"saved {path}")
 
 

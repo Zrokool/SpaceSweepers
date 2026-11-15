@@ -631,3 +631,16 @@ def test_facts_table_is_built_by_code_from_the_record(catalog):
     t = answers.facts(reader_for(catalog).read("What did FLEX find about extinction?"), catalog)
     assert t["columns"][0]["name"] == "FLEX" and t["rows"][-1]["attribute"] == "DOI"
     assert any(r["attribute"] == "Tests" for r in t["rows"]) and answers.facts(reader_for(catalog).read("How many studies?"), catalog) is None
+
+
+def test_run_logs_say_who_asked_and_evaluation_runs_are_kept_apart_from_real_questions(tmp_path):
+    from app.config import Settings
+    from app.insights import pipeline
+    user = Settings(_env_file=None, cache_dir=tmp_path)
+    evaluation = user.model_copy(update={"run_origin": "evaluation"})
+    pipeline._write_log(user, "a", {"origin": user.run_origin, "question": "q"})
+    pipeline._write_log(evaluation, "b", {"origin": evaluation.run_origin, "question": "q"})
+    assert [p.name for p in user.runs_dir.glob("insights-*.json")] == ["insights-a.json"]            # only real questions sit at the top
+    assert (user.runs_dir / "evaluation" / "insights-b.json").exists()
+    with pytest.raises(Exception):
+        Settings(_env_file=None, run_origin="anything else")

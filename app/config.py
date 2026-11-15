@@ -3,6 +3,7 @@
 from functools import lru_cache
 from pathlib import Path
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -37,6 +38,9 @@ class Settings(BaseSettings):
     si_timeout_seconds: float = 300.0
     si_queue_wait_seconds: float = 90.0   # how long a question may wait for the one model before it is answered from evidence alone
     si_max_waiting: int = 4               # how many questions may wait for the model at once
+    # Who a run log belongs to, so measurements are never mixed with development: "user" (a person asking in the app, the default),
+    # "evaluation" (python -m app.insights.evaluate) or "development" (scripts and manual testing; set SS_RUN_ORIGIN=development).
+    run_origin: str = Field(default="user", pattern=r"^(user|evaluation|development)$")
     si_keep_alive: str = "30m"     # how long Ollama keeps the model in memory after a call (a cold load can take minutes)
 
     @property
