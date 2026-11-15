@@ -6,6 +6,13 @@ The idea in one line: **SI proposes, PSI data decides.** A local SI model reads 
 
 Data: NASA Physical Sciences Informatics (PSI). SpaceSweepers is not affiliated with or endorsed by NASA.
 
+**Live demo:** <https://zrokool.github.io/SpaceSweepers/>, a static copy of the dashboard on GitHub Pages (no SI model).
+
+| Branch | What it is |
+|---|---|
+| `production` | The full app: the dashboard plus the SI chat, run locally with the SI model. This branch. |
+| `demo` (default) | The static GitHub Pages demo. Merge `production` into it to refresh the demo. |
+
 ---
 
 ## Status
