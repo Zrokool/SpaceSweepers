@@ -93,12 +93,13 @@ def test_the_page_uses_relative_paths_so_it_works_under_a_repository_address(sit
     assert sum(f.stat().st_size for f in site.rglob("*") if f.is_file()) < 40_000_000                      # well inside Pages' limits
 
 
-def test_precomputed_si_explanations_say_what_wrote_them_and_were_checked(site):
-    if not sx.EXPLANATIONS.exists():
-        pytest.skip("explanations have not been pre-computed")
-    stored = json.loads(sx.EXPLANATIONS.read_text(encoding="utf-8"))
-    assert {"generated_at", "model", "spec_hash", "snapshot_fetched_at", "note", "explanations"} <= set(stored)
-    assert len(stored["explanations"]) == len(sx.sweeper_selections())
-    for sel in sx.sweeper_selections():
-        one = json.loads((site / sx.static_file("/api/sweeper/explain", sel)).read_text(encoding="utf-8"))
-        assert one["precomputed"]["model"] == stored["model"] and {"answer", "removed", "sources", "notes"} <= set(one)
+def test_the_demo_publishes_no_si_text_because_nimbus_cannot_check_meaning(site, tmp_path):
+    """The generated explanations are kept in the repo but not published unless asked: some read wrongly against the patterns."""
+    assert not list((site / "api").rglob("*explain*"))
+    if sx.EXPLANATIONS.exists():
+        stored = json.loads(sx.EXPLANATIONS.read_text(encoding="utf-8"))
+        assert {"generated_at", "model", "spec_hash", "snapshot_fetched_at", "note", "explanations"} <= set(stored)
+        assert len(stored["explanations"]) == len(sx.sweeper_selections())
+        opted_in = tmp_path / "with"
+        sx.build(opted_in, with_explanations=True)
+        assert len(list((opted_in / "api").rglob("explain*"))) == len(stored["explanations"])

@@ -1,0 +1,891 @@
+{
+ "generated_at": "2026-11-15T18:07:35Z",
+ "model": "granite3.3:2b",
+ "spec_hash": "b016a537fe64e79b",
+ "snapshot_fetched_at": "2026-11-14T20:43:05Z",
+ "note": "Written by the local SI model from the Flame Sweeper's computed patterns and PSI passages, then checked sentence by sentence by Nimbus. Computed without a habitat, so it does not depend on the habitat chosen on the page.",
+ "explanations": {
+  "api/sweeper/explain.family-droplet-end-state.json": {
+   "mode": "si",
+   "answer": [
+    {
+     "text": "At 0.34 oxygen or more, flames were 'burned until the test ended' or 'went out by itself' in all 9 tests, with no 'went out by itself' at 0.15 oxygen or less.",
+     "cites": [
+      1,
+      2
+     ]
+    },
+    {
+     "text": "Flames with 'went out by itself' were more common in lower oxygen concentrations (0.15 or less), with 87 of 122 tests involving carbon dioxide, 40 of 50 tests involving helium, and 58 of 101 tests involving nitrogen only.",
+     "cites": [
+      3
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "n": 1,
+     "id": "C:sweeper:P1",
+     "label": "Computed by code from the PSI snapshot",
+     "kind": "computed by code",
+     "psi": null,
+     "doi": null,
+     "url": null,
+     "file": null,
+     "page": null,
+     "row": null,
+     "computed": true,
+     "text": "At 0.34 oxygen or more, the outcome was \"burned until the test ended\" in all 9 tests and \"went out by itself\" in none."
+    },
+    {
+     "n": 2,
+     "id": "C:sweeper:P2",
+     "label": "Computed by code from the PSI snapshot",
+     "kind": "computed by code",
+     "psi": null,
+     "doi": null,
+     "url": null,
+     "file": null,
+     "page": null,
+     "row": null,
+     "computed": true,
+     "text": "At 0.15 oxygen or less, the outcome was \"went out by itself\" in 45 of 48 tests."
+    },
+    {
+     "n": 3,
+     "id": "C:sweeper:P3",
+     "label": "Computed by code from the PSI snapshot",
+     "kind": "computed by code",
+     "psi": null,
+     "doi": null,
+     "url": null,
+     "file": null,
+     "page": null,
+     "row": null,
+     "computed": true,
+     "text": "Tests with the outcome \"went out by itself\", by what else was in the chamber gas: carbon dioxide: 87 of 122; helium: 40 of 50; nitrogen only: 58 of 101. This compares observed counts only; the tests did not vary one gas at a time."
+    }
+   ],
+   "removed": [
+    {
+     "text": "Computational models and microgravity experiments have shown that radiative and kinetic extinction limits are significant, with nitrogen-diluted hydrogen/methane blends potentially indicating kinetic extinction and helium-diluted hydrogen/methane blends possibly showing radiative extinction.",
+     "reason": "says ACME/Flame Design used simulation, but neither its label nor the evidence it cites says so",
+     "rules": [
+      "C-METHOD",
+      "C-SUPPORT"
+     ]
+    }
+   ],
+   "notes": [],
+   "model": "granite3.3:2b",
+   "cached": false
+  },
+  "api/sweeper/explain.family-droplet-end-state.diluent-nitrogen-only.json": {
+   "mode": "si",
+   "answer": [
+    {
+     "text": "At 0.34 oxygen or more, the flame was 'burned until the test ended' in all 9 tests and 'went out by itself' in none.",
+     "cites": [
+      1
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "n": 1,
+     "id": "C:sweeper:P1",
+     "label": "Computed by code from the PSI snapshot",
+     "kind": "computed by code",
+     "psi": null,
+     "doi": null,
+     "url": null,
+     "file": null,
+     "page": null,
+     "row": null,
+     "computed": true,
+     "text": "At 0.34 oxygen or more, the outcome was \"burned until the test ended\" in all 9 tests and \"went out by itself\" in none."
+    }
+   ],
+   "removed": [
+    {
+     "text": "Nitrogen-diluted hydrogen/methane blends may have indicated kinetic extinction, but more analyses are needed.",
+     "reason": "cites no computed pattern, so it doesn't explain what these tests show",
+     "rules": [
+      "C-ANCHOR"
+     ]
+    },
+    {
+     "text": "At 0.15 oxygen or less, the flame 'went out by itself' in 30 of 33 tests.",
+     "reason": "repeats an earlier sentence",
+     "rules": [
+      "C-DUP"
+     ]
+    }
+   ],
+   "notes": [],
+   "model": "granite3.3:2b",
+   "cached": false
+  },
+  "api/sweeper/explain.family-droplet-end-state.diluent-helium.json": {
+   "mode": "si",
+   "answer": [
+    {
+     "text": "Radiative extinction is unlikely in normal gravity due to increased buoyancy with flame size, enhancing mixing and reducing residence times.",
+     "cites": [
+      1,
+      2,
+      3,
+      4
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "n": 1,
+     "id": "D:PSI-10:d6:p19:2",
+     "label": "ACME/Flame Design · Science Documents_SRD_ACMEFlameDesign, page 19",
+     "kind": "document",
+     "psi": "PSI-10",
+     "doi": "10.60555/w4zy-bt45",
+     "url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-10",
+     "file": "PSI-10_Science Documents_SRD_ACMEFlameDesign.pdf",
+     "page": "19",
+     "row": null,
+     "computed": false,
+     "text": "ACME/Flame Design document Science Documents_SRD_ACMEFlameDesign, page 19: Radiative extinction is unlikely in normal grav ity because buoyancy increases with flame size, and under conditions where radiative extincti on might otherwise occur, buoyancy enhances mixing and reduces residence times. On the other hand, radiative extinction can be important in microgravity and its improved understanding s hould contribute to spacecraft fire safety. Microgravity experiments allowed the first obser vation of radiative extinction, this being for droplet combustion (Dietrich et al., 1996, Nayagam et al., 1998). Santa et al. (2007a) presents observations of radiative extinction in gaseous spherical flames. As described above, the experiments were conducted in microgravity in the NASA Glenn 2.2 s drop tower."
+    },
+    {
+     "n": 2,
+     "id": "C:sweeper:skill",
+     "label": "Computed by code from the PSI snapshot",
+     "kind": "computed by code",
+     "psi": null,
+     "doi": null,
+     "url": null,
+     "file": null,
+     "page": null,
+     "row": null,
+     "computed": true,
+     "text": "Only 50 usable tests (10 of one outcome, 40 of the other): at least 60 tests and 15 of each outcome are needed to fit a model."
+    },
+    {
+     "n": 3,
+     "id": "D:PSI-23:d2:p31:2",
+     "label": "ACME s-Flame · Reports_s_Flame_final_report_20210729, page 31",
+     "kind": "document",
+     "psi": "PSI-23",
+     "doi": "10.60555/k57n-p030",
+     "url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-23",
+     "file": "PSI-23_Reports_s_Flame_final_report_20210729.pdf",
+     "page": "31",
+     "row": null,
+     "computed": false,
+     "text": "ACME s-Flame document Reports_s_Flame_final_report_20210729, page 31: Damköhler numbers) and radiative/c hemical-kinetic extinction limits (high system Damköhler numbers) for mixtures of different H 2/CH4/diluent ratios (soot -free) and different C 2H4/diluent ratios (sooty). Nitrogen-diluted ethylene and methane evinced both radiative and kinetic extinctions. Nitrogen- diluted hydrogen/methane blends only demonstrated radiative extinction for the parameters tested. Nitrogen-diluted hydrogen cases may have indicated kinetic extinction, but more analyses are needed. Helium-diluted hydrogen/methane blends may have shown radiative extinction, but more analyses are needed. Helium -diluted hydrogen displayed radiative extinction and sho wed kinetic extinction for oxygen -reduced environments. Helium -diluted ethylene and methane exhibited radiative extinction."
+    },
+    {
+     "n": 4,
+     "id": "D:PSI-23:d2:p65:2",
+     "label": "ACME s-Flame · Reports_s_Flame_final_report_20210729, page 65",
+     "kind": "document",
+     "psi": "PSI-23",
+     "doi": "10.60555/k57n-p030",
+     "url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-23",
+     "file": "PSI-23_Reports_s_Flame_final_report_20210729.pdf",
+     "page": "65",
+     "row": null,
+     "computed": false,
+     "text": "ACME s-Flame document Reports_s_Flame_final_report_20210729, page 65: Observations of such radiative extinction behavior at high flow rates is an achievement because such phenomenon was not observed in our ground - based studies, given the limited microgravity durations. Radiative reabsor ption extends flame size at extinction. In ISS testing, radiative extinction has been found to be a common event, which was predicted computationally, but not observe d previously for our flame conditions. The 19256 tests (in Increment 60) were aimed at examining kinetic extinction. Similar to the radiative extinction cases, sufficient microgravity duration is needed to observe kinetic extinction because a near steady flame needs to be established first, before ramp down in flow rate to find properly the chemical kinetic extinction limit. High flow rate"
+    }
+   ],
+   "removed": [
+    {
+     "text": "Microgravity experiments first observed radiative extinction in droplet combustion, a phenomenon not seen in ground-based studies due to limited durations.",
+     "reason": "cites no computed pattern, so it doesn't explain what these tests show",
+     "rules": [
+      "C-ANCHOR"
+     ]
+    },
+    {
+     "text": "Cool flame extinction is primarily controlled by chemical kinetics, with smaller droplets experiencing earlier extinction due to reduced residence time in the reaction zone.",
+     "reason": "cites no computed pattern, so it doesn't explain what these tests show",
+     "rules": [
+      "C-ANCHOR"
+     ]
+    }
+   ],
+   "notes": [],
+   "model": "granite3.3:2b",
+   "cached": false
+  },
+  "api/sweeper/explain.family-droplet-end-state.diluent-carbon-dioxide.json": {
+   "mode": "si",
+   "answer": [
+    {
+     "text": "At 0.15 oxygen or less, the outcome was 'went out by itself' in 10 of 10 tests.",
+     "cites": [
+      1
+     ]
+    },
+    {
+     "text": "Accuracy 77% against 71% for always guessing the commoner outcome, AUC 0.79: the model beats guessing, so estimates are shown for untested cells inside the tested range.",
+     "cites": [
+      2
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "n": 1,
+     "id": "C:sweeper:P2",
+     "label": "Computed by code from the PSI snapshot",
+     "kind": "computed by code",
+     "psi": null,
+     "doi": null,
+     "url": null,
+     "file": null,
+     "page": null,
+     "row": null,
+     "computed": true,
+     "text": "At 0.15 oxygen or less, the outcome was \"went out by itself\" in 10 of 10 tests."
+    },
+    {
+     "n": 2,
+     "id": "C:sweeper:skill",
+     "label": "Computed by code from the PSI snapshot",
+     "kind": "computed by code",
+     "psi": null,
+     "doi": null,
+     "url": null,
+     "file": null,
+     "page": null,
+     "row": null,
+     "computed": true,
+     "text": "Accuracy 77% against 71% for always guessing the commoner outcome, AUC 0.79: the model beats guessing, so estimates are shown for untested cells inside the tested range."
+    }
+   ],
+   "removed": [
+    {
+     "text": "Nitrogen-diluted hydrogen/methane blends may have indicated kinetic extinction, but more analyses are needed.",
+     "reason": "cites no computed pattern, so it doesn't explain what these tests show",
+     "rules": [
+      "C-ANCHOR"
+     ]
+    }
+   ],
+   "notes": [],
+   "model": "granite3.3:2b",
+   "cached": false
+  },
+  "api/sweeper/explain.family-droplet-end-state.fuel-heptane.json": {
+   "mode": "si",
+   "answer": [
+    {
+     "text": "At 0.25 oxygen or more, flames were 'burned until the test ended' or 'went out by itself' in all 13 tests, with no 'went out by itself' at 0.15 oxygen or less in 8 of 11.",
+     "cites": [
+      1,
+      2
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "n": 1,
+     "id": "C:sweeper:P1",
+     "label": "Computed by code from the PSI snapshot",
+     "kind": "computed by code",
+     "psi": null,
+     "doi": null,
+     "url": null,
+     "file": null,
+     "page": null,
+     "row": null,
+     "computed": true,
+     "text": "At 0.25 oxygen or more, the outcome was \"burned until the test ended\" in all 13 tests and \"went out by itself\" in none."
+    },
+    {
+     "n": 2,
+     "id": "C:sweeper:P2",
+     "label": "Computed by code from the PSI snapshot",
+     "kind": "computed by code",
+     "psi": null,
+     "doi": null,
+     "url": null,
+     "file": null,
+     "page": null,
+     "row": null,
+     "computed": true,
+     "text": "At 0.15 oxygen or less, the outcome was \"went out by itself\" in 8 of 11 tests."
+    }
+   ],
+   "removed": [
+    {
+     "text": "Computational models and microgravity experiments have shown that radiative and kinetic extinction limits are influenced by diluents like nitrogen, helium, and xenon, with more analyses needed for hydrogen/methane blends.",
+     "reason": "says ACME/Flame Design used simulation, but neither its label nor the evidence it cites says so",
+     "rules": [
+      "C-METHOD"
+     ]
+    },
+    {
+     "text": "Tests with 'went out by itself' showed varying outcomes based on chamber gas composition, with carbon dioxide, helium, and nitrogen only contributing to this outcome.",
+     "reason": "says nothing specific: no number, investigation, material or quote",
+     "rules": [
+      "C-GENERIC"
+     ]
+    }
+   ],
+   "notes": [],
+   "model": "granite3.3:2b",
+   "cached": false
+  },
+  "api/sweeper/explain.family-droplet-end-state.fuel-heptane.diluent-nitrogen-only.json": {
+   "mode": "si",
+   "answer": [
+    {
+     "text": "At 0.30 oxygen or more, flames were 'burned until the test ended' in all 11 tests and 'went out by itself' in none.",
+     "cites": [
+      1
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "n": 1,
+     "id": "C:sweeper:P1",
+     "label": "Computed by code from the PSI snapshot",
+     "kind": "computed by code",
+     "psi": null,
+     "doi": null,
+     "url": null,
+     "file": null,
+     "page": null,
+     "row": null,
+     "computed": true,
+     "text": "At 0.30 oxygen or more, the outcome was \"burned until the test ended\" in all 11 tests and \"went out by itself\" in none."
+    }
+   ],
+   "removed": [
+    {
+     "text": "Microgravity experiments allowed the first observation of radiative extinction, a phenomenon not observed in ground-based studies due to limited durations.",
+     "reason": "cites no computed pattern, so it doesn't explain what these tests show",
+     "rules": [
+      "C-ANCHOR"
+     ]
+    },
+    {
+     "text": "At 0.15 oxygen or less, flames 'went out by themselves' in 8 of 11 tests.",
+     "reason": "repeats an earlier sentence",
+     "rules": [
+      "C-DUP"
+     ]
+    }
+   ],
+   "notes": [],
+   "model": "granite3.3:2b",
+   "cached": false
+  },
+  "api/sweeper/explain.family-droplet-end-state.fuel-heptane.diluent-helium.json": {
+   "mode": "si",
+   "answer": [
+    {
+     "text": "Only 22 usable tests (8 of one outcome, 14 of the other): at least 60 tests and 15 of each outcome are needed to fit a model.",
+     "cites": [
+      1
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "n": 1,
+     "id": "C:sweeper:skill",
+     "label": "Computed by code from the PSI snapshot",
+     "kind": "computed by code",
+     "psi": null,
+     "doi": null,
+     "url": null,
+     "file": null,
+     "page": null,
+     "row": null,
+     "computed": true,
+     "text": "Only 22 usable tests (8 of one outcome, 14 of the other): at least 60 tests and 15 of each outcome are needed to fit a model."
+    }
+   ],
+   "removed": [
+    {
+     "text": "Nitrogen-diluted ethylene and methane evinced both radiative and kinetic extinctions, while helium-diluted hydrogen/methane blends only demonstrated radiative extinction for the parameters tested.",
+     "reason": "cites no computed pattern, so it doesn't explain what these tests show",
+     "rules": [
+      "C-ANCHOR"
+     ]
+    },
+    {
+     "text": "Radiative extinction can be important in microgravity and its improved understanding should contribute to spacecraft fire safety.",
+     "reason": "cites no computed pattern, so it doesn't explain what these tests show",
+     "rules": [
+      "C-ANCHOR"
+     ]
+    }
+   ],
+   "notes": [],
+   "model": "granite3.3:2b",
+   "cached": false
+  },
+  "api/sweeper/explain.family-droplet-end-state.fuel-heptane.diluent-carbon-dioxide.json": {
+   "mode": "si",
+   "answer": [
+    {
+     "text": "Radiative extinction is unlikely in normal gravity due to increased buoyancy with flame size, enhancing mixing and reducing residence times.",
+     "cites": [
+      1,
+      2,
+      3,
+      4
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "n": 1,
+     "id": "C:sweeper:skill",
+     "label": "Computed by code from the PSI snapshot",
+     "kind": "computed by code",
+     "psi": null,
+     "doi": null,
+     "url": null,
+     "file": null,
+     "page": null,
+     "row": null,
+     "computed": true,
+     "text": "Only 48 usable tests (21 of one outcome, 27 of the other): at least 60 tests and 15 of each outcome are needed to fit a model."
+    },
+    {
+     "n": 2,
+     "id": "D:PSI-10:d6:p19:2",
+     "label": "ACME/Flame Design · Science Documents_SRD_ACMEFlameDesign, page 19",
+     "kind": "document",
+     "psi": "PSI-10",
+     "doi": "10.60555/w4zy-bt45",
+     "url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-10",
+     "file": "PSI-10_Science Documents_SRD_ACMEFlameDesign.pdf",
+     "page": "19",
+     "row": null,
+     "computed": false,
+     "text": "ACME/Flame Design document Science Documents_SRD_ACMEFlameDesign, page 19: Radiative extinction is unlikely in normal grav ity because buoyancy increases with flame size, and under conditions where radiative extincti on might otherwise occur, buoyancy enhances mixing and reduces residence times. On the other hand, radiative extinction can be important in microgravity and its improved understanding s hould contribute to spacecraft fire safety. Microgravity experiments allowed the first obser vation of radiative extinction, this being for droplet combustion (Dietrich et al., 1996, Nayagam et al., 1998). Santa et al. (2007a) presents observations of radiative extinction in gaseous spherical flames. As described above, the experiments were conducted in microgravity in the NASA Glenn 2.2 s drop tower."
+    },
+    {
+     "n": 3,
+     "id": "D:PSI-23:d2:p65:2",
+     "label": "ACME s-Flame · Reports_s_Flame_final_report_20210729, page 65",
+     "kind": "document",
+     "psi": "PSI-23",
+     "doi": "10.60555/k57n-p030",
+     "url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-23",
+     "file": "PSI-23_Reports_s_Flame_final_report_20210729.pdf",
+     "page": "65",
+     "row": null,
+     "computed": false,
+     "text": "ACME s-Flame document Reports_s_Flame_final_report_20210729, page 65: Observations of such radiative extinction behavior at high flow rates is an achievement because such phenomenon was not observed in our ground - based studies, given the limited microgravity durations. Radiative reabsor ption extends flame size at extinction. In ISS testing, radiative extinction has been found to be a common event, which was predicted computationally, but not observe d previously for our flame conditions. The 19256 tests (in Increment 60) were aimed at examining kinetic extinction. Similar to the radiative extinction cases, sufficient microgravity duration is needed to observe kinetic extinction because a near steady flame needs to be established first, before ramp down in flow rate to find properly the chemical kinetic extinction limit. High flow rate"
+    },
+    {
+     "n": 4,
+     "id": "D:PSI-39:d1:p9:2",
+     "label": "CFI · Reports_CFI Science Final Report, page 9",
+     "kind": "document",
+     "psi": "PSI-39",
+     "doi": "10.60555/m6pj-a914",
+     "url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-39",
+     "file": "PSI-39_Reports_CFI Science Final Report.pdf",
+     "page": "9",
+     "row": null,
+     "computed": false,
+     "text": "CFI document Reports_CFI Science Final Report, page 9: Cool flame extinction diameters as a function of ambient pressure for n-dodecane droplets burning in air. Since the cool flame extinction is an instability phenomenon where the dynamic balance between heat release and heat loss from the flame is lost at the lower turning point in the NTC region, one would expect addition of helium to have a substantial influence on the process. Figure 5 illustrates the effect of helium dilution on the extinction diameter for n-dodecane. Increase helium dilution leads to earlier cool flame extinction giving a larger extinction diameter."
+    }
+   ],
+   "removed": [
+    {
+     "text": "Helium dilution in flames can lead to earlier cool flame extinction and larger extinction diameters, primarily influenced by chemical kinetics.",
+     "reason": "cites no computed pattern, so it doesn't explain what these tests show",
+     "rules": [
+      "C-ANCHOR",
+      "C-MECH"
+     ]
+    },
+    {
+     "text": "Microgravity experiments first observed radiative extinction in droplet combustion, a phenomenon not seen in ground-based studies due to limited durations.",
+     "reason": "says nothing specific: no number, investigation, material or quote",
+     "rules": [
+      "C-GENERIC"
+     ]
+    }
+   ],
+   "notes": [],
+   "model": "granite3.3:2b",
+   "cached": false
+  },
+  "api/sweeper/explain.family-droplet-end-state.fuel-methanol.json": {
+   "mode": "si",
+   "answer": [
+    {
+     "text": "At 0.15 oxygen or less, the outcome was 'went out by itself' in 37 of 37 tests.",
+     "cites": [
+      1
+     ]
+    },
+    {
+     "text": "Tests with the outcome 'went out by itself' show that carbon dioxide was present in 60 of 74, helium in 26 of 28, and nitrogen only in 39 of 54.",
+     "cites": [
+      2
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "n": 1,
+     "id": "C:sweeper:P2",
+     "label": "Computed by code from the PSI snapshot",
+     "kind": "computed by code",
+     "psi": null,
+     "doi": null,
+     "url": null,
+     "file": null,
+     "page": null,
+     "row": null,
+     "computed": true,
+     "text": "At 0.15 oxygen or less, the outcome was \"went out by itself\" in 37 of 37 tests."
+    },
+    {
+     "n": 2,
+     "id": "C:sweeper:P3",
+     "label": "Computed by code from the PSI snapshot",
+     "kind": "computed by code",
+     "psi": null,
+     "doi": null,
+     "url": null,
+     "file": null,
+     "page": null,
+     "row": null,
+     "computed": true,
+     "text": "Tests with the outcome \"went out by itself\", by what else was in the chamber gas: carbon dioxide: 60 of 74; helium: 26 of 28; nitrogen only: 39 of 54. This compares observed counts only; the tests did not vary one gas at a time."
+    }
+   ],
+   "removed": [
+    {
+     "text": "Nitrogen-diluted hydrogen/methane blends may have indicated kinetic extinction, but more analyses are needed.",
+     "reason": "cites no computed pattern, so it doesn't explain what these tests show",
+     "rules": [
+      "C-ANCHOR"
+     ]
+    }
+   ],
+   "notes": [],
+   "model": "granite3.3:2b",
+   "cached": false
+  },
+  "api/sweeper/explain.family-droplet-end-state.fuel-methanol.diluent-nitrogen-only.json": {
+   "mode": "si",
+   "answer": [
+    {
+     "text": "At 0.15 oxygen or less, the flame went out by itself in 22 out of 22 tests.",
+     "cites": [
+      1
+     ]
+    },
+    {
+     "text": "Only 54 usable tests (15 of one outcome, 39 of the other) indicate a need for at least 60 tests and 15 of each outcome to fit a model.",
+     "cites": [
+      2
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "n": 1,
+     "id": "C:sweeper:P2",
+     "label": "Computed by code from the PSI snapshot",
+     "kind": "computed by code",
+     "psi": null,
+     "doi": null,
+     "url": null,
+     "file": null,
+     "page": null,
+     "row": null,
+     "computed": true,
+     "text": "At 0.15 oxygen or less, the outcome was \"went out by itself\" in 22 of 22 tests."
+    },
+    {
+     "n": 2,
+     "id": "C:sweeper:skill",
+     "label": "Computed by code from the PSI snapshot",
+     "kind": "computed by code",
+     "psi": null,
+     "doi": null,
+     "url": null,
+     "file": null,
+     "page": null,
+     "row": null,
+     "computed": true,
+     "text": "Only 54 usable tests (15 of one outcome, 39 of the other): at least 60 tests and 15 of each outcome are needed to fit a model."
+    }
+   ],
+   "removed": [
+    {
+     "text": "Nitrogen-diluted hydrogen/methane blends and helium-diluted hydrogen/methane blends may have indicated kinetic extinction, but more analyses are needed.",
+     "reason": "cites no computed pattern, so it doesn't explain what these tests show",
+     "rules": [
+      "C-ANCHOR"
+     ]
+    }
+   ],
+   "notes": [],
+   "model": "granite3.3:2b",
+   "cached": false
+  },
+  "api/sweeper/explain.family-droplet-end-state.fuel-methanol.diluent-helium.json": {
+   "mode": "si",
+   "answer": [
+    {
+     "text": "Only 28 usable tests (2 of one outcome, 26 of the other): at least 60 tests and 15 of each outcome are needed to fit a model.",
+     "cites": [
+      1
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "n": 1,
+     "id": "C:sweeper:skill",
+     "label": "Computed by code from the PSI snapshot",
+     "kind": "computed by code",
+     "psi": null,
+     "doi": null,
+     "url": null,
+     "file": null,
+     "page": null,
+     "row": null,
+     "computed": true,
+     "text": "Only 28 usable tests (2 of one outcome, 26 of the other): at least 60 tests and 15 of each outcome are needed to fit a model."
+    }
+   ],
+   "removed": [
+    {
+     "text": "Nitrogen-diluted ethylene and methane evinced both radiative and kinetic extinctions, while helium-diluted hydrogen/methane blends may have shown radiative extinction, and helium-diluted hydrogen displayed kinetic extinction for oxygen-reduced environments.",
+     "reason": "cites no computed pattern, so it doesn't explain what these tests show",
+     "rules": [
+      "C-ANCHOR"
+     ]
+    },
+    {
+     "text": "Radiative extinction is influenced by ambient pressure, with higher pressures leading to reignitions and complete combustion, while lower pressures may result in cool flame extinction.",
+     "reason": "cites no computed pattern, so it doesn't explain what these tests show",
+     "rules": [
+      "C-ANCHOR",
+      "C-MECH"
+     ]
+    }
+   ],
+   "notes": [],
+   "model": "granite3.3:2b",
+   "cached": false
+  },
+  "api/sweeper/explain.family-droplet-end-state.fuel-methanol.diluent-carbon-dioxide.json": {
+   "mode": "si",
+   "answer": [
+    {
+     "text": "At 0.15 oxygen or less, the flame went out by itself in 10 of 10 tests.",
+     "cites": [
+      1
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "n": 1,
+     "id": "C:sweeper:P2",
+     "label": "Computed by code from the PSI snapshot",
+     "kind": "computed by code",
+     "psi": null,
+     "doi": null,
+     "url": null,
+     "file": null,
+     "page": null,
+     "row": null,
+     "computed": true,
+     "text": "At 0.15 oxygen or less, the outcome was \"went out by itself\" in 10 of 10 tests."
+    }
+   ],
+   "removed": [
+    {
+     "text": "Only 74 usable tests were conducted due to limited sample size, necessitating more tests for model fitting.",
+     "reason": "uses words that aren't in the evidence it cites (not supported by its sources)",
+     "rules": [
+      "C-SUPPORT"
+     ]
+    },
+    {
+     "text": "Nitrogen-diluted hydrogen/methane blends and helium-diluted hydrogen/methane exhibited both radiative and kinetic extinction, indicating complex extinction mechanisms.",
+     "reason": "cites no computed pattern, so it doesn't explain what these tests show",
+     "rules": [
+      "C-ANCHOR"
+     ]
+    }
+   ],
+   "notes": [],
+   "model": "granite3.3:2b",
+   "cached": false
+  },
+  "api/sweeper/explain.family-gas-ignition.json": {
+   "mode": "si",
+   "answer": [
+    {
+     "text": "At 0.40 oxygen or more, the outcome was 'a hot flame lit' in all 12 tests and 'no hot flame' in none.",
+     "cites": [
+      1
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "n": 1,
+     "id": "C:sweeper:P1",
+     "label": "Computed by code from the PSI snapshot",
+     "kind": "computed by code",
+     "psi": null,
+     "doi": null,
+     "url": null,
+     "file": null,
+     "page": null,
+     "row": null,
+     "computed": true,
+     "text": "At 0.40 oxygen or more, the outcome was \"a hot flame lit\" in all 12 tests and \"no hot flame\" in none."
+    }
+   ],
+   "removed": [
+    {
+     "text": "Nitrogen-diluted hydrogen/methane blends only demonstrated radiative extinction for the parameters tested.",
+     "reason": "cites no computed pattern, so it doesn't explain what these tests show",
+     "rules": [
+      "C-ANCHOR"
+     ]
+    },
+    {
+     "text": "Radiative extinction has been found to be a common event in ISS testing, which was predicted computationally but not observed previously for our flame conditions.",
+     "reason": "cites no computed pattern, so it doesn't explain what these tests show",
+     "rules": [
+      "C-ANCHOR",
+      "C-SCOPE"
+     ]
+    }
+   ],
+   "notes": [],
+   "model": "granite3.3:2b",
+   "cached": false
+  },
+  "api/sweeper/explain.family-droplet-reignition.json": {
+   "mode": "si",
+   "answer": [
+    {
+     "text": "Flame reignition is influenced by chamber gas composition, with helium reducing reignition likelihood compared to nitrogen only.",
+     "cites": [
+      1,
+      2
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "n": 1,
+     "id": "C:sweeper:P3",
+     "label": "Computed by code from the PSI snapshot",
+     "kind": "computed by code",
+     "psi": null,
+     "doi": null,
+     "url": null,
+     "file": null,
+     "page": null,
+     "row": null,
+     "computed": true,
+     "text": "Tests with the outcome \"no reignition\", by what else was in the chamber gas: helium: 18 of 29; nitrogen only: 96 of 122. This compares observed counts only; the tests did not vary one gas at a time."
+    },
+    {
+     "n": 2,
+     "id": "C:sweeper:P5",
+     "label": "Computed by code from the PSI snapshot",
+     "kind": "computed by code",
+     "psi": null,
+     "doi": null,
+     "url": null,
+     "file": null,
+     "page": null,
+     "row": null,
+     "computed": true,
+     "text": "At 1.25 atm or less, the outcome was \"the flame reignited\" in none of 88 tests; above 1.25 atm it was in 37 of 63."
+    }
+   ],
+   "removed": [
+    {
+     "text": "Flame reignition is more likely at pressures above 1.25 atm, with lower likelihood at or below this pressure.",
+     "reason": "uses words that aren't in the evidence it cites (not supported by its sources)",
+     "rules": [
+      "C-SUPPORT"
+     ]
+    },
+    {
+     "text": "Models predict flame reignition with 82% accuracy, surpassing simple guessing methods.",
+     "reason": "predicts an outcome; SI Insights only reports what PSI's data shows",
+     "rules": [
+      "C-SCOPE",
+      "C-SUPPORT"
+     ]
+    }
+   ],
+   "notes": [],
+   "model": "granite3.3:2b",
+   "cached": false
+  },
+  "api/sweeper/explain.family-solid-burn.json": {
+   "mode": "si",
+   "answer": [
+    {
+     "text": "The lab notes indicate that 49 out of 53 samples burned, while 4 did not ignite.",
+     "cites": [
+      1
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "n": 1,
+     "id": "C:sweeper:P6",
+     "label": "Computed by code from the PSI snapshot",
+     "kind": "computed by code",
+     "psi": null,
+     "doi": null,
+     "url": null,
+     "file": null,
+     "page": null,
+     "row": null,
+     "computed": true,
+     "text": "Read from the lab's test notes: \"the notes say it burned\" for 49 of 53 samples with a clear outcome; \"the notes say it did not ignite\" for 4. These are the notes' words, not table values, and are not used in any model."
+    }
+   ],
+   "removed": [
+    {
+     "text": "Testing was restricted to oxygen concentrations at or above 21% O2, as per ISS cabin and working volume requirements.",
+     "reason": "cites no computed pattern, so it doesn't explain what these tests show",
+     "rules": [
+      "C-ANCHOR"
+     ]
+    },
+    {
+     "text": "Tests were conducted under normal ISS operations conditions, excluding thruster fire, spacecraft dock, or undock from ISS.",
+     "reason": "cites no computed pattern, so it doesn't explain what these tests show",
+     "rules": [
+      "C-ANCHOR"
+     ]
+    }
+   ],
+   "notes": [],
+   "model": "granite3.3:2b",
+   "cached": false
+  }
+ }
+}

@@ -6,8 +6,9 @@
 GitHub Pages has no server, so the Python app and the local SI model cannot run there. What can be pre-computed is: the
 dashboard views (Rank, Envelope, Flame Sweeper, Compare, Fire Safety, References, detail panels) read the very same API as the
 live app, called in-process, so the files hold exactly what the live app would answer. SI Insights (the chat) needs the model
-and is replaced by a notice. The Flame Sweeper's SI explanations are checked by Nimbus and stored in
-data/static_explanations.json with the model, the spec hash and the time; the site build only copies them.
+and is replaced by a notice. The Flame Sweeper's SI explanation is left off the demo too: Nimbus checks a sentence's words and
+numbers, not its meaning, and some pre-computed sentences read wrongly against the computed patterns. The generated explanations
+stay in data/static_explanations.json (with the model, spec hash and time) but are only copied into the site with --with-explanations.
 
 The request-to-file mapping lives in static/js/staticmap.js and below; a test runs both on the same inputs.
 """
@@ -100,7 +101,7 @@ def _client(cache_dir: Path):
     return TestClient(app, base_url="http://localhost")
 
 
-def build(out: Path, cache_dir: Path | None = None) -> dict:
+def build(out: Path, cache_dir: Path | None = None, with_explanations: bool = False) -> dict:
     """Write the whole site under `out` and return a short summary."""
     import tempfile
 
@@ -151,7 +152,7 @@ def build(out: Path, cache_dir: Path | None = None) -> dict:
         "lineage": catalog.lineage}, ensure_ascii=False, separators=(",", ":")))
     count += 1
     explained = 0
-    if EXPLANATIONS.exists():
+    if with_explanations and EXPLANATIONS.exists():
         stored = json.loads(EXPLANATIONS.read_text(encoding="utf-8"))
         for rel, result in stored["explanations"].items():
             _write(out, rel, json.dumps({**result, "precomputed": {k: stored[k] for k in ("generated_at", "model", "spec_hash", "snapshot_fetched_at")}},
@@ -197,6 +198,7 @@ async def precompute_explanations() -> dict:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--out", type=Path, default=ROOT / "_site", help="where to write the site (default _site/)")
+    parser.add_argument("--with-explanations", action="store_true", help="also publish the pre-computed Flame Sweeper explanations (off by default)")
     parser.add_argument("--explain", action="store_true", help="pre-compute the Flame Sweeper explanations with the local model (needs Ollama)")
     args = parser.parse_args(argv)
     if args.explain:
@@ -204,7 +206,7 @@ def main(argv: list[str] | None = None) -> int:
         EXPLANATIONS.write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
         print(f"saved {EXPLANATIONS} ({len(data['explanations'])} explanations)")
         return 0
-    summary = build(args.out)
+    summary = build(args.out, with_explanations=args.with_explanations)
     print(f"static site written to {args.out}: {summary['files']} files, {summary['explanations']} pre-computed SI explanations")
     return 0
 
