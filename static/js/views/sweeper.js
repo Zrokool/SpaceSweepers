@@ -35,7 +35,7 @@ async function runExplain(habitatKey) {
 function explainBlock(habitatKey) {
   // The static demo has no model. The patterns above are computed by code and are the same there.
   if (isStatic) return el("p", { class: "muted" }, "The SI explanation of these patterns needs the local SI model, so it isn't on this demo. To install and run the SI, follow the ",
-    el("a", { href: README_RUN_URL, target: "_blank", rel: "noopener noreferrer", text: "README (Run it)" }), ", then use \"Explain these patterns (SI)\" in the full app.");
+    el("a", { href: README_RUN_URL, target: "_blank", rel: "noopener noreferrer", text: "README (Deploy with Docker)" }), ", then use \"Explain these patterns (SI)\" in the full app.");
   const s = explained[explainKey()] || { status: "idle" };
   const button = el("button", { class: "btn", type: "button", disabled: s.status === "running", onclick: () => runExplain(habitatKey),
     text: s.status === "running" ? "Micro-Flame is reading PSI passages…" : "Explain these patterns (SI)" });

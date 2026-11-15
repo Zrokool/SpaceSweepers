@@ -48,7 +48,7 @@ export function svg(tag, attrs = {}, ...children) {
 // The static (GitHub Pages) copy: no server, so every API answer is a pre-computed file (see staticmap.js).
 export const isStatic = !!document.querySelector('meta[name="ss-static"]');
 // Where the full app's install and run steps are written. The static demo points people here instead of repeating them.
-export const README_RUN_URL = "https://github.com/Zrokool/SpaceSweepers/blob/main/README.md#run-it";
+export const README_RUN_URL = "https://github.com/Zrokool/SpaceSweepers/blob/main/README.md#deploy";
 export const fileHref = (path) => (isStatic ? staticFile(path) : path);
 
 export async function api(path, options) {
