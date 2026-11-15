@@ -1,6 +1,6 @@
 // Flame Sweeper: sweep the oxygen x pressure field. Tested cells are revealed (how many tests, how many flames kept burning);
 // untested cells stay hidden. A model estimate appears in an untested cell only where the model beat guessing in cross-validation.
-import { el, svg, api, showTip, hideTip, fmt, hab, isStatic } from "../ui.js";
+import { el, svg, api, showTip, hideTip, fmt, hab, isStatic, README_RUN_URL } from "../ui.js";
 import { habitatQuery, openDetail } from "../app.js";
 
 const W = 700, M = { l: 62, r: 16, t: 12, b: 50 };
@@ -34,7 +34,8 @@ async function runExplain(habitatKey) {
 
 function explainBlock(habitatKey) {
   // The static demo has no model. The patterns above are computed by code and are the same there.
-  if (isStatic) return el("p", { class: "muted", text: "The SI explanation of these patterns needs the local model, so it isn't on this demo. Run the full app locally to use it." });
+  if (isStatic) return el("p", { class: "muted" }, "The SI explanation of these patterns needs the local SI model, so it isn't on this demo. To install and run the SI, follow the ",
+    el("a", { href: README_RUN_URL, target: "_blank", rel: "noopener noreferrer", text: "README (Run it)" }), ", then use \"Explain these patterns (SI)\" in the full app.");
   const s = explained[explainKey()] || { status: "idle" };
   const button = el("button", { class: "btn", type: "button", disabled: s.status === "running", onclick: () => runExplain(habitatKey),
     text: s.status === "running" ? "Micro-Flame is reading PSI passages…" : "Explain these patterns (SI)" });
