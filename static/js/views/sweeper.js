@@ -1,6 +1,6 @@
 // Flame Sweeper: sweep the oxygen x pressure field. Tested cells are revealed (how many tests, how many flames kept burning);
 // untested cells stay hidden. A model estimate appears in an untested cell only where the model beat guessing in cross-validation.
-import { el, svg, api, showTip, hideTip, fmt, hab } from "../ui.js";
+import { el, svg, api, showTip, hideTip, fmt, hab, isStatic } from "../ui.js";
 import { habitatQuery, openDetail } from "../app.js";
 
 const W = 700, M = { l: 62, r: 16, t: 12, b: 50 };
@@ -35,12 +35,13 @@ async function runExplain(habitatKey) {
 function explainBlock(habitatKey) {
   const s = explained[explainKey()] || { status: "idle" };
   const button = el("button", { class: "btn", type: "button", disabled: s.status === "running", onclick: () => runExplain(habitatKey),
-    text: s.status === "running" ? "Micro-Flame is reading PSI passages…" : "Explain these patterns (SI)" });
+    text: s.status === "running" ? (isStatic ? "Loading…" : "Micro-Flame is reading PSI passages…") : (isStatic ? "Show the SI explanation (pre-computed)" : "Explain these patterns (SI)") });
   const kids = [button];
-  if (s.status === "running") kids.push(el("p", { class: "muted", text: "Granite runs on this computer's CPU, so this takes up to a minute." }));
+  if (s.status === "running" && !isStatic) kids.push(el("p", { class: "muted", text: "Granite runs on this computer's CPU, so this takes up to a minute." }));
   if (s.status === "error") kids.push(el("div", { class: "note", text: s.error }));
   if (s.status === "done") {
     const d = s.data;
+    if (d.precomputed) kids.push(el("div", { class: "note", text: `Pre-computed with ${d.precomputed.model} on ${d.precomputed.generated_at.slice(0, 10)} from the same patterns, then checked by Nimbus. It doesn't depend on the habitat chosen above.` }));
     kids.push(...d.notes.map((n) => el("div", { class: "note", text: n })));
     kids.push(...d.answer.map((a) => el("p", { class: "sentence" }, a.text, " ", ...a.cites.map((n) => el("span", { class: "cite-n", text: `[${n}]` })))));
     if (d.sources.length) kids.push(el("details", { class: "gaps", open: true }, el("summary", { text: "Sources for this explanation" }),

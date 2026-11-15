@@ -76,6 +76,16 @@ docker run --rm -p 8000:8000 -e 'SS_ALLOWED_HOSTS=["localhost","127.0.0.1","your
 - **CI** (`.github/workflows/deploy.yml`): security gate (SAST, SCA, secrets) → unit tests and the packaged-data check → build the image → smoke-test the running container (`/api/meta`, `/api/sweeper`) → Grype scan → push to GHCR with SBOM and provenance → cosign signature. A weekly security scan runs on its own.
 - **Updating the data:** run `python -m app.psi.sync` (and `python -m app.nimbus.method`, `app.nimbus.tables`, `app.nimbus.pillars` as needed), review the tables it prints, commit `data/`, push. The pipeline rebuilds the image from the committed data. The SI parts that need Granite (chat, Micro-Flame explanations) work only where Ollama is reachable at `SS_OLLAMA_URL`; everything else works without it.
 
+### GitHub Pages (static demo, `demo` branch)
+The static demo lives on the **`demo` branch**. `main` is the full app that runs locally with the SI model and contains none of this. Merge `main` into `demo` to refresh the demo after a change.
+
+GitHub Pages serves files only, so it can't run the Python server or the local SI model. `.github/workflows/pages.yml` therefore runs the app once, in-process, and writes every answer of its API to a file (`python -m app.static_export --out _site`), then publishes the result. The dashboard views (Overview, Fire Safety, Rank, Correlation, Envelope, Flame Sweeper, References and the investigation panels) are the same data and the same calculations as the live app, for each habitat, pillar and Flame Sweeper selection the page offers. Two things differ:
+
+- **SI Insights** (the chat) needs the model, so the static page shows a notice with the commands to run it locally.
+- **Flame Sweeper's "Explain these patterns (SI)"** shows a pre-computed explanation. `python -m app.static_export --explain` (needs Ollama) runs the model once per selection, Nimbus checks every sentence, and the results are stored in `data/static_explanations.json` with the model, spec hash and time. Re-run it after the data or the Micro-Flame spec changes. The explanation is written without a habitat, so it doesn't depend on the habitat chosen on the page.
+
+One-time setup: **Settings → Pages → Build and deployment → Source: GitHub Actions**. After that every push to `demo` redeploys. To preview locally: `python -m app.static_export --out _site && python -m http.server -d _site 8080`.
+
 ---
 
 ## How it works

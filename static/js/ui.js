@@ -1,4 +1,6 @@
 // Small DOM helpers. All text goes in through textContent, so record or SI text can never become HTML.
+import { staticFile } from "./staticmap.js";
+
 
 // A value that depends on the chosen habitat: drawn in the habitat colour, and it flashes once when the page redraws after a change.
 // A habitat's name inside a sentence: lower-case words, but acronyms such as ISS and EVA keep their capitals.
@@ -43,8 +45,21 @@ export function svg(tag, attrs = {}, ...children) {
   return node;
 }
 
+// The static (GitHub Pages) copy: no server, so every API answer is a pre-computed file (see staticmap.js).
+export const isStatic = !!document.querySelector('meta[name="ss-static"]');
+export const fileHref = (path) => (isStatic ? staticFile(path) : path);
+
 export async function api(path, options) {
-  const resp = await fetch(path, options);
+  let url = path, init = options;
+  if (isStatic) {
+    const [p, query = ""] = path.split("?");
+    const params = Object.fromEntries(new URLSearchParams(query));
+    if (options && options.body) Object.assign(params, JSON.parse(options.body));
+    url = staticFile(p, params);
+    init = undefined;
+  }
+  const resp = await fetch(url, init);
+  if (!resp.ok && isStatic) throw new Error("This isn't pre-computed in the static copy. The live app answers it.");
   if (!resp.ok) {
     let detail = resp.statusText;
     try { detail = (await resp.json()).detail || detail; } catch { /* not JSON */ }

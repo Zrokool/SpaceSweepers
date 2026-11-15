@@ -10,3 +10,4 @@ tests
 *.md
 !Nimbus/**/*.md
 !license/**
+_site

@@ -1,5 +1,6 @@
 // Compare: 2–4 investigations side by side, and how all of them relate.
-import { el, svg, api, showTip, hideTip, title, METHOD_LABEL } from "../ui.js";
+import { el, svg, api, showTip, hideTip, title, METHOD_LABEL, isStatic } from "../ui.js";
+import { compareFromProfiles } from "../staticmap.js";
 import { navigate, openDetail } from "../app.js";
 
 const DEFAULT_IDS = ["PSI-69", "PSI-117", "PSI-142"];  // FLEX and the two ground studies built on its data
@@ -90,7 +91,8 @@ export async function render(root, state) {
   const known = new Set(all.map((i) => i.id));
   let ids = (state.params.get("ids") || "").split(",").filter((i) => known.has(i)).slice(0, 4);
   if (ids.length < 2) ids = DEFAULT_IDS.filter((i) => known.has(i));
-  const result = await api("/api/compare", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ids }) });
+  const result = isStatic ? compareFromProfiles(await api("/api/compare-profiles"), ids)
+    : await api("/api/compare", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ids }) });
 
   const toggle = (id) => {
     const next = ids.includes(id) ? ids.filter((i) => i !== id) : [...ids, id];

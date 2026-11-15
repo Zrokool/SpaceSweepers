@@ -1,6 +1,6 @@
 // The investigation detail drawer: everything the snapshot holds about one investigation, with its evidence.
 import { figureSection } from "./figures.js";
-import { el, api, withTip, typeBadge, methodBadge, fmt, METHOD_LABEL, PILLAR_LABEL, ROLE_LABEL } from "../ui.js";
+import { el, api, withTip, typeBadge, methodBadge, fmt, METHOD_LABEL, PILLAR_LABEL, ROLE_LABEL, fileHref } from "../ui.js";
 
 const VARIABLE_LABEL = { o2_fraction: "oxygen fraction", pressure_psi: "pressure", burn_time_s: "burn time", fuel: "fuel",
   flame_temp_k: "flame temperature", fuel_flow_mg_s: "fuel flow", outcome: "outcome", ending: "how the flame ended" };
@@ -128,7 +128,7 @@ export async function openDetail(id) {
         el("dt", { text: "Held fixed" }), el("dd", { text: s.fixed.map((v) => `${VARIABLE_LABEL[v.variable] || v.variable} = ${v.value}`).join(", ") || "nothing" })),
       Object.keys(s.o2_by_role).includes("oxidizer_stream") && el("div", { class: "note" }, el("strong", { text: "Burner-stream oxygen. " }),
         "In these tests the oxygen value is the gas flowing out of the burner, not the air around the flame. It is never counted as habitat oxygen."),
-      el("a", { class: "btn", href: `/api/investigations/${inv.id}/tests.csv`, text: "Download harmonised tests (CSV with sources)" }),
+      el("a", { class: "btn", href: fileHref(`/api/investigations/${inv.id}/tests.csv`), text: "Download harmonised tests (CSV with sources)" }),
     ] : [el("p", { class: "muted", text: `No test data: ${inv.tables_status}.` }),
          inv.tables.some((t) => t.status === "stale") && el("div", { class: "note refresh" }, el("strong", { text: "Data refresh needed. " }),
            "A test table changed after it was mapped. Its data is hidden until it is mapped again.")]),

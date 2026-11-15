@@ -1,6 +1,6 @@
 // SI Insights: ask questions about all the PSI data. SI writes, Nimbus checks every sentence, sources are shown.
 // All text is set with textContent (through el()), so PSI text and model text can never become HTML.
-import { el, api, fmt, safeHref, METHOD_LABEL } from "../ui.js";
+import { el, api, fmt, safeHref, METHOD_LABEL, isStatic } from "../ui.js";
 import { openDetail, navigate } from "../app.js";
 
 const STAGES = [
@@ -353,7 +353,20 @@ function download() {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+// The static copy (GitHub Pages) has no server and no local model, so the chat can't run there.
+function staticNotice() {
+  const cmd = (text) => el("pre", { class: "code" }, text);
+  return el("div", { class: "card static-note" },
+    el("p", { class: "eyebrow", text: "SI Insights" }),
+    el("h1", { text: "The live chat runs on your own computer" }),
+    el("p", { text: "SI Insights needs a Python server and a local SI model (IBM Granite 3.3 2B, run through Ollama), and a static web page can run neither. Everything else on this site is the same data and the same calculations as the full app: Rank, Envelope, the Flame Sweeper, Correlation, Fire Safety and References." }),
+    el("p", { text: "To use the chat, run SpaceSweepers locally. Get the code from the repository and follow its README:" }),
+    cmd("git clone https://github.com/Zrokool/SpaceSweepers\ncd SpaceSweepers\npip install -r requirements.txt\nollama pull granite3.3:2b\nuvicorn app.main:app --port 8000"),
+    el("p", { class: "muted", text: "Every answer there is written from PSI evidence with numbered citations, and Nimbus removes any sentence the evidence doesn't support." }));
+}
+
 export async function render(root, state) {
+  if (isStatic) { root.append(staticNotice()); return; }
   restore();
   ui = {};
   ui.log = el("div", { class: "chat-log", role: "log", "aria-live": "polite" });
