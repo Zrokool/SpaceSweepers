@@ -317,7 +317,10 @@ async def run(data_dir: Path, model: str, only: list[str] | None, out_path: Path
                 tables[name] = entry
                 log.info("%s %-44s %s", inv["id"], name[:44], ("mapped: " + ", ".join(result["columns"])) if result["mapped"] else f"not mappable: {result['reason_code']}")
     out = {"generated_at": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"), "registry_hash": registry_hash(data_dir / "variables.yaml"),
-           "model": model if use_si else None, "tables": dict(sorted(tables.items()))}
+           "model": model if use_si else None,
+           "note": (f"Code finds the candidate columns and rules M-1 to M-5 decide; {model} (SI) is asked only to break ties between candidates, "
+                    "and never invents a mapping." if use_si else "Mapped by code and rules M-1 to M-5 only; no SI was used for this ledger."),
+           "tables": dict(sorted(tables.items()))}
     out_path.write_text(json.dumps(out, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     return out
 

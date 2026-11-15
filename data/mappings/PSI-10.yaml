@@ -1,4 +1,4 @@
-# Hand-reviewed mapping with document evidence (staged for review)
+# Mapping with document evidence. Drafted with SI assistance (Claude Code); every column and quote was checked against the PSI table and document text and approved by the team.
 investigation: PSI-10
 tables:
 - file: PSI-10_Experimental table_Flame Design_Normal Flame.csv

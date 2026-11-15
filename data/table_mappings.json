@@ -2,6 +2,7 @@
  "generated_at": "2026-11-15T04:08:45Z",
  "registry_hash": "18c002fe71e73463",
  "model": null,
+ "note": "Mapped by code and rules M-1 to M-5 only; no SI was used for this ledger.",
  "tables": {
   "PSI-100_Experimental table_SAFFIRE-3.csv": {
    "investigation": "PSI-100",

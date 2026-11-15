@@ -1,6 +1,7 @@
 # Column mapping for PSI-159 (ACME CFI-G) test tables. Reviewed by hand against the
 # table and the investigation's Approach text. Nothing here changes a value: it only
 # says which column means what, in which unit.
+# Drafted with SI assistance (Claude Code); every column and quote was checked against the PSI table and document text and approved by the team.
 investigation: PSI-159
 tables:
   - file: "PSI-159_Experimental table_CFI-G_Inverse Flames.csv"
