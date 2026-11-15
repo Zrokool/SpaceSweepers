@@ -2,6 +2,9 @@
 import { el, api, fmt, pct, hab, habName } from "../ui.js";
 import { habitatQuery, navigate, openDetail } from "../app.js";
 
+// Who the dashboard is written for. Shown as its own block under the intro, on both versions of the Overview.
+const AUDIENCE = ["Professors", "Graduate students", "Undergraduate students", "Aerospace researchers", "Aerospace engineers"];
+
 function tile(value, label, sub, onclick, accent = false) {
   return el(onclick ? "button" : "div", { class: "tile btn-tile", type: onclick ? "button" : null, onclick },
     el("div", { class: "value" }, accent ? hab(value) : value), el("div", { class: "label" }, accent ? hab(label) : label), sub && el("div", { class: "sub", text: sub }));
@@ -63,6 +66,10 @@ export async function render(root, state) {
       el("p", { class: "lede" }, habitatOn
         ? ["NASA has studied flames in microgravity for decades. This dashboard ranks, compares and explains that research for a ", hab(habName(h.label), " (", h.summary, ")"), ", and shows where the data stops."]
         : "NASA has studied flames in microgravity for decades. This dashboard ranks, compares and explains that research, and shows where the data stops."),
+      el("div", { class: "audience" },
+        el("p", { class: "audience-label", text: "Built for" }),
+        el("ul", { class: "audience-list" }, ...AUDIENCE.map((who) => el("li", { text: who }))),
+        el("p", { class: "audience-note", text: "Analyzing NASA PSI data" })),
       el("div", { class: "hero-actions" },
         el("button", { class: "btn-primary", type: "button", text: "Explore the Flame Sweeper", onclick: () => navigate("sweeper") }),
         el("button", { class: "btn", type: "button", text: "Ask SI Insights", onclick: () => navigate("insights") }))),
