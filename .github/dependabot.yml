@@ -1,0 +1,19 @@
+# Keeps pinned dependencies current so SCA findings get fixed by PR.
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /
+    schedule: { interval: weekly }
+    cooldown: { default-days: 7 }  # let brand-new releases age before adopting them
+    groups:
+      python: { patterns: ["*"] }
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly }
+    cooldown: { default-days: 7 }  # let brand-new releases age before adopting them
+    groups:
+      actions: { patterns: ["*"] }
+  - package-ecosystem: docker
+    directory: /
+    schedule: { interval: weekly }
+    cooldown: { default-days: 7 }  # let brand-new releases age before adopting them

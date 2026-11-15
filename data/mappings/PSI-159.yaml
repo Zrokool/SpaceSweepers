@@ -1,0 +1,88 @@
+# Column mapping for PSI-159 (ACME CFI-G) test tables. Reviewed by hand against the
+# table and the investigation's Approach text. Nothing here changes a value: it only
+# says which column means what, in which unit.
+investigation: PSI-159
+tables:
+  - file: "PSI-159_Experimental table_CFI-G_Inverse Flames.csv"
+    sha256: "d4d44f8b9896936728748e34d1b6ad0812032a92fa5289599b708c138e3a9b39"   # the exact file this was reviewed against; if the file changes the mapping is blocked
+    label: CFI-G inverse flames
+    outcome_kind: ignition   # "Hot ignition": did a hot flame light
+    fuel_class: gas
+    # Inverse flames: the chamber holds fuel and nitrogen, and an oxygen-nitrogen
+    # mixture flows OUT of the burner. So XO2 is the oxygen in the burner stream,
+    # NOT the oxygen in the surrounding atmosphere. It must never be counted as
+    # habitat (room) oxygen.
+    o2_role: oxidizer_stream
+    o2_role_reason: "Inverse flame: XO2 is the oxygen fraction of the stream leaving the burner; the chamber atmosphere is fuel and nitrogen."
+    test_id: "Test"
+    columns:
+      fuel: {column: "Fuel", kind: text}
+      o2_fraction: {column: "XO2", kind: number, unit: mole_fraction, min: 0, max: 1}
+      pressure_psi: {column: "approx p (bar)", kind: number, unit: bar, min: 0.5, max: 150}
+      burn_time_s: {column: "burn time (sec)", kind: number, unit: s, min: 0, max: 3600}
+      flame_temp_k: {column: "Tad (K)", kind: number, unit: K, min: 200, max: 4000}
+      fuel_flow_mg_s: {column: "HC burnrate (mg/s)", kind: number, unit: mg/s, min: 0, max: 1000}
+      outcome:
+        column: "Hot ignition"
+        kind: category
+        values: {"yes": ignited, "no": no_ignition, "flash": flash}  # quoted: bare yes/no are booleans in YAML
+      ending:
+        column: "Self -ext or flow term"
+        kind: category
+        values: {"se": self_extinguished, "ft": flow_terminated, "-": not_applicable}
+      comment: {column: "Comments", kind: text}
+  # ---- Normal flames table (added by Phase A; evidence quotes are verified against the PSI report by code)
+  - file: PSI-159_Experimental table_CFI-G_Normal Flames.csv
+    sha256: d95a621c3fbd27d204dd32ed29fa17d68f2b779d6a523cde8479ed7ebaa5251a
+    label: CFI-G normal flames
+    fuel_class: gas
+    outcome_kind: ignition
+    o2_role: ambient
+    o2_role_reason: 'Normal flames: the fuel flows from the burner into an oxygen/nitrogen atmosphere, so XO2 is the oxygen of the chamber atmosphere (before the test).'
+    test_id: Test
+    columns:
+      fuel:
+        column: Fuel
+        kind: text
+      o2_fraction:
+        column: ' XO2 before test'
+        kind: number
+        unit: mole_fraction
+        min: 0
+        max: 1
+      pressure_psi:
+        column: approx p (bar)
+        kind: number
+        unit: bar
+        min: 0.5
+        max: 150
+      burn_time_s:
+        column: burn time (sec)
+        kind: number
+        unit: s
+        min: 0
+        max: 3600
+      outcome:
+        column: Hot ignition
+        kind: category
+        values:
+          'yes': ignited
+          'no': no_ignition
+          flash: flash
+      ending:
+        column: Self-ext or flow term
+        kind: category
+        values:
+          se: self_extinguished
+          ft: flow_terminated
+          '-': not_applicable
+      comment:
+        column: Comments
+        kind: text
+    evidence:
+    - file: PSI-159/PSI-159_Reports_FinalRpt_ACME.CFI-G.pdf.txt
+      page: 38
+      quote: The first round of testing featured normal flames in which the fuel flowed from the burner into an oxygen/nitrogen atmosphere.
+    - file: PSI-159/PSI-159_Reports_FinalRpt_ACME.CFI-G.pdf.txt
+      page: 14
+      quote: pre - and post-test analysis of the chamber atmosphere, e.g., for oxygen, nitrogen

@@ -1,0 +1,209 @@
+# Security tests for SpaceSweepers: SAST, SCA and secret scanning run in parallel,
+# then a summary job writes one high-level report to the run page.
+# deploy.yml calls this workflow first, so nothing ships unless it passes.
+name: Security
+
+on:
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+  schedule:
+    - cron: "17 6 * * 1"  # weekly: new CVEs appear even when the code doesn't change
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.14"
+  SEMGREP_VERSION: "1.180.0"
+  BANDIT_VERSION: "1.9.4"
+  PIP_AUDIT_VERSION: "2.10.1"
+  GITLEAKS_VERSION: "8.30.1"
+  TRUFFLEHOG_VERSION: "3.99.2"
+  REPORT: .github/scripts/security_report.py
+
+jobs:
+  # ---------------------------------------------------------------- SAST
+  sast:
+    name: SAST (Semgrep + Bandit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write  # upload SARIF to the Security tab
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install scanners
+        run: pip install "semgrep==${SEMGREP_VERSION}" "bandit==${BANDIT_VERSION}"
+
+      - name: Semgrep (Python, JavaScript, OWASP Top 10, Dockerfile, GitHub Actions)
+        run: |
+          semgrep scan --metrics=off --disable-version-check \
+            --config p/python --config p/javascript --config p/owasp-top-ten \
+            --config p/dockerfile --config p/github-actions \
+            --exclude static/vendor --exclude .venv \
+            --json-output=semgrep.json --sarif-output=semgrep.sarif
+
+      - name: Bandit (Python security linter)
+        run: bandit -r app scripts .github/scripts -f json -o bandit.json --exit-zero
+
+      - name: Upload SARIF to code scanning
+        if: always() && hashFiles('semgrep.sarif') != ''
+        continue-on-error: true  # needs GitHub Advanced Security on private repos
+        uses: github/codeql-action/upload-sarif@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep
+
+      - name: Evaluate & summarize
+        run: |
+          python "$REPORT" collect --category sast --fail-on high --out results/sast.json \
+            semgrep=semgrep.json bandit=bandit.json
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: security-sast
+          path: |
+            results/sast.json
+            semgrep.sarif
+          retention-days: 14
+          if-no-files-found: ignore
+
+  # ---------------------------------------------------------------- SCA
+  sca:
+    name: SCA (pip-audit + OSV-Scanner)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install pip-audit
+        run: pip install "pip-audit==${PIP_AUDIT_VERSION}"
+
+      - name: pip-audit (resolves the full dependency tree)
+        run: |
+          pip-audit -r requirements.txt -r requirements-dev.txt \
+            --format json --output pip-audit.json --progress-spinner off || true
+          test -s pip-audit.json
+
+      - name: OSV-Scanner (Python lockfiles/manifests)
+        uses: google/osv-scanner-action/osv-scanner-action@a345acffa64b0eaede81a3d9aae6141214d9c8fc # v2.6.0
+        continue-on-error: true  # exit code 1 just means "vulns found"; the gate below decides
+        with:
+          scan-args: |-
+            --format=json
+            --output=osv.json
+            --lockfile=requirements.txt
+            --lockfile=requirements-dev.txt
+
+      - name: Evaluate & summarize
+        run: |
+          python "$REPORT" collect --category sca --fail-on high --out results/sca.json \
+            pip-audit=pip-audit.json osv=osv.json
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: security-sca
+          path: |
+            results/sca.json
+            pip-audit.json
+            osv.json
+          retention-days: 14
+          if-no-files-found: ignore
+
+  # ---------------------------------------------------------------- Secrets
+  secrets:
+    name: Secrets (Gitleaks + TruffleHog)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0  # scan the whole git history, not just the latest commit
+          persist-credentials: false
+
+      - name: Install Gitleaks (checksum-verified release binary)
+        run: |
+          cd "$RUNNER_TEMP"
+          base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
+          curl -sSfLO "${base}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -sSfLO "${base}/gitleaks_${GITLEAKS_VERSION}_checksums.txt"
+          grep "gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" "gitleaks_${GITLEAKS_VERSION}_checksums.txt" | sha256sum -c -
+          tar -xzf "gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" gitleaks
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+
+      - name: Gitleaks (full history, values redacted)
+        run: gitleaks git --redact --no-banner --exit-code 0 --report-format json --report-path gitleaks.json .
+
+      - name: TruffleHog (full history, live-verifies credentials)
+        run: |
+          docker run --rm -v "$PWD:/repo:ro" \
+            "ghcr.io/trufflesecurity/trufflehog:${TRUFFLEHOG_VERSION}" \
+            git file:///repo --json --no-update --results=verified,unknown \
+            > trufflehog.raw.json
+          # Keep only metadata: drop the secret values before anything is stored.
+          python - <<'EOF'
+          import json
+          out = []
+          for line in open("trufflehog.raw.json"):
+              if line.strip().startswith("{"):
+                  r = json.loads(line)
+                  out.append(json.dumps({k: r.get(k) for k in ("DetectorName", "Verified", "SourceMetadata")}))
+          open("trufflehog.json", "w").write("\n".join(out))
+          EOF
+          rm trufflehog.raw.json
+
+      - name: Evaluate & summarize
+        run: |
+          python "$REPORT" collect --category secrets --fail-on low --out results/secrets.json \
+            gitleaks=gitleaks.json trufflehog=trufflehog.json
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: security-secrets
+          path: results/secrets.json  # normalized only — never the raw reports
+          retention-days: 14
+          if-no-files-found: ignore
+
+  # ---------------------------------------------------------------- Summary
+  summary:
+    name: Security summary
+    needs: [sast, sca, secrets]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .github/scripts
+          persist-credentials: false
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: security-*
+          merge-multiple: true
+
+      - name: Write high-level overview
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: python "$REPORT" summarize results/*.json

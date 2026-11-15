@@ -1,0 +1,17 @@
+# PSI "Analyzed Data" files that are stored in the snapshot (reviewed by hand). Everything else PSI lists there is only counted
+# (see the References page). Each file is the data behind a figure in the investigators' own papers.
+# `charted` files are read by app/analysis/extinction.py; the others are stored for reference and not drawn.
+max_bytes: 5000000
+files:
+  PSI-117:
+    - {file: "PSI-117_Analyzed Data_PROCI_2023_C12_Extinction_Diameter_vs_pressure.csv", figure: "Fig. 7", charted: true}
+    - {file: "PSI-117_Analyzed Data_MST_2024_Kavg.csv", figure: "Fig. 4", charted: true}
+    - {file: "PSI-117_Analyzed Data_MST_2024_Dext.csv", figure: "Fig. 5", charted: false}
+    - {file: "PSI-117_Analyzed Data_PROCI_2023_Alkane_Extinction_Diameter_1atm.csv", figure: "Fig. 3", charted: false}
+    - {file: "PSI-117_Analyzed Data_MST_2024_Burning_history_Flame_diameter.csv", figure: "Fig. 1", charted: false}
+    - {file: "PSI-117_Analyzed Data_MST_2024_Radiance_Flame_Diameter.csv", figure: "Fig. 11", charted: false}
+    - {file: "PSI-117_Analyzed Data_PROCI_2019_Stable_Cool.csv", figure: "Fig. 1", charted: false}
+    - {file: "PSI-117_Analyzed Data_PROCI_2019_Oscillatory_Cool_Flame.csv", figure: "Fig. 1", charted: false}
+    - {file: "PSI-117_Analyzed Data_PROCI_C12_2019_Three_Stage.csv", figure: "Fig. 7", charted: false}
+  PSI-142:
+    - {file: "PSI-142_Analyzed Data_PSI data summary Princeton with links.xlsx", figure: "Data IDs 1 to 8", charted: false}

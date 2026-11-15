@@ -1,0 +1,118 @@
+# Variable registry: the dictionary every PSI test table is mapped against.
+# A key here (o2_fraction, pressure_psi…) is what the dashboard computes with. A table's own
+# header is mapped to one of these keys by app/nimbus/tables.py, never the other way round.
+#   quantity     the name SI is asked about (Nimbus/agents/13-table-mapper.md)
+#   header       wording that makes a column header a candidate for this key (regular expressions)
+#   units        for each unit the key accepts: the wording a header must contain to state it.
+#                Conversions to the canonical unit are in app/psi/units.py. A header that states
+#                no unit is never mapped.
+#   min, max     physically plausible limits in the canonical unit
+#   needs_ambient  the table must say the value describes the surrounding gas (not a burner stream)
+variables:
+  test_id:
+    quantity: test_id
+    kind: id
+    header: ['^(?:test|run|sample)\s*(?:#|number|id|no\.?)?\s*\*?$', '\btest\s*#', '^data id$', '^flex number$']
+  fuel:
+    quantity: fuel
+    kind: text
+    header: ['^(?:fuel|material|sample material|fuel sample material|fuel type|sample type|sample \(fuel type\)|fuel bottle)$']
+  o2_fraction:
+    quantity: oxygen
+    kind: number
+    canonical_unit: mole_fraction
+    header: ['\bO2\b', '\bXO2\b', 'oxygen', '^O initial']
+    units:
+      mole_fraction: ['mole\s*frac\w*']
+      percent: ['percent', '%', 'by vol']
+    min: 0
+    max: 1
+    needs_ambient: true
+  pressure_psi:
+    quantity: pressure
+    kind: number
+    canonical_unit: psi
+    header: ['pressure', '^p(?:init|final|mean)?\s*\(']
+    units:
+      atm: ['\batm\b']
+      bar: ['\bbar\b']
+      psi: ['\bpsi\b']
+      kpa: ['\bkpa\b']
+      torr: ['\btorr\b']
+      mmhg: ['\bmmhg\b']
+    min: 0.05
+    max: 300
+  burn_time_s:
+    quantity: burn_time
+    kind: number
+    canonical_unit: s
+    header: ['burn\s*time']
+    units:
+      s: ['\(\s*sec\w*\s*\)', '\(\s*s\s*\)', ';\s*s\b', '\bsec(?:onds)?\b']
+    min: 0
+    max: 3600
+  n2_fraction:
+    quantity: nitrogen
+    kind: number
+    canonical_unit: mole_fraction
+    header: ['^N initial', '^nitrogen$']
+    units:
+      mole_fraction: ['mole\s*frac\w*']
+    min: 0
+    max: 1
+  he_fraction:
+    quantity: helium
+    kind: number
+    canonical_unit: mole_fraction
+    header: ['^He initial', '^helium$']
+    units:
+      mole_fraction: ['mole\s*frac\w*']
+    min: 0
+    max: 1
+  co2_fraction:
+    # PSI's FLEX table labels this column "CO". It is a bulk chamber gas (up to 0.7 of the atmosphere, and O+N+CO+He
+    # sums to 1), and the FLEX objective names CO2, He and SF6 as the suppressants tested, so it is read as CO2.
+    # The table label is kept in the mapping and shown in the app.
+    quantity: co2
+    kind: number
+    canonical_unit: mole_fraction
+    header: ['^CO initial']
+    units:
+      mole_fraction: ['mole\s*frac\w*']
+    min: 0
+    max: 1
+  droplet_diameter_mm:
+    quantity: diameter
+    kind: number
+    canonical_unit: mm
+    header: ['droplet initial diameter']
+    units:
+      mm: ['[;(]\s*mm\b']
+    min: 0.05
+    max: 20
+
+# Outcome columns. Each raw value in the table must be listed here, otherwise the column is not mapped and the
+# unknown values are reported for review (rule M-6). Nothing is guessed: a value that isn't listed stays unmapped.
+#   harmonised_as  the variable name the tests carry
+#   outcome_kind   what the outcome means, so families are never mixed: end_state (how a flame ended), ignition (did it light)
+outcomes:
+  end_state:
+    quantity: end_state
+    kind: category
+    harmonised_as: outcome
+    outcome_kind: end_state
+    header: ['^test end$']
+    values: {extinction: extinguished, disruption: disrupted, completion: completed}
+  ignition:
+    quantity: ignition
+    kind: category
+    harmonised_as: outcome
+    outcome_kind: ignition
+    header: ['^hot ignition$']
+    values: {"yes": ignited, "no": no_ignition, flash: flash}
+  extinction_mode:
+    quantity: extinction_mode
+    kind: category
+    harmonised_as: ending
+    header: ['^self\s*-?\s*ext\b']
+    values: {se: self_extinguished, ft: flow_terminated, "-": not_applicable}

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SpaceSweepers</title>
+  <meta name="description" content="What NASA's microgravity combustion research tells us about fire safety in space habitats.">
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script type="module" src="/static/js/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#/overview">
+      <img src="/static/brand/spacesweepers-mark.svg" alt="" width="28" height="28">
+      <span>SpaceSweepers</span>
+    </a>
+    <nav id="nav" class="nav" aria-label="Views">
+      <a href="#/overview" data-view="overview">Overview</a>
+      <a href="#/earth" data-view="earth">Earth</a>
+      <a href="#/rank" data-view="rank">Rank</a>
+      <a href="#/compare" data-view="compare">Correlation</a>
+      <a href="#/envelope" data-view="envelope">Envelope</a>
+      <a href="#/sweeper" data-view="sweeper">Flame Sweeper</a>
+      <a href="#/insights" data-view="insights">SI Insights</a>
+      <a href="#/sources" data-view="sources">References</a>
+    </nav>
+  </header>
+
+  <div class="context" id="context" role="group" aria-label="Habitat and fire-safety pillar">
+    <div class="field" id="habitat-view-field">
+      <span class="eyebrow">Habitat view</span>
+      <button id="habitat-view" class="switch" type="button" role="switch" aria-checked="true">
+        <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
+        <span class="switch-label">On</span>
+      </button>
+    </div>
+    <label class="field" id="habitat-field">
+      <span class="eyebrow">Habitat</span>
+      <select id="habitat" aria-label="Habitat atmosphere"></select>
+    </label>
+    <div class="field" id="pillar-field">
+      <span class="eyebrow">Pillar</span>
+      <div id="pillar" class="segmented" role="radiogroup" aria-label="Fire-safety pillar"></div>
+    </div>
+    <p id="habitat-basis" class="context-note"></p>
+    <p id="habitat-key" class="context-note tiny"><span class="hab">Highlighted values</span> change with the habitat you pick.</p>
+    <p id="habitat-disclaimer" class="context-note tiny"></p>
+  </div>
+
+  <div id="refresh-note" class="note refresh" role="status" hidden></div>
+  <main id="view" class="view" tabindex="-1" aria-live="polite"></main>
+
+  <footer class="page-foot"><p id="snapshot" class="context-note"></p></footer>
+
+  <aside id="drawer" class="drawer" hidden aria-label="Investigation detail">
+    <button id="drawer-close" class="btn-ghost drawer-close" aria-label="Close detail">Close</button>
+    <div id="drawer-body"></div>
+  </aside>
+  <div id="tooltip" class="tooltip" role="tooltip" hidden></div>
+
+  <footer class="footer">
+    Data: NASA Physical Sciences Informatics (PSI). SpaceSweepers is not affiliated with or endorsed by NASA.
+  </footer>
+</body>
+</html>

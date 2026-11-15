@@ -1,0 +1,8 @@
+# Team-confirmed fire-safety pillar evidence. An entry here replaces what SI pointed at and is shown as "team-confirmed".
+# The quote must be a sentence of the record's own text (it is checked every time the app loads).
+#
+# PSI-20:
+#   suppression:
+#     field: impacts            # impacts | objective | hypothesis | approach
+#     quote: "…a sentence copied from that field of the PSI record…"
+{}

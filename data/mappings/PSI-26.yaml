@@ -1,0 +1,43 @@
+# Hand-reviewed mapping with document evidence (staged for review).
+investigation: PSI-26
+tables:
+- file: PSI-26_Workbook table_BASS As Run.csv
+  sha256: eec0ad9f4769bef638be6ea0adfff6b4c53b1d83fe27de30d7dd13ec8efd0a70
+  label: BASS as-run tests (lab workbook)
+  fuel_class: solid
+  o2_role: ambient
+  o2_role_reason: The as-run matrix records the ISS cabin environment of each test; the BASS requirements say the oxygen of the ISS cabin atmosphere is measured on each day of testing.
+  unit_note: 'The header says ''% by volume'' but every value is 0.159 to 0.227: mole fractions of cabin air (as a percentage they would be under 0.3%). The BASS-II table, by contrast, is in real percent.'
+  test_id: Test no.
+  columns:
+    fuel:
+      column: material
+      kind: text
+    o2_fraction:
+      column: O2 % by volume
+      kind: number
+      unit: mole_fraction
+      min: 0
+      max: 1
+    pressure_psi:
+      column: pressure, atm
+      kind: number
+      unit: atm
+      min: 0.05
+      max: 300
+    cabin_co2_mmhg:
+      column: CO2, mm Hg
+      kind: number
+      unit: mmhg
+      min: 0
+      max: 50
+    flow_setting:
+      column: Fan display
+      kind: text
+    observations:
+      column: Test Observations and Anomalies (ignited, spread, extinguished, burn time, color, etc.)
+      kind: text
+  evidence:
+  - file: PSI-26/PSI-26_Science Documents_SRD_BASS.pdf.txt
+    page: 8
+    quote: On each day of testing, the oxygen concentration of the ISS cabin atmosphere should be measured.

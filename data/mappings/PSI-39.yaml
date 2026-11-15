@@ -1,0 +1,94 @@
+# Hand-reviewed mapping with document evidence (staged for review). Replaces the mapping of the superseded CFI CSV.
+investigation: PSI-39
+tables:
+- file: PSI-39_Workbook table_CFI Data Summary.csv
+  sha256: d7073ac61ba7ccd67a30846d50f1b49ea28e4bd696d30710e25223e2037fdf3b
+  label: CFI droplet tests (lab workbook)
+  fuel_class: liquid
+  o2_role: ambient
+  outcome_kind: reignition
+  o2_role_reason: 'The table lists the ambient gas of each droplet test: pressure, oxygen, nitrogen and helium (the report speaks of ''ambient pressures'' and helium added ''to the ambient gas'').'
+  test_id: Flex Number
+  columns:
+    fuel:
+      column: Fuel
+      kind: text
+    pressure_psi:
+      column: Pressure (atm)
+      kind: number
+      unit: atm
+      min: 0.05
+      max: 300
+    o2_fraction:
+      column: Oxygen
+      kind: number
+      unit: mole_fraction
+      min: 0
+      max: 1
+    n2_fraction:
+      column: Nitrogen
+      kind: number
+      unit: mole_fraction
+      min: 0
+      max: 1
+    he_fraction:
+      column: Helium
+      kind: number
+      unit: mole_fraction
+      min: 0
+      max: 1
+    droplet_diameter_mm:
+      column: D0 ( mm )
+      kind: number
+      unit: mm
+      min: 0.05
+      max: 20
+    extinction_diameter_mm:
+      column: Dext, hot ( mm )
+      kind: number
+      unit: mm
+      min: 0
+      max: 20
+    cool_extinction_diameter_mm:
+      column: Dext,cool ( mm )
+      kind: number
+      unit: mm
+      min: 0
+      max: 20
+    burn_rate_hot_mm2_s:
+      column: khot ( mm^2/s )
+      kind: number
+      unit: mm2/s
+      min: 0
+      max: 5
+    burn_rate_cool_mm2_s:
+      column: kcool ( mm^2/s )
+      kind: number
+      unit: mm2/s
+      min: 0
+      max: 5
+    reignitions:
+      column: Reignitions
+      kind: number
+      unit: count
+      min: 0
+      max: 50
+    outcome:
+      column: Reignitions
+      kind: category_from_number
+      threshold: 0
+      above: reignited
+      otherwise: no_reignition
+    comment:
+      column: Comments
+      kind: text
+  evidence:
+  - file: PSI-39/PSI-39_Reports_CFI Science Final Report.pdf.txt
+    page: 3
+    quote: ambient pressures up to 5 atmospheres
+  - file: PSI-39/PSI-39_Reports_CFI Science Final Report.pdf.txt
+    page: 3
+    quote: addition of helium to the ambient gas
+  - file: PSI-39/PSI-39_Reports_CFI Science Final Report.pdf.txt
+    page: 6
+    quote: as the ambient pressure is increased above 2 atm, multiple reignition cycles were observed

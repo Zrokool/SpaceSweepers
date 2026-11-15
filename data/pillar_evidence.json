@@ -1,0 +1,940 @@
+{
+ "generated_at": "2026-11-15T03:12:00Z",
+ "model": "granite3.3:2b",
+ "spec_hash": "cfaafb76949e776f",
+ "pillars": {
+  "PSI-10": {
+   "prevention": {
+    "status": "evidence",
+    "id": "O11",
+    "field": "objective",
+    "quote": "Evaluate whether pseudo-flammability limits can be obtained for these flames."
+   },
+   "detection": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "suppression": {
+    "status": "evidence",
+    "id": "O10",
+    "field": "objective",
+    "quote": "Identify the presence of radiative or kinetic extinction."
+   },
+   "review": [],
+   "candidates": {
+    "prevention": [
+     "O11"
+    ],
+    "detection": [],
+    "suppression": [
+     "O10",
+     "H2"
+    ]
+   },
+   "proposed": {
+    "prevention": "O11",
+    "detection": "none",
+    "suppression": "O10"
+   },
+   "model": "granite3.3:2b"
+  },
+  "PSI-20": {
+   "prevention": {
+    "status": "evidence",
+    "id": "I1",
+    "field": "impacts",
+    "quote": "BRE yielded important data relevant to spacecraft fire safety."
+   },
+   "detection": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "suppression": {
+    "status": "evidence",
+    "id": "A8",
+    "field": "approach",
+    "quote": "Eventually either the flame will extinguish, the surface temperature of the burner will equilibrate, or the temperature limit of the heat flux sensor will be reached."
+   },
+   "review": [],
+   "candidates": {
+    "prevention": [
+     "I1",
+     "I4",
+     "H5"
+    ],
+    "detection": [],
+    "suppression": [
+     "A8",
+     "A12",
+     "A18"
+    ]
+   },
+   "proposed": {
+    "prevention": "I1",
+    "detection": "none",
+    "suppression": "A8"
+   },
+   "model": "granite3.3:2b"
+  },
+  "PSI-21": {
+   "prevention": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "detection": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "suppression": {
+    "status": "evidence",
+    "id": "I3",
+    "field": "impacts",
+    "quote": "In addition, an understanding of those factors that affect flame extinction in diffusion flames is critical in the suppression of fires and in improving engine efficiency."
+   },
+   "review": [],
+   "candidates": {
+    "prevention": [],
+    "detection": [],
+    "suppression": [
+     "I3",
+     "O2"
+    ]
+   },
+   "proposed": {
+    "prevention": "none",
+    "detection": "none",
+    "suppression": "I3"
+   },
+   "model": "granite3.3:2b"
+  },
+  "PSI-22": {
+   "prevention": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "detection": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "suppression": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "review": [],
+   "candidates": {
+    "prevention": [],
+    "detection": [],
+    "suppression": []
+   },
+   "proposed": {
+    "prevention": null,
+    "detection": null,
+    "suppression": null
+   },
+   "model": null
+  },
+  "PSI-23": {
+   "prevention": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "detection": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "suppression": {
+    "status": "evidence",
+    "id": "O3",
+    "field": "objective",
+    "quote": "Determine the quasi-steady convective/chemical-kinetic extinction limits (low system Damköhler numbers) and radiative/chemical-kinetic extinction limits (high system Damköhler numbers) for mixtures of different H2/CH4/diluent ratios (soot-free) and different C2H4/diluent ratios (sooty)."
+   },
+   "review": [],
+   "candidates": {
+    "prevention": [],
+    "detection": [],
+    "suppression": [
+     "O3",
+     "H2"
+    ]
+   },
+   "proposed": {
+    "prevention": "none",
+    "detection": "none",
+    "suppression": "O3"
+   },
+   "model": "granite3.3:2b"
+  },
+  "PSI-25": {
+   "prevention": {
+    "status": "evidence",
+    "id": "I1",
+    "field": "impacts",
+    "quote": "A primary goal of BASS-II is improved spacecraft fire safety, improved understanding of combustion in space and how to avoid it."
+   },
+   "detection": {
+    "status": "evidence",
+    "id": "O1",
+    "field": "objective",
+    "quote": "BASS-II results contribute to the combustion computational models used in the design of fire detection and suppression systems in microgravity and on Earth."
+   },
+   "suppression": {
+    "status": "evidence",
+    "id": "O1",
+    "field": "objective",
+    "quote": "BASS-II results contribute to the combustion computational models used in the design of fire detection and suppression systems in microgravity and on Earth."
+   },
+   "review": [],
+   "candidates": {
+    "prevention": [
+     "I1",
+     "O2"
+    ],
+    "detection": [
+     "O1"
+    ],
+    "suppression": [
+     "O1",
+     "O2"
+    ]
+   },
+   "proposed": {
+    "prevention": "I1",
+    "detection": "O1",
+    "suppression": "O1"
+   },
+   "model": "granite3.3:2b"
+  },
+  "PSI-26": {
+   "prevention": {
+    "status": "evidence",
+    "id": "I1",
+    "field": "impacts",
+    "quote": "Current NASA spacecraft materials selection is based on a standard test method (NASA–STD–6001 Test 1) that segregates material based on 1-g behavior without consideration of low gravity effects."
+   },
+   "detection": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "suppression": {
+    "status": "evidence",
+    "id": "I4",
+    "field": "impacts",
+    "quote": "Using nitrogen as a flame suppressant in microgravity provides a direct link to current and planned extinguishment techniques."
+   },
+   "review": [],
+   "candidates": {
+    "prevention": [
+     "I1",
+     "I3"
+    ],
+    "detection": [],
+    "suppression": [
+     "I4",
+     "O5"
+    ]
+   },
+   "proposed": {
+    "prevention": "I1",
+    "detection": "none",
+    "suppression": "I4"
+   },
+   "model": "granite3.3:2b"
+  },
+  "PSI-39": {
+   "prevention": {
+    "status": "evidence",
+    "id": "I1",
+    "field": "impacts",
+    "quote": "A basic understanding of cool flames is important for understanding ignition phenomena of practical fuels and fuel additives."
+   },
+   "detection": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "suppression": {
+    "status": "evidence",
+    "id": "O5",
+    "field": "objective",
+    "quote": "4) Investigate the relationship between droplet size, pressure, and flame extinction, and (5) understand the consequence of soot formation during cool flame combustion."
+   },
+   "review": [],
+   "candidates": {
+    "prevention": [
+     "I1",
+     "I2",
+     "I3"
+    ],
+    "detection": [],
+    "suppression": [
+     "O5",
+     "H1"
+    ]
+   },
+   "proposed": {
+    "prevention": "I1",
+    "detection": "none",
+    "suppression": "O5"
+   },
+   "model": "granite3.3:2b"
+  },
+  "PSI-47": {
+   "prevention": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "detection": {
+    "status": "evidence",
+    "id": "I1",
+    "field": "impacts",
+    "quote": "Extended duration space flight missions with larger vessels will require fire detection systems with increased reliability and sensitivity."
+   },
+   "suppression": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "review": [],
+   "candidates": {
+    "prevention": [],
+    "detection": [
+     "I1",
+     "I2",
+     "I3",
+     "O1",
+     "O2",
+     "H7"
+    ],
+    "suppression": []
+   },
+   "proposed": {
+    "prevention": "none",
+    "detection": "I1",
+    "suppression": "none"
+   },
+   "model": "granite3.3:2b"
+  },
+  "PSI-60": {
+   "prevention": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "detection": {
+    "status": "evidence",
+    "id": "I2",
+    "field": "impacts",
+    "quote": "For space applications, the results support safer fire detection, suppression, and cleaner combustion technologies critical for long-duration missions."
+   },
+   "suppression": {
+    "status": "evidence",
+    "id": "I2",
+    "field": "impacts",
+    "quote": "For space applications, the results support safer fire detection, suppression, and cleaner combustion technologies critical for long-duration missions."
+   },
+   "review": [],
+   "candidates": {
+    "prevention": [],
+    "detection": [
+     "I2"
+    ],
+    "suppression": [
+     "I2"
+    ]
+   },
+   "proposed": {
+    "prevention": "none",
+    "detection": "I2",
+    "suppression": "I2"
+   },
+   "model": "granite3.3:2b"
+  },
+  "PSI-62": {
+   "prevention": {
+    "status": "evidence",
+    "id": "I1",
+    "field": "impacts",
+    "quote": "This research provides predictive tools for screening new materials’ flammability limits, which can lead to the design of safer spacecrafts."
+   },
+   "detection": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "suppression": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "review": [],
+   "candidates": {
+    "prevention": [
+     "I1",
+     "I4",
+     "O1",
+     "O6"
+    ],
+    "detection": [],
+    "suppression": []
+   },
+   "proposed": {
+    "prevention": "I1",
+    "detection": "none",
+    "suppression": "none"
+   },
+   "model": "granite3.3:2b"
+  },
+  "PSI-68": {
+   "prevention": {
+    "status": "evidence",
+    "id": "O7",
+    "field": "objective",
+    "quote": "Determine the influence of droplet interactions on the flammability limits and extinction behavior of droplet arrays."
+   },
+   "detection": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "suppression": {
+    "status": "evidence",
+    "id": "O5",
+    "field": "objective",
+    "quote": "Study flame extinction mechanisms and their boundaries."
+   },
+   "review": [],
+   "candidates": {
+    "prevention": [
+     "O7"
+    ],
+    "detection": [],
+    "suppression": [
+     "O5",
+     "O7"
+    ]
+   },
+   "proposed": {
+    "prevention": "O7",
+    "detection": "none",
+    "suppression": "O5"
+   },
+   "model": "granite3.3:2b"
+  },
+  "PSI-69": {
+   "prevention": {
+    "status": "evidence",
+    "id": "O1",
+    "field": "objective",
+    "quote": "The FLEX (Flame Extinguishment Experiment) investigation aims to map the flammability limits of liquid fuels in microgravity environments, measure the effectiveness of various gaseous fire suppressants such as CO2, He, and SF6, and develop reliable predictive models for combustion limits under reduced gravity conditions."
+   },
+   "detection": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "suppression": {
+    "status": "evidence",
+    "id": "I2",
+    "field": "impacts",
+    "quote": "By enhancing our understanding of microgravity combustion, the mission directly contributes to improved fire safety protocols for future space missions, ensuring the safety of crew members in environments where traditional fire suppression methods may be ineffective."
+   },
+   "review": [],
+   "candidates": {
+    "prevention": [
+     "O1",
+     "H2",
+     "H3"
+    ],
+    "detection": [],
+    "suppression": [
+     "I2",
+     "I4",
+     "O1",
+     "O3",
+     "H1",
+     "H2"
+    ]
+   },
+   "proposed": {
+    "prevention": "O1",
+    "detection": "none",
+    "suppression": "I2"
+   },
+   "model": "granite3.3:2b"
+  },
+  "PSI-98": {
+   "prevention": {
+    "status": "evidence",
+    "id": "I3",
+    "field": "impacts",
+    "quote": "Results determine microgravity flammability limits for several spacecraft materials, help to validate NASA’s material selection criteria, and how microgravity and limited oxygen affect flame size."
+   },
+   "detection": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "suppression": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "review": [],
+   "candidates": {
+    "prevention": [
+     "I3",
+     "O2",
+     "O3",
+     "H1"
+    ],
+    "detection": [],
+    "suppression": []
+   },
+   "proposed": {
+    "prevention": "I3",
+    "detection": "none",
+    "suppression": "none"
+   },
+   "model": "granite3.3:2b"
+  },
+  "PSI-99": {
+   "prevention": {
+    "status": "evidence",
+    "id": "I3",
+    "field": "impacts",
+    "quote": "Results determine microgravity flammability limits for several spacecraft materials, help to validate NASA’s material selection criteria, and how microgravity and limited oxygen affect flame size."
+   },
+   "detection": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "suppression": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "review": [],
+   "candidates": {
+    "prevention": [
+     "I3",
+     "O1",
+     "H1"
+    ],
+    "detection": [],
+    "suppression": []
+   },
+   "proposed": {
+    "prevention": "I3",
+    "detection": "none",
+    "suppression": "none"
+   },
+   "model": "granite3.3:2b"
+  },
+  "PSI-100": {
+   "prevention": {
+    "status": "evidence",
+    "id": "I3",
+    "field": "impacts",
+    "quote": "Results determine microgravity flammability limits for several spacecraft materials, help to validate NASA’s material selection criteria, and how microgravity and limited oxygen affect flame size."
+   },
+   "detection": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "suppression": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "review": [],
+   "candidates": {
+    "prevention": [
+     "I3",
+     "O2",
+     "H1"
+    ],
+    "detection": [],
+    "suppression": []
+   },
+   "proposed": {
+    "prevention": "I3",
+    "detection": "none",
+    "suppression": "none"
+   },
+   "model": "granite3.3:2b"
+  },
+  "PSI-101": {
+   "prevention": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "detection": {
+    "status": "evidence",
+    "id": "I1",
+    "field": "impacts",
+    "quote": "Along with the results from the original SAME investigation, the results from SAME-R can lead to technology for an advanced fire detector for future spacecraft that will be used for long duration missions."
+   },
+   "suppression": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "review": [],
+   "candidates": {
+    "prevention": [],
+    "detection": [
+     "I1",
+     "I4",
+     "I5",
+     "I6",
+     "O1",
+     "O2"
+    ],
+    "suppression": []
+   },
+   "proposed": {
+    "prevention": "none",
+    "detection": "I1",
+    "suppression": "none"
+   },
+   "model": "granite3.3:2b"
+  },
+  "PSI-102": {
+   "prevention": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "detection": {
+    "status": "evidence",
+    "id": "I1",
+    "field": "impacts",
+    "quote": "The SAME experiment will provide technology for an advanced fire detector for future spacecraft that will be used for long duration missions."
+   },
+   "suppression": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "review": [],
+   "candidates": {
+    "prevention": [],
+    "detection": [
+     "I1",
+     "I4",
+     "I5",
+     "O1",
+     "O2",
+     "H2"
+    ],
+    "suppression": []
+   },
+   "proposed": {
+    "prevention": "none",
+    "detection": "I1",
+    "suppression": "none"
+   },
+   "model": "granite3.3:2b"
+  },
+  "PSI-106": {
+   "prevention": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "detection": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "suppression": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "review": [],
+   "candidates": {
+    "prevention": [],
+    "detection": [],
+    "suppression": []
+   },
+   "proposed": {
+    "prevention": null,
+    "detection": null,
+    "suppression": null
+   },
+   "model": null
+  },
+  "PSI-107": {
+   "prevention": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "detection": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "suppression": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "review": [],
+   "candidates": {
+    "prevention": [],
+    "detection": [],
+    "suppression": []
+   },
+   "proposed": {
+    "prevention": null,
+    "detection": null,
+    "suppression": null
+   },
+   "model": null
+  },
+  "PSI-108": {
+   "prevention": {
+    "status": "not applicable",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "detection": {
+    "status": "not applicable",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "suppression": {
+    "status": "not applicable",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "review": [],
+   "candidates": {},
+   "proposed": {},
+   "reason": "Not combustion research (Fluid Physics)."
+  },
+  "PSI-115": {
+   "prevention": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "detection": {
+    "status": "evidence",
+    "id": "I1",
+    "field": "impacts",
+    "quote": "Models and tools that characterize particles generated as smoke can be used to ascertain how temperature, gravity, and material properties affect the smoke produced."
+   },
+   "suppression": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "review": [],
+   "candidates": {
+    "prevention": [],
+    "detection": [
+     "I1",
+     "I2",
+     "O1",
+     "O2",
+     "H1",
+     "H2"
+    ],
+    "suppression": []
+   },
+   "proposed": {
+    "prevention": "none",
+    "detection": "I1",
+    "suppression": "none"
+   },
+   "model": "granite3.3:2b"
+  },
+  "PSI-117": {
+   "prevention": {
+    "status": "evidence",
+    "id": "O2",
+    "field": "objective",
+    "quote": "Focusing on both small and large droplets, the work mapped stability windows for ignition, sustained oscillation, transitions to hot ignition and warm-flame behavior, and extinction under microgravity."
+   },
+   "detection": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "suppression": {
+    "status": "evidence",
+    "id": "I1",
+    "field": "impacts",
+    "quote": "Space Benefits: Potential to improve spacecraft fire-safety modeling by resolving cool-flame/extinction behavior in microgravity; leverages FLEX to define safer operating envelopes/materials."
+   },
+   "review": [],
+   "candidates": {
+    "prevention": [
+     "O2"
+    ],
+    "detection": [],
+    "suppression": [
+     "I1",
+     "O2"
+    ]
+   },
+   "proposed": {
+    "prevention": "O2",
+    "detection": "none",
+    "suppression": "I1"
+   },
+   "model": "granite3.3:2b"
+  },
+  "PSI-142": {
+   "prevention": {
+    "status": "evidence",
+    "id": "O2",
+    "field": "objective",
+    "quote": "1) Develop a new diagram of the flammability limits of diffusional cool flames affected by radiation, diffusion, and convection."
+   },
+   "detection": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "suppression": {
+    "status": "evidence",
+    "id": "O5",
+    "field": "objective",
+    "quote": "4) Obtain new, quantitative data of extinction limit, flame temperature, and species distribution for the validation of kinetic and radiation models involving cool flames."
+   },
+   "review": [],
+   "candidates": {
+    "prevention": [
+     "O2",
+     "H1"
+    ],
+    "detection": [],
+    "suppression": [
+     "O5",
+     "H1"
+    ]
+   },
+   "proposed": {
+    "prevention": "O2",
+    "detection": "none",
+    "suppression": "O5"
+   },
+   "model": "granite3.3:2b"
+  },
+  "PSI-159": {
+   "prevention": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "detection": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "suppression": {
+    "status": "none",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "review": [],
+   "candidates": {
+    "prevention": [],
+    "detection": [],
+    "suppression": []
+   },
+   "proposed": {
+    "prevention": null,
+    "detection": null,
+    "suppression": null
+   },
+   "model": null
+  },
+  "PSI-181": {
+   "prevention": {
+    "status": "not applicable",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "detection": {
+    "status": "not applicable",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "suppression": {
+    "status": "not applicable",
+    "id": null,
+    "field": null,
+    "quote": null
+   },
+   "review": [],
+   "candidates": {},
+   "proposed": {},
+   "reason": "Not combustion research (Materials Science)."
+  }
+ }
+}

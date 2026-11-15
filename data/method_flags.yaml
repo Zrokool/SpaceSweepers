@@ -1,0 +1,11 @@
+# Team confirmations of method flags. An entry here overrides the SI proposal and is
+# shown in the dashboard as "team-confirmed". Use it to settle flags the checks left
+# as "method not confirmed". Quote the sentence from the PSI record that shows it.
+#
+# PSI-142:
+#   flag: both                  # experimental | simulation | both
+#   labels: [Experimental, Simulation]
+#   experimental: {quote: "…sentence showing their own physical test…", field: approach}
+#   simulation:   {quote: "…a comparative studies … was conducted using three different numerical modeling schemes…", field: approach}
+#   confirmed_by: "name, date"
+{}

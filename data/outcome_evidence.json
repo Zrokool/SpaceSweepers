@@ -1,0 +1,858 @@
+{
+ "generated_at": "2026-11-15T04:20:39Z",
+ "model": "granite3.3:2b",
+ "spec_hash": "099063f09e68dd0c",
+ "PSI-26": {
+  "table": "PSI-26_Workbook table_BASS As Run.csv",
+  "sha256": "eec0ad9f4769bef638be6ea0adfff6b4c53b1d83fe27de30d7dd13ec8efd0a70",
+  "rows": {
+   "2": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S1",
+    "quote": "Nice symmetric burn, some soot at 10 cm/s, Steady spreading, flame seems to reach a steady length.",
+    "review": false
+   },
+   "3": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "4": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S6",
+    "quote": "Don noted that there was no soot on the sphere, just the 'char layer'. ~ 2 minute total burn.",
+    "review": false
+   },
+   "5": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S1",
+    "quote": "~ 40 s burn, Don asked if images were too saturated, Paul said OK.",
+    "review": false
+   },
+   "6": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S1",
+    "quote": "~ 60 s burn, Don said he like to watch solid samples burn in space and it makes him appreciate that he wouldn't want to be be there in a real fire - it wouldn't be pretty.",
+    "review": false
+   },
+   "7": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "8": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "9": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "10": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "11": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "12": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S1",
+    "quote": "Burning laminar but sooty at 42, turned down very slowly to 41 and flame started to turn blue and vapor jet.",
+    "review": false
+   },
+   "13": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S5",
+    "quote": "Burned sample on video at 14:59.",
+    "review": false
+   },
+   "14": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "15": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S1",
+    "quote": "Ignited and burned for only 2 s.",
+    "review": false
+   },
+   "16": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S2",
+    "quote": "Ignited GBX time 16:14:44, N2 on at 16:17:18, did not extinguish, increased to pot 10, at 16:18:37, N2 off at 16:19:19.",
+    "review": false
+   },
+   "17": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "18": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "19": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "20": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S2",
+    "quote": "Don instructed to let it burn about 2 minutes then turn fan off.",
+    "review": false
+   },
+   "21": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S2",
+    "quote": "Don has 2nd bonus camera set up too., Burned about 3 min.",
+    "review": false
+   },
+   "22": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S1",
+    "quote": "ignited within 15 s (still hot?), sooting by 35 s, fully engulfed by ~ 1 min.",
+    "review": false
+   },
+   "23": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "24": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S3",
+    "quote": "Ignited at 16:05 turned flow down to ~40.5 ish, and flame got very spherical, alternating blue and orange?(filter on)",
+    "review": false
+   },
+   "25": {
+    "status": "evidence",
+    "class": "no_ignition",
+    "id": "S1",
+    "quote": "preheated by briefly heating igniter wire then hitting it full, did not ignite but smoked .",
+    "review": false
+   },
+   "26": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "27": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S2",
+    "quote": "2nd ignition flame stabilized at 42 then 41. grew to stokes flow envelope flame, N2 blew out stag region but flame remained side stabilized, long burn , extinguished when flow is turned off.",
+    "review": false
+   },
+   "28": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S5",
+    "quote": "Turned nitrogen off to allow flame to spread back to stagnation point.",
+    "review": false
+   },
+   "29": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "30": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "31": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S1",
+    "quote": "Joe 1st day, ignited at 9.75 cm/s, flame mostly envelope by end of ignition, turned flow slowly to 42, so lots of vapor jetting and soot.",
+    "review": false
+   },
+   "32": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S1",
+    "quote": "ignited at 10 cm/s, fan to 42, less vapor jetting noted, bullet shaped flame, sooty.",
+    "review": false
+   },
+   "33": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "34": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S1",
+    "quote": "adjusted igniter, ignited at 43, he started to turn fan down when fuel ran out and flame extinguished.",
+    "review": false
+   },
+   "35": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S3",
+    "quote": "Ignited quickly, all blue, spread slowly upstream.",
+    "review": false
+   },
+   "36": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S1",
+    "quote": "sooty at 1:15 , 4 minute burn, got long sooty tail, didn't quite wrap around to stag zone, nice symmetric flame, over the shoulder view shows nice image of flame through msg window.",
+    "review": false
+   },
+   "37": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "38": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S1",
+    "quote": "Ignited and turned flow down, then N2 on while flame was small and blue.",
+    "review": false
+   },
+   "39": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "40": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S1",
+    "quote": "ignited and left igniter on until flame spread away.",
+    "review": false
+   },
+   "41": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "42": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "43": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S2",
+    "quote": "Quite spread by end of ignition, very dim blue.",
+    "review": false
+   },
+   "44": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "45": {
+    "status": "evidence",
+    "class": "no_ignition",
+    "id": "S1",
+    "quote": "just smoked slightly, no ignition.",
+    "review": false
+   },
+   "46": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S2",
+    "quote": "Ignited and spread a bit on top side only, seemed to quench 5 mm from the end.",
+    "review": false
+   },
+   "47": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S1",
+    "quote": "opposed flow flame test, steady spread at 9 cm/s! started turning down flow late, but didn't complete change before burned out whole sample.",
+    "review": false
+   },
+   "48": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "49": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "50": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "51": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "52": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "53": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S1",
+    "quote": "ignited on 3rd try, started getting sooty, then turned on N2. weakened briefly then got sooty again.",
+    "review": false
+   },
+   "54": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S1",
+    "quote": "ignited after a few tries, turned N2 on 5.0 pot, flame still very sooty but only on top half of sphere in video, fan to 42, still sooty but dimmer, fan 41, similar.",
+    "review": false
+   },
+   "55": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S1",
+    "quote": "ignited at 62, fan up to 87 then 100, got long sooty tail, comet.",
+    "review": false
+   },
+   "56": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "57": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "58": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "59": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "60": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "61": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "62": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "63": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "64": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "65": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "66": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "67": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S1",
+    "quote": "nice burn, left igniter on a bit long and then on again.",
+    "review": false
+   },
+   "68": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "69": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "70": {
+    "status": "conflict",
+    "class": null,
+    "id": "S4",
+    "quote": "LOS wider coils on igniter, windows clean, ignited and was all blue initially, then got soot spot, decreased flow but soot persisted until 0.32 pot when soot disappeared then flame went out.",
+    "review": true
+   },
+   "71": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S2",
+    "quote": "Ignited very quickly on 2nd try, and was sooty immediately.",
+    "review": false
+   },
+   "72": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S2",
+    "quote": "Burned out all wax, only 2 brackets.",
+    "review": false
+   },
+   "73": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S2",
+    "quote": "Very long burn (~ 10 min), waited at every flow condition, steady radiometer at 0.32 pot ~ 2.2 (lowest for flame).",
+    "review": false
+   },
+   "74": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S2",
+    "quote": "Extinguished/burned out at 0.31",
+    "review": false
+   },
+   "75": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "76": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "77": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "78": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S1",
+    "quote": "ignited well and had initial sooty flame wrapped around leading edge of sample.",
+    "review": false
+   },
+   "79": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S3",
+    "quote": "Ignited and got immediate dim blue flame.",
+    "review": false
+   },
+   "80": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S3",
+    "quote": "Flame sooty for a while, then as it burned out leading edge it got dimmer, shorter and eventully all blue.",
+    "review": false
+   },
+   "81": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "82": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "83": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "84": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "85": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S1",
+    "quote": "wake ign, dim flame propagates upstream, some soot late in burn, slightly non-symmetric with top spreading faster than bottom",
+    "review": false
+   },
+   "86": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "87": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S2",
+    "quote": "Flame spread all the way upstream.",
+    "review": false
+   },
+   "88": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S4",
+    "quote": "Sphere down to about 1 cm, smooth after this last burn.",
+    "review": false
+   },
+   "89": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "90": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "91": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "92": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S5",
+    "quote": "Last pic still had a flame~3:15 burn",
+    "review": false
+   },
+   "93": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "94": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "95": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S1",
+    "quote": "LONG candle burn at very low flow rates.",
+    "review": false
+   },
+   "96": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S1",
+    "quote": "Only spread top half of video initially.",
+    "review": false
+   },
+   "97": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "98": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "99": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "100": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "101": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S1",
+    "quote": "flame lit on 2nd try, quickly turned sooty, spread around small remaining sphere.",
+    "review": false
+   },
+   "102": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "103": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S2",
+    "quote": "Got a flame briefly, but did not sustain for any spread, shrank and winked out after maybe 15 s or so.",
+    "review": false
+   },
+   "104": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S3",
+    "quote": "2nd vitiation, got it ignited, burned just on forward stagnation region, minimal spread.",
+    "review": false
+   },
+   "105": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "106": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S1",
+    "quote": "ignited 'concurrent' or stagnation.17:45 - 0.5; 18:30-0.4; 19:20-0.35; 20:20-0.33; 21:30-0.32; out 14:22:50",
+    "review": false
+   },
+   "107": {
+    "status": "evidence",
+    "class": "no_ignition",
+    "id": "S1",
+    "quote": "no ignition, despite prolonged attempted ignition.",
+    "review": false
+   },
+   "108": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "109": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "110": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S3",
+    "quote": "Short burn about 2 minutes.",
+    "review": false
+   },
+   "111": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S4",
+    "quote": "Post-burn sample had large amounts of soot on it that had to be wiped off.",
+    "review": false
+   },
+   "112": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "113": {
+    "status": "evidence",
+    "class": "no_ignition",
+    "id": "S1",
+    "quote": "No ignition on this test.",
+    "review": false
+   },
+   "114": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "115": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "116": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S1",
+    "quote": "stills during ignition.flame ignited over lower part of sphere, wrapped around and then decreased flow to near limit flow, flame shrank forward and oscillated slightly at pot 0.35, went out when pot turned down to 0.29.",
+    "review": false
+   },
+   "117": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "118": {
+    "status": "evidence",
+    "class": "burned",
+    "id": "S3",
+    "quote": "Sample ignited briefly - blue curving around leading edge, but went out.",
+    "review": false
+   },
+   "119": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "120": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "121": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   },
+   "122": {
+    "status": "none",
+    "class": null,
+    "id": null,
+    "quote": null,
+    "review": false
+   }
+  }
+ }
+}
