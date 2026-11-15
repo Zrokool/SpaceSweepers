@@ -42,7 +42,7 @@ export async function render(root, state) {
     habitatOn && el("li", {}, "Tests inside the ", hab(habName(h.label)), " box (", hab(h.summary), "): ", hab(String(env.gaps.in_box)), " in the data we hold."),
     habitatOn && env.gaps.look_alike_note && el("li", { text: env.gaps.look_alike_note }),
     habitatOn && env.gaps.caveat && el("li", { text: env.gaps.caveat }),
-    !habitatOn && withoutTables > 0 && el("li", { text: `${withoutTables} of the combustion investigations have no test data in the charts yet: their tables aren't mapped yet, or PSI lists none.` }),
+    !habitatOn && withoutTables > 0 && el("li", { text: `${withoutTables} of the combustion investigations have no plotted tests in the charts yet: their tables aren't mapped yet, or PSI lists none.` }),
     el("li", { text: "PSI holds no partial-gravity combustion data yet (Moon or Mars gravity). Microgravity and normal-gravity results can only bound what happens in between." }),
   ];
   const sure = [

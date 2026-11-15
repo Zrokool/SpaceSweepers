@@ -4,6 +4,7 @@ tables:
 - file: PSI-10_Experimental table_Flame Design_Normal Flame.csv
   sha256: 4a663292bd3f65201943cc71bd661a70383639276a9176f64105b285bf0b6deb
   label: Flame Design normal flames
+  fuel_class: gas
   o2_role: ambient
   o2_role_reason: 'Normal flames: gaseous fuel is ejected from the burner into an oxygen/nitrogen atmosphere; the report gives the ambient oxygen mole fraction.'
   test_id: Test
@@ -33,6 +34,7 @@ tables:
 - file: PSI-10_Experimental table_Flame Design_Inverse Flame.csv
   sha256: 97933ee9ae0b9ebc6b948a67485a0fe2f8218f753253a4f2be93c40d374c44e4
   label: Flame Design inverse flames
+  fuel_class: gas
   o2_role: oxidizer_stream
   o2_role_reason: 'Inverse flames: an oxygen/nitrogen mixture flows out of the burner into a chamber filled with ethylene/nitrogen, so XO2 is the oxygen of the burner stream, not the surrounding atmosphere.'
   test_id: Test

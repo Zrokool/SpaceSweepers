@@ -7,6 +7,7 @@ data, and the answer says so every time it is used.
 
 from __future__ import annotations
 
+import hashlib
 import re
 from dataclasses import dataclass, field
 
@@ -15,9 +16,10 @@ from app.analysis import compare as compare_mod
 from app.analysis.rank import NEAR_O2, NEAR_PSI
 from app.analysis.sweeper import _value
 from app.catalog import Catalog
+from app.insights import scenario
 from app.insights.frame import Frame
 from app.insights.library import Item
-from app.insights.tools import computed
+from app.insights.tools import computed  # noqa: F401  (re-used by the pipeline for concept answers)
 
 HABITAT_WORDS = re.compile(r"\b(habitats?|moon|lunar|rover|spacesuit|space suit|eva|iss|space station|cabin|spacecraft)\b", re.I)
 HABITAT_NOTE = ("Habitat atmospheres are the NASA Space Apps challenge's reference values, not PSI data; "
@@ -33,6 +35,9 @@ class Special:
     direct: list[dict] | None = None                      # sentences to show as the whole answer (no SI)
     only: bool = False                                    # the items replace everything else found
     habitat: dict | None = None                           # the reference habitat used, for the answer's footnote
+    analysis: dict | None = None                          # the scenario answer card (headline, table, caveats, links) computed from the tests
+    slots: dict | None = None                             # the scenario's conditions, returned so the next question can build on them
+    suggestions: list[str] = field(default_factory=list)  # follow-up questions that are known to be answerable (guided mode only)
 
 
 def _tests(catalog: Catalog) -> list[tuple[dict, float, float]]:
@@ -100,16 +105,39 @@ def habitat_reference(frame: Frame, catalog: Catalog, habitat: dict | None) -> I
     return computed("habitat:" + habitat["key"], text)
 
 
-def build(frame: Frame, catalog: Catalog, habitat: dict | None) -> Special:
+def plain_coverage(text: str) -> str:
+    """The coverage sentence in everyday words (guided mode)."""
+    text = re.sub(r"^Searched the (\d[\d,]*) PSI tests whose oxygen and pressure are mapped, from (\d+) investigations \(inverse-flame tests are left out: their oxygen is the burner stream, not the chamber\)\.", r"I searched the \1 PSI tests that record both oxygen and pressure (from \2 investigations).", text)
+    return text.replace("Tests in tables whose columns are not mapped cannot be searched this way, so a missing match is not proof that nothing was tested.", "Some PSI tables cannot be searched by oxygen and pressure, so a missing match does not prove nothing was tested.")
+
+
+def plain_count(text: str) -> str:
+    """A count or list sentence in everyday words (guided mode): no 'counted by code', 'checked-simulation' becomes 'labelled simulation'."""
+    text = re.sub(r"^Counted by code over the \d+ investigations in PSI's combustion search:\s*", "", text)
+    text = re.sub(r"(\d+) ((?:\w+ )?)checked-(experimental|simulation) investigations", r"\1 \2investigations labelled \3", text)
+    text = re.sub(r"Only investigations whose method label was checked are counted; (\d+) are not confirmed yet", r"Counted only where the method label was checked; \1 are not confirmed yet", text)
+    return text[:1].upper() + text[1:]
+
+
+def build(frame: Frame, catalog: Catalog, habitat: dict | None, structured: dict | None = None, context: dict | None = None, audience: str = "expert") -> Special:
     if "safety" in frame.intents:
         item = computed("safety", SAFETY_TEXT)
         return Special([item], [{"text": SAFETY_TEXT, "cites": [1]}], only=True)
+    sc = scenario.read(frame.question, frame, structured, context if audience == "guided" else None)
+    card = (scenario.analyse(catalog, sc) or scenario.no_match(catalog, sc)) if sc else None
+    if card:                                                  # a scenario the tests can answer: code writes it, no SI is needed
+        guided = audience == "guided"
+        if guided:
+            card["context_note"] = scenario.context_note(sc)
+        item = computed(f"scenario:{card['goal']}:{hashlib.sha1(card['title'].encode()).hexdigest()[:8]}", " ".join(card["headline"]))        # a stable id: the same question gives the same id in every run
+        return Special([item], [{"text": h, "cites": [1]} for h in card["headline"]], analysis=card, slots=scenario.slots(sc),
+                       suggestions=scenario.suggest(catalog, sc) if guided and card["goal"] != "none" else [])
     items: list[Item] = []
     cov, hab = coverage(frame, catalog), habitat_reference(frame, catalog, habitat)
     items += [i for i in (cov, hab) if i]
     direct = None
     if cov or (hab and not frame.topics and not frame.psi_ids and not (set(frame.intents) - {"tests", "list"})):
-        direct = [{"text": i.text, "cites": [n]} for n, i in enumerate(items, 1)][:2]
+        direct = [{"text": plain_coverage(i.text) if audience == "guided" else i.text, "cites": [n]} for n, i in enumerate(items, 1)][:2]
     return Special(items, direct, habitat={"key": habitat["key"], "label": habitat["label"], "note": HABITAT_NOTE} if hab and habitat else None)
 
 

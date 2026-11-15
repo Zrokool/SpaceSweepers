@@ -26,14 +26,15 @@ def _value(test: dict, variable: str) -> float | None:
     return v["value"] if v and v["flag"] in USABLE else None
 
 
-def proximity(tests: list[dict], habitat: dict) -> dict:
+def proximity(tests: list[dict], habitat: dict, tables_status: str | None = None) -> dict:
     """How many tests sit in or near the habitat's atmosphere.
 
     Only tests whose oxygen value describes the surrounding atmosphere count. A
     burner-stream oxygen fraction (CFI-G inverse flames) says nothing about room air.
     """
     if not tests:
-        return {"score": None, "why": "No test table is available for this investigation."}
+        reason = (tables_status or "no test table is available").rstrip(".")
+        return {"score": None, "why": f"No tests are mapped for this investigation ({reason}), so its condition match is unknown, not zero."}
     ambient = [t for t in tests if t["o2_role"] == "ambient"]
     other_roles = sorted({t["o2_role"] for t in tests if t["o2_role"] and t["o2_role"] != "ambient"})
     if not ambient:
@@ -101,7 +102,7 @@ def data_richness(inv: dict) -> dict:
 
 
 def score(inv: dict, tests: list[dict], habitat: dict, wanted_pillar: str | None) -> dict:
-    components = {"proximity": proximity(tests, habitat), "fuel": fuel(inv["attributes"]),
+    components = {"proximity": proximity(tests, habitat, inv.get("tables_status")), "fuel": fuel(inv["attributes"]),
                   "pillar": pillar(inv, wanted_pillar), "data": data_richness(inv)}
     return {"components": components,
             "factor": 1.0 if inv["is_combustion"] else OFF_TOPIC_FACTOR,

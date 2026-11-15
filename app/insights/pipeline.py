@@ -22,7 +22,7 @@ from datetime import UTC, datetime
 import httpx
 
 from app.config import Settings
-from app.insights import answers, hygiene
+from app.insights import answers, concepts, hygiene
 from app.insights.frame import Frame, reader_for
 from app.insights.library import KIND_LABEL, Item, Library
 from app.insights.report import build_report, source_entry, structured
@@ -43,6 +43,10 @@ DIRECT_INTENTS = {"count", "list", "lineage", "files"}      # questions whose an
 CACHE_SIZE = 64
 _cache: "OrderedDict[tuple, list[dict]]" = OrderedDict()   # finished answers, as the events that made them, until the data or the model changes
 DRAFT_TEXT = re.compile(r'"text"\s*:\s*"((?:[^"\\]|\\.)*)"')
+
+
+GUIDED_NO_ANSWER = "I could not ground an answer to that in PSI. Here are questions I can answer from the data:"
+GUIDED_STARTERS = ["What is the lowest oxygen concentration at which methanol droplets burned in FLEX?", "How does carbon dioxide compare with helium as a suppressant in FLEX?", "What is a cool flame?"]
 
 
 def sse(event: dict) -> bytes:
@@ -76,6 +80,31 @@ def direct_answer(frame: Frame, evidence: list[Item]) -> list[dict] | None:
         text = evidence[n - 1].text
         out.append({"text": text if len(text) <= 700 else text[:700].rsplit(" ", 1)[0] + " …", "cites": [n]})
     return out or None
+
+
+async def concept_special(http: httpx.AsyncClient, settings: Settings, library: Library, term: str, si_ok: bool, question: str = "") -> answers.Special:
+    """A concept question: PSI's own sentence, chosen by code and (if SI is there and quick) pointed at by SI, then verified by code."""
+    cands = concepts.candidates(library, term)
+    good = [c for c in cands if c.score >= concepts.MIN_SCORE and concepts.verify(c.sentence, term)]
+    chosen = good[0] if good else None
+    if len(good) > 1 and si_ok:
+        agent = spec.agent("17-definition-pointer.md")
+        schema = json.loads(json.dumps(agent.output_schema))
+        schema["properties"]["evidence"]["enum"] = [c.id for c in good] + ["none"]
+        user = agent.user_template.format(term=term, candidates="\n".join(f"{c.id}: {c.sentence}" for c in good))
+        try:
+            async with model_slot(settings.si_max_waiting, 5):
+                answer = await asyncio.wait_for(ollama.chat_json(http, settings.ollama_url, settings.si_model, agent.system_prompt, user, schema,
+                                                                 20, agent.meta.get("options"), settings.si_keep_alive), 20)
+            pick = next((c for c in good if c.id == str(answer.get("evidence", "")).strip()), None)       # D-1: only a real candidate counts
+            chosen = pick or chosen
+        except (ollama.SIError, httpx.HTTPError, TimeoutError, asyncio.TimeoutError):
+            pass                                                                                        # D-3: code's own top candidate stands
+    why = concepts.why_it_matters(cands, chosen, term) if concepts.WHY_ASKED.search(question) else None
+    card = concepts.card(term, chosen, [c for c in good if c is not chosen and c is not why], why)
+    item = chosen.item if chosen else answers.computed("concept:" + term.replace(" ", "_"), card["headline"][0])
+    items = [item, *([why.item] if why else [])]
+    return answers.Special(items, [{"text": h, "cites": [n]} for n, h in enumerate(card["headline"], 1)], analysis=card)
 
 
 def draft_sentences(buffer: str) -> list[str]:
@@ -219,9 +248,10 @@ def _write_log(settings: Settings, run_id: str, record: dict) -> None:
 
 
 async def run(*, question: str, previous: list[str], http: httpx.AsyncClient, settings: Settings, library: Library,
-              toolbox: Toolbox, checker: Checker, habitat: dict | None = None) -> AsyncIterator[bytes]:
+              toolbox: Toolbox, checker: Checker, habitat: dict | None = None, scenario: dict | None = None,
+              audience: str = "expert", context: dict | None = None) -> AsyncIterator[bytes]:
     """The same question on the same data and model replays its earlier checked answer instead of asking the model again."""
-    key = (re.sub(r"\W+", " ", question.lower()).strip(), tuple(previous), habitat and habitat["key"], data_version(settings))
+    key = (re.sub(r"\W+", " ", question.lower()).strip(), tuple(previous), habitat and habitat["key"], json.dumps(scenario, sort_keys=True), audience, json.dumps(context, sort_keys=True), data_version(settings))
     if key in _cache:
         _cache.move_to_end(key)
         for ev in _cache[key]:
@@ -231,7 +261,7 @@ async def run(*, question: str, previous: list[str], http: httpx.AsyncClient, se
             yield sse(ev)
         return
     events: list[dict] = []
-    async for chunk in _run(question=question, previous=previous, http=http, settings=settings, library=library, toolbox=toolbox, checker=checker, habitat=habitat):
+    async for chunk in _run(question=question, previous=previous, http=http, settings=settings, library=library, toolbox=toolbox, checker=checker, habitat=habitat, scenario=scenario, audience=audience, context=context):
         ev = json.loads(chunk[6:])
         if ev["type"] != "draft":
             events.append(ev)
@@ -244,7 +274,8 @@ async def run(*, question: str, previous: list[str], http: httpx.AsyncClient, se
 
 
 async def _run(*, question: str, previous: list[str], http: httpx.AsyncClient, settings: Settings, library: Library,
-               toolbox: Toolbox, checker: Checker, habitat: dict | None = None) -> AsyncIterator[bytes]:
+               toolbox: Toolbox, checker: Checker, habitat: dict | None = None, scenario: dict | None = None,
+               audience: str = "expert", context: dict | None = None) -> AsyncIterator[bytes]:
     started = time.time()
     now = datetime.now(UTC)
     run_id = f"{now:%Y%m%d-%H%M%S}-{hashlib.sha1(question.encode()).hexdigest()[:6]}"
@@ -273,7 +304,9 @@ async def _run(*, question: str, previous: list[str], http: httpx.AsyncClient, s
                      f"Model {settings.si_model} isn't installed (ollama pull {settings.si_model}): showing the evidence only.")
 
     # 2. the Investigator chooses tools (SI), on top of code's own calls
-    special = answers.build(frame, library.catalog, habitat)            # code's own answers: safety stance, coverage, habitat reference
+    special = answers.build(frame, library.catalog, habitat, scenario, context, audience)
+    if not special.analysis and not special.only and not scenario and (term := concepts.read_term(frame.question, frame.psi_ids)):
+        special = await concept_special(http, settings, library, term, si_ok, frame.question)            # code's own answers: safety stance, coverage, habitat reference
     calls = baseline_calls(frame, toolbox)
     call_labels = [{"label": c.label(), "source": "code"} for c in calls]
     if si_ok and (special.direct or not needs_investigator(frame)):
@@ -319,6 +352,8 @@ async def _run(*, question: str, previous: list[str], http: httpx.AsyncClient, s
     # 4–5. the Analyst writes (SI), Nimbus checks every sentence (code)
     verification, mode, raw = None, "sources_only", None
     direct = special.direct or (direct_answer(frame, evidence) if evidence else None)
+    if direct and audience == "guided" and not special.analysis:
+        direct = [{**d, "text": answers.plain_count(d["text"])} for d in direct]
     if direct:                                             # a count or a list: code writes it from the data, no SI, nothing to check
         mode = "computed"
         notes.append("Answered directly from the PSI data by code. No SI was needed.")
@@ -353,6 +388,14 @@ async def _run(*, question: str, previous: list[str], http: httpx.AsyncClient, s
                           library=library, mode=mode, model=settings.si_model if si_ok else None, notes=notes, run_id=run_id, direct=direct)
     report.update(structured(ran, toolbox, library))
     report["links"] = answers.links(frame, special)
+    report["analysis"] = special.analysis
+    report["scenario"] = special.slots
+    if audience == "guided":
+        if special.suggestions:
+            report["followups"] = [{"label": t, "question": t} for t in special.suggestions]
+        if report["mode"] == "no_answer":
+            report["answer"] = [{"text": GUIDED_NO_ANSWER, "cites": [], "note": True}]
+            report["followups"] = [{"label": t, "question": t} for t in GUIDED_STARTERS]
     report["facts"] = None if report.get("table") else answers.facts(frame, library.catalog)
     report["habitat"] = special.habitat if special.habitat and any(i.id.startswith("C:habitat:") for i in evidence) else None
     record.update({"raw_answer": raw, "verification": None if verification is None else {

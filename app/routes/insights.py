@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import re
+from collections import Counter
 from functools import lru_cache
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
@@ -16,7 +17,9 @@ from app.analysis.habitats import HABITATS
 from app.catalog import get_catalog
 from app.config import Settings, get_settings
 from app.deps import get_http, limiter
+from app.analysis import queries
 from app.insights import micro_flame, pipeline
+from app.psi.units import convert
 from app.insights.frame import reader_for
 from app.insights.library import KIND_LABEL, Library, get_library
 from app.insights.tools import Toolbox
@@ -47,10 +50,50 @@ class Turn(BaseModel):
     psi_ids: list[Annotated[str, Field(pattern=PSI_ID)]] = Field(default_factory=list, max_length=4)
 
 
+class ScenarioInput(BaseModel):
+    """The Scenario builder: what the user chose in the form. Every field is checked against fixed lists and numeric limits."""
+    model_config = ConfigDict(extra="forbid")
+    goal: Literal["nearest", "outcomes", "threshold", "compare", "profile"]
+    target: Literal["burn", "extinguish", "ignite", "reignite"] | None = None
+    fuel: str | None = Field(default=None, max_length=40)
+    diluent: Literal["helium", "carbon dioxide", "nitrogen only"] | None = None
+    o2_percent: float | None = Field(default=None, gt=0, le=100)
+    pressure: float | None = Field(default=None, gt=0, le=1000)
+    pressure_unit: Literal["psi", "atm", "kpa"] = "psi"
+    variable: Literal["o2", "p"] | None = None
+
+    def structured(self) -> dict:
+        if self.fuel and self.fuel not in queries.FUEL_ALIASES:
+            raise HTTPException(422, "unknown fuel or material")
+        return {"goal": self.goal, "target": self.target, "fuel": self.fuel, "diluent": self.diluent, "variable": self.variable,
+                "o2": None if self.o2_percent is None else self.o2_percent / 100,
+                "p_psi": None if self.pressure is None else convert(self.pressure, self.pressure_unit, "pressure_psi")}
+
+
+class ScenarioContext(BaseModel):
+    """The conditions of the last answer, sent back so a follow-up can build on them (guided mode). Every field is checked."""
+    model_config = ConfigDict(extra="forbid")
+    goal: Literal["nearest", "outcomes", "threshold", "compare", "profile"]
+    target: Literal["burn", "extinguish", "ignite", "reignite"] | None = None
+    variable: Literal["o2", "p"] | None = None
+    fuel: str | None = Field(default=None, max_length=40)
+    diluent: Literal["helium", "carbon dioxide", "nitrogen only"] | None = None
+    o2: float | None = Field(default=None, gt=0, le=1)
+    p_psi: float | None = Field(default=None, gt=0, le=1000)
+
+    def clean(self) -> dict:
+        if self.fuel and self.fuel not in queries.FUEL_ALIASES:
+            raise HTTPException(422, "unknown fuel or material")
+        return self.model_dump()
+
+
 class AskRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     question: str = Field(min_length=2, max_length=500)
     history: list[Turn] = Field(default_factory=list, max_length=3)
+    scenario: ScenarioInput | None = None
+    audience: Literal["guided", "expert"] = "expert"          # guided = plain wording and follow-ups that build on the last answer; expert = unchanged
+    context: ScenarioContext | None = None
     habitat: str | None = Field(default=None, max_length=12)       # the reference habitat chosen on the page; used only for counts from PSI tests
 
 
@@ -68,7 +111,9 @@ async def ask(request: Request, body: AskRequest, eng: Engine, settings: Annotat
         raise HTTPException(404, f"unknown habitat {body.habitat!r}")
     habitat = {"key": body.habitat, **HABITATS[body.habitat]} if body.habitat else None
     stream = pipeline.run(question=question, previous=previous, http=http, settings=settings, library=library,
-                          toolbox=toolbox, checker=checker, habitat=habitat)
+                          toolbox=toolbox, checker=checker, habitat=habitat,
+                          scenario=body.scenario.structured() if body.scenario else None, audience=body.audience,
+                          context=body.context.clean() if body.context else None)
     return StreamingResponse(stream, media_type="text/event-stream",
                              headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
@@ -107,6 +152,21 @@ async def suggestions(request: Request, eng: Engine) -> dict:
     library, _, _ = eng
     names = {i["name"] for i in library.catalog.ordered()}
     return {"starters": [q for q, needs in STARTERS if needs is None or needs in names]}
+
+
+@router.get("/scenario-options")
+@limiter.limit(lambda: get_settings().api_rate_limit)
+async def scenario_options(request: Request, eng: Engine) -> dict:
+    """What the Scenario builder can offer: only fuels, gases and ranges that exist in the mapped tests, with their test counts."""
+    library, _, _ = eng
+    rows = queries.all_rows(library.catalog)
+    fuels = Counter(r["fuel_key"] for r in rows if r["fuel_key"])
+    diluents = Counter(r["diluent"] for r in rows)
+    with_outcome = [r for r in rows if r["outcome"]]
+    return {"fuels": [{"name": k, "tests": n} for k, n in fuels.most_common()], "diluents": [{"name": k, "tests": n} for k, n in diluents.most_common()],
+            "tests": len(rows), "with_outcome": len(with_outcome),
+            "o2_percent": [round(min(r["o2"] for r in rows) * 100, 1), round(max(r["o2"] for r in rows) * 100, 1)],
+            "pressure_psi": [round(min(r["p_psi"] for r in rows), 1), round(max(r["p_psi"] for r in rows), 1)]}
 
 
 @router.get("/library")
