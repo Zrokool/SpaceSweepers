@@ -9,6 +9,9 @@ test table must not read as "NASA didn't test this".
 
 from __future__ import annotations
 
+import random
+from collections import Counter
+
 from app.analysis import pillars as pillar_mod
 from app.analysis.habitats import in_box
 
@@ -70,6 +73,9 @@ def fuel(attributes: dict) -> dict:
     if attributes["solid_emulation"] and score < SOLID_EMULATION_SCORE:
         score = SOLID_EMULATION_SCORE
         why += " Emulates burning solids with a gas burner."
+    if not classes and not attributes["solid_emulation"]:
+        # No fuel word is a gap in what we know, not a finding that the fuel is harmless.
+        return {"score": None, "why": why + " The fuel is unknown, not zero."}
     return {"score": score, "why": why + " Solids (fabrics, plastics) are the main habitat fire load."}
 
 
@@ -83,6 +89,7 @@ def pillar(inv: dict, wanted: str | None) -> dict:
 
 
 ROWS_FULL, PUBLICATIONS_FULL, DOCUMENTS_FULL = 100, 10, 5     # amounts that count as a full score for each kind of data
+FIGURES_FULL, FIGURE_CREDIT = 5, 0.2     # stored Analyzed Data figures add up to this much extra, so investigations without figures keep their score
 
 
 def data_richness(inv: dict) -> dict:
@@ -95,24 +102,62 @@ def data_richness(inv: dict) -> dict:
                                       "when the snapshot was taken."}
     rows, pubs = inv["table_rows"], len(inv["publications"])
     docs = sum(1 for d in inv["documents"] if d["status"] == "read")
-    score = (0.4 * min(1.0, rows / ROWS_FULL) + 0.3 * min(1.0, pubs / PUBLICATIONS_FULL) + 0.3 * min(1.0, docs / DOCUMENTS_FULL))
-    return {"score": score, "rows": rows, "publications": pubs, "documents": docs,
+    figures = len(inv.get("analyzed") or [])
+    base = 0.4 * min(1.0, rows / ROWS_FULL) + 0.3 * min(1.0, pubs / PUBLICATIONS_FULL) + 0.3 * min(1.0, docs / DOCUMENTS_FULL)
+    score = min(1.0, base + FIGURE_CREDIT * min(1.0, figures / FIGURES_FULL))
+    return {"score": score, "rows": rows, "publications": pubs, "documents": docs, "figures": figures,
             "why": f"{rows} test-table rows, {pubs} publications and {docs} documents read "
-                   f"(full marks at {ROWS_FULL} rows, {PUBLICATIONS_FULL} publications, {DOCUMENTS_FULL} documents)."}
+                   f"(full marks at {ROWS_FULL} rows, {PUBLICATIONS_FULL} publications, {DOCUMENTS_FULL} documents)."
+                   + (f" {figures} stored PSI Analyzed Data figure{'s' if figures != 1 else ''} add up to {int(FIGURE_CREDIT * 100)}% extra "
+                      f"(full at {FIGURES_FULL}); figures are data we hold, never condition evidence." if figures else "")}
 
 
 def score(inv: dict, tests: list[dict], habitat: dict, wanted_pillar: str | None) -> dict:
     components = {"proximity": proximity(tests, habitat, inv.get("tables_status")), "fuel": fuel(inv["attributes"]),
                   "pillar": pillar(inv, wanted_pillar), "data": data_richness(inv)}
     return {"components": components,
+            "unknown": [k for k, c in components.items() if c["score"] is None],
             "factor": 1.0 if inv["is_combustion"] else OFF_TOPIC_FACTOR,
             "factor_reason": None if inv["is_combustion"] else
             f"Not a combustion investigation ({inv['research_area']}). It is in the PSI search results "
             f"because it {inv['match_reason']}."}
 
 
-def total(result: dict, weights: dict = DEFAULT_WEIGHTS) -> float:
-    """0..100. Unknown components count as zero and are reported as unknown."""
+def _blend(result: dict, weights: dict, fill: float) -> float:
+    """0..100 over the parts named in `weights`; a part that can't be computed counts as `fill`."""
     weight_sum = sum(weights.values()) or 1
-    raw = sum(weights[k] * (c["score"] or 0.0) for k, c in result["components"].items()) / weight_sum
-    return round(100 * raw * result["factor"], 1)
+    raw = sum(w * (result["components"][k]["score"] if result["components"][k]["score"] is not None else fill)
+              for k, w in weights.items()) / weight_sum
+    return 100 * raw * result["factor"]
+
+
+def total(result: dict, weights: dict = DEFAULT_WEIGHTS) -> float:
+    """0..100, the proven fit: what the data shows. A part that can't be computed counts as zero and is reported as unknown."""
+    return round(_blend(result, weights, 0.0), 1)
+
+
+def ceiling(result: dict, weights: dict = DEFAULT_WEIGHTS) -> float:
+    """0..100 if every unknown part turned out perfect. Never used for ranking; it shows how much is still open."""
+    return round(_blend(result, weights, 1.0), 1)
+
+
+def stability(results: dict[str, dict], parts: tuple[str, ...] = tuple(DEFAULT_WEIGHTS), runs: int = 400, seed: int = 7, top: int = 5) -> dict[str, float]:
+    """Share of random weightings (each weight between 5 and 50) in which an investigation lands in the top `top`.
+
+    Shows how much of the ranking depends on our weights. Deterministic: the same seed gives the same answer.
+    """
+    rng, counts = random.Random(seed), Counter()
+    for _ in range(runs):
+        w = {k: rng.uniform(5, 50) for k in parts}
+        ranked = sorted(results, key=lambda i: (-_blend(results[i], w, 0.0), i))
+        counts.update(ranked[:top])
+    return {i: round(n / runs, 2) for i, n in counts.most_common() if n / runs >= 0.05}
+
+
+def method() -> dict:
+    """The scoring rules as constants, so the page that explains them cannot drift from the code."""
+    return {"weights": DEFAULT_WEIGHTS, "fuel_scores": FUEL_SCORE, "solid_emulation_score": SOLID_EMULATION_SCORE,
+            "proximity_full": PROXIMITY_FULL, "near": {"o2": NEAR_O2, "pressure_psi": NEAR_PSI},
+            "off_topic_factor": OFF_TOPIC_FACTOR,
+            "data_full": {"rows": ROWS_FULL, "publications": PUBLICATIONS_FULL, "documents": DOCUMENTS_FULL, "figures": FIGURES_FULL},
+            "figure_credit": FIGURE_CREDIT}
