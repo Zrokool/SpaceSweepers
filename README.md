@@ -79,12 +79,12 @@ docker run --rm -p 8000:8000 -e 'SS_ALLOWED_HOSTS=["localhost","127.0.0.1","your
 ### GitHub Pages (static demo, `demo` branch)
 The static demo lives on the **`demo` branch**. `main` is the full app that runs locally with the SI model and contains none of this. Merge `main` into `demo` to refresh the demo after a change.
 
-GitHub Pages serves files only, so it can't run the Python server or the local SI model. `.github/workflows/pages.yml` therefore runs the app once, in-process, and writes every answer of its API to a file (`python -m app.static_export --out _site`), then publishes the result. The dashboard views (Overview, Fire Safety, Rank, Correlation, Envelope, Flame Sweeper, References and the investigation panels) are the same data and the same calculations as the live app, for each habitat, pillar and Flame Sweeper selection the page offers. Two things differ:
+GitHub Pages serves files only, so it can't run the Python server or the local SI model. The exporter therefore runs the app once, in-process, and writes every answer of its API to a file. `python -m app.static_export --publish` writes `index.html`, `api/` and `.nojekyll` at the repository root, next to `static/` (which the page uses as is). Pages set to **Deploy from a branch → `demo` → `/ (root)`** serves them; no workflow or environment setting is needed. A test fails if those files are out of date, so run `--publish` and commit after any change to the data or the dashboard. The dashboard views (Overview, Fire Safety, Rank, Correlation, Envelope, Flame Sweeper, References and the investigation panels) are the same data and the same calculations as the live app, for each habitat, pillar and Flame Sweeper selection the page offers. Two things differ:
 
 - **SI Insights** (the chat) needs the model, so the static page shows a notice with the commands to run it locally.
 - **Flame Sweeper's "Explain these patterns (SI)"** is left off the demo, with a note. The patterns, skill check and suggestions are computed by code and are the same. Nimbus checks a sentence's words and numbers, not its meaning, and in a trial of pre-computed explanations (`python -m app.static_export --explain`, kept in `data/static_explanations.json` with the model, spec hash and time) some kept sentences read wrongly against the computed patterns, so they are not published. `--with-explanations` includes them if you want to.
 
-One-time setup: **Settings → Pages → Build and deployment → Source: GitHub Actions**. After that every push to `demo` redeploys. To preview locally: `python -m app.static_export --out _site && python -m http.server -d _site 8080`.
+To preview locally: `python -m app.static_export --out _site && python -m http.server -d _site 8080`.
 
 ---
 

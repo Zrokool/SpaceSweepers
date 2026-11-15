@@ -103,3 +103,18 @@ def test_the_demo_publishes_no_si_text_because_nimbus_cannot_check_meaning(site,
         opted_in = tmp_path / "with"
         sx.build(opted_in, with_explanations=True)
         assert len(list((opted_in / "api").rglob("explain*"))) == len(stored["explanations"])
+
+
+def test_the_files_the_demo_branch_serves_are_a_fresh_build(site):
+    """GitHub Pages serves index.html, api/ and .nojekyll from the branch root. They must be what the exporter writes today."""
+    assert (ROOT / ".nojekyll").exists(), "run: python -m app.static_export --publish"
+    assert (ROOT / "index.html").read_bytes() == (site / "index.html").read_bytes(), "index.html is stale: run python -m app.static_export --publish"
+    built = {p.relative_to(site / "api") for p in (site / "api").rglob("*") if p.is_file()}
+    served = {p.relative_to(ROOT / "api") for p in (ROOT / "api").rglob("*") if p.is_file()}
+    assert built == served, "api/ is stale: run python -m app.static_export --publish"
+    assert [p for p in built if (site / "api" / p).read_bytes() != (ROOT / "api" / p).read_bytes()] == []
+
+
+def test_the_static_si_status_says_the_demo_has_no_model(site):
+    status = json.loads((site / "api" / "si" / "status.json").read_text(encoding="utf-8"))
+    assert status["available"] is False and "static demo" in status["message"] and "Ollama" not in status["message"]

@@ -1,6 +1,7 @@
 """Export SpaceSweepers as a static site (for GitHub Pages): every answer the API gives is written to a file.
 
-    python -m app.static_export --out _site              # build the site
+    python -m app.static_export --out _site              # build the site into a folder (to preview)
+    python -m app.static_export --publish                # build it and write index.html, api/ and .nojekyll at the repo root
     python -m app.static_export --explain                # (needs Ollama) pre-compute the Flame Sweeper explanations
 
 GitHub Pages has no server, so the Python app and the local SI model cannot run there. What can be pre-computed is: the
@@ -128,8 +129,13 @@ def build(out: Path, cache_dir: Path | None = None, with_explanations: bool = Fa
 
     habitats = list(HABITATS)
     meta = fetch("/api/meta").json()
-    for path in ("/api/sources", "/api/quality", "/api/data-complexity", "/api/graph", "/api/si/status"):
+    for path in ("/api/sources", "/api/quality", "/api/data-complexity", "/api/graph"):
         fetch(path)
+    # The live app reports whether Ollama is running. A static page has no model at all, so it says that instead.
+    from app.config import Settings
+    _write(out, static_file("/api/si/status"), json.dumps({"available": False, "model": Settings(_env_file=None).si_model, "message":
+           "This is the static demo, which has no SI model. The full app runs it locally."}, ensure_ascii=False, separators=(",", ":")))
+    count += 1
     for habitat in habitats:
         for pillar in PILLARS:
             fetch("/api/investigations", {"habitat": habitat, "pillar": pillar})
@@ -195,9 +201,28 @@ async def precompute_explanations() -> dict:
             "explanations": results}
 
 
+def publish(root: Path = ROOT) -> dict:
+    """Build the site and write its generated files at the repository root, next to static/ (which the page already uses as is).
+
+    GitHub Pages set to "Deploy from a branch" serves the branch root, so committing index.html, api/ and .nojekyll there is all the
+    demo needs: no workflow and no environment settings.
+    """
+    import tempfile
+    with tempfile.TemporaryDirectory(prefix="ss-publish-") as tmp:
+        site = Path(tmp) / "site"
+        summary = build(site)
+        if (root / "api").exists():
+            shutil.rmtree(root / "api")
+        shutil.copytree(site / "api", root / "api")
+        for name in ("index.html", ".nojekyll"):
+            shutil.copyfile(site / name, root / name)
+    return summary
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--out", type=Path, default=ROOT / "_site", help="where to write the site (default _site/)")
+    parser.add_argument("--publish", action="store_true", help="write index.html, api/ and .nojekyll at the repository root (what the demo branch serves)")
     parser.add_argument("--with-explanations", action="store_true", help="also publish the pre-computed Flame Sweeper explanations (off by default)")
     parser.add_argument("--explain", action="store_true", help="pre-compute the Flame Sweeper explanations with the local model (needs Ollama)")
     args = parser.parse_args(argv)
@@ -205,6 +230,10 @@ def main(argv: list[str] | None = None) -> int:
         data = asyncio.run(precompute_explanations())
         EXPLANATIONS.write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
         print(f"saved {EXPLANATIONS} ({len(data['explanations'])} explanations)")
+        return 0
+    if args.publish:
+        summary = publish()
+        print(f"published at the repository root: {summary['files']} files")
         return 0
     summary = build(args.out, with_explanations=args.with_explanations)
     print(f"static site written to {args.out}: {summary['files']} files, {summary['explanations']} pre-computed SI explanations")
