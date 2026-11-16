@@ -34,7 +34,7 @@ def run_node(tmp_path: Path, script: str, payload) -> list:
 
 def ui_requests(catalog) -> list[tuple[str, dict]]:
     """Every request the pages can make in the static copy."""
-    reqs = [(p, {}) for p in ("/api/meta", "/api/sources", "/api/quality", "/api/data-complexity", "/api/graph", "/api/si/status", "/api/compare-profiles")]
+    reqs = [(p, {}) for p in ("/api/meta", "/api/sources", "/api/quality", "/api/data-complexity", "/api/graph", "/api/si/status", "/api/compare-profiles", "/api/insights/demo")]
     reqs.append(("/api/investigations", {}))                                                     # compare.js and earth.js ask with no query
     for h in HABITATS:
         for pillar in (None, "prevention", "detection", "suppression"):
@@ -118,3 +118,55 @@ def test_the_files_the_demo_branch_serves_are_a_fresh_build(site):
 def test_the_static_si_status_says_the_demo_has_no_model(site):
     status = json.loads((site / "api" / "si" / "status.json").read_text(encoding="utf-8"))
     assert status["available"] is False and "static demo" in status["message"] and "Ollama" not in status["message"]
+
+
+# ---------------------------------------------------------------- SI Insights on the demo: pre-generated answers, both modes
+def demo_answers(site):
+    return json.loads((site / "api" / "insights" / "demo.json").read_text(encoding="utf-8"))
+
+
+def test_every_demo_use_case_has_a_code_written_answer_in_guided_and_in_expert(site):
+    data = demo_answers(site)
+    assert len(data["cases"]) == len(sx.INSIGHTS_CASES) >= 12
+    for mode in ("guided", "expert"):
+        for case in data["cases"]:
+            entry = data["answers"][mode][sx.normalise_question(case["question"])]
+            r = entry["report"]
+            assert r["mode"] == "computed" and r["model"] is None and r["answer"], (mode, case["question"])   # no SI text anywhere
+            assert not any(n.startswith("SI offline") for n in r["notes"])                                     # nothing that contradicts the demo banner
+            assert r["run_id"].startswith("demo-") and all(s["cites"] and max(s["cites"]) <= len(r["sources"]) for s in r["answer"] if not s.get("note"))
+
+
+def test_every_follow_up_chip_the_demo_offers_has_an_answer_and_the_safety_question_is_refused(site):
+    data = demo_answers(site)
+    for mode in ("guided", "expert"):
+        followups = [(k, v) for k, v in data["answers"][mode].items() if "||" in k]
+        assert followups and all(v["report"]["mode"] == "computed" for _, v in followups)
+    refusal = data["answers"]["guided"][sx.normalise_question("Is there a fire in the cabin?")]["report"]["answer"][0]["text"]
+    assert "cannot tell whether a fire is happening" in refusal and "no emergency instructions" in refusal
+
+
+def test_the_demo_answers_are_the_same_every_time_they_are_generated():
+    import asyncio
+    first, second = (json.dumps(asyncio.run(sx.insights_demo()), sort_keys=True) for _ in range(2))
+    assert first == second
+
+
+def test_the_page_and_the_exporter_look_an_answer_up_by_the_same_key(tmp_path):
+    if not NODE:
+        pytest.skip("node is not installed")
+    module = tmp_path / "staticmap.mjs"
+    module.write_text((ROOT / "static" / "js" / "staticmap.js").read_text(encoding="utf-8"), encoding="utf-8")
+    samples = ["What is a cool flame?", "  Is there   a FIRE in the cabin ? ", "Lowest oxygen where it burned...", "At 2 atm?! ", "plain"]
+    code = f'import {{ normQuestion }} from "{module.as_uri()}"; console.log(JSON.stringify(JSON.parse(process.argv[1]).map(normQuestion)));'
+    done = subprocess.run([NODE, "--input-type=module", "-e", code, json.dumps(samples)], capture_output=True, text=True, timeout=60)
+    assert done.returncode == 0, done.stderr
+    assert json.loads(done.stdout) == [sx.normalise_question(s) for s in samples]
+
+
+def test_the_demo_page_has_the_banner_and_puts_the_run_it_yourself_steps_after_the_chat():
+    source = (ROOT / "static" / "js" / "views" / "insights.js").read_text(encoding="utf-8")
+    assert "Demo Mode: SI Not Enabled" in source and "staticNotice" not in source
+    render = source[source.index("export async function render"):]
+    assert render.index("ui.insights = el(") < render.index("isStatic && runItYourself()")           # the steps are the last thing on the page
+    assert "/api/insights/ask" in source                                                              # the live app still asks the server

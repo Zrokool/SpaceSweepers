@@ -46,6 +46,31 @@ FUEL_CHOICES = [None, "heptane", "methanol"]                                   #
 DILUENT_CHOICES = [None, "nitrogen only", "helium", "carbon dioxide"]
 EXPLANATIONS = ROOT / "data" / "static_explanations.json"
 
+# The SI Insights use cases shown on the static demo: (short label, question). The demo has no model, so each is answered here, once,
+# by the full app's own pipeline with the SI switched off. Every answer is written by code from the PSI tests, in Guided and in Expert.
+INSIGHTS_CASES = [
+    ("Lowest oxygen where methanol burned", "What is the lowest oxygen concentration at which methanol droplets burned in FLEX?"),
+    ("Lowest oxygen where heptane burned", "What is the lowest oxygen level at which heptane droplets stayed burning in FLEX?"),
+    ("When cool flames reignite", "At what pressure did cool flame reignition first appear in CFI?"),
+    ("CO2 vs helium as a suppressant", "How does carbon dioxide compare with helium as a suppressant in FLEX?"),
+    ("Lunar habitat: 34% oxygen, 8.2 psi", "We are designing a lunar habitat at 34% oxygen and 8.2 psi. Which tested conditions are closest and what happened to the fuels there?"),
+    ("Cabin: 30% oxygen, 10.2 psi", "Our cabin will run at 30% oxygen and 10.2 psi. What has NASA tested near that?"),
+    ("Materials that burned in BASS", "Which materials burned in BASS at oxygen above 21%?"),
+    ("Flame spread over PMMA", "Is there data on flame spread over PMMA at elevated oxygen?"),
+    ("Oxygen and methanol droplets", "How does oxygen affect whether methanol droplets burn?"),
+    ("Propane flames at 21% oxygen", "What happened to propane flames at 21% oxygen?"),
+    ("Ethane ignition in CFI-G", "Did ethane flames ignite below 25% oxygen in CFI-G?"),
+    ("What is a cool flame?", "What is a cool flame and why does it matter for spacecraft fire safety?"),
+    ("What is extinction?", "What is extinction in combustion?"),
+    ("Which investigations were simulations?", "Which investigations were simulations?"),
+    ("Is there a fire in the cabin?", "Is there a fire in the cabin?"),
+]
+
+
+def normalise_question(q: str) -> str:
+    """The key the demo page looks an answer up by. Mirrors normQuestion in static/js/staticmap.js."""
+    return re.sub(r"[?.!]+$", "", " ".join(q.lower().split())).strip()
+
 
 def _slug(v) -> str:
     return re.sub(r"^-+|-+$", "", re.sub(r"[^a-z0-9]+", "-", str(v).strip().lower()))
@@ -157,6 +182,8 @@ def build(out: Path, cache_dir: Path | None = None, with_explanations: bool = Fa
         "names": {i: {"id": i, "name": catalog.investigations[i]["name"], "title": catalog.investigations[i]["title"]} for i in ids},
         "lineage": catalog.lineage}, ensure_ascii=False, separators=(",", ":")))
     count += 1
+    _write(out, static_file("/api/insights/demo"), json.dumps(asyncio.run(insights_demo()), ensure_ascii=False, separators=(",", ":")))
+    count += 1
     explained = 0
     if with_explanations and EXPLANATIONS.exists():
         stored = json.loads(EXPLANATIONS.read_text(encoding="utf-8"))
@@ -174,6 +201,63 @@ def build(out: Path, cache_dir: Path | None = None, with_explanations: bool = Fa
     _write(out, "index.html", html)
     _write(out, ".nojekyll", "")
     return {"files": count + explained + 2, "explanations": explained, "snapshot": meta.get("snapshot", {}).get("fetched_at") if isinstance(meta, dict) else None}
+
+
+async def insights_demo() -> dict:
+    """Answer every demo use case, in both modes, with the full app's own pipeline and the SI model switched off.
+
+    A follow-up chip is answered too, one level deep, when code can answer it. Volatile fields (the run id and the "SI offline" note) are
+    normalised, so the same data always gives the same file.
+    """
+    import hashlib
+    import tempfile
+
+    from app.config import Settings
+    from app.insights import pipeline
+    from app.routes.insights import get_engine
+
+    settings = Settings(_env_file=None, cache_dir=Path(tempfile.mkdtemp(prefix="ss-demo-")), run_origin="development", ollama_url="http://127.0.0.1:9")
+    library, toolbox, checker = get_engine(settings.data_dir)
+
+    def offline(request: httpx.Request) -> httpx.Response:
+        raise httpx.ConnectError("the demo has no SI model", request=request)
+
+    async def ask(http, question, audience, previous=None, context=None):
+        pipeline._cache.clear()
+        chips = report = None
+        async for raw in pipeline.run(question=question, previous=previous or [], http=http, settings=settings, library=library, toolbox=toolbox,
+                                      checker=checker, audience=audience, context=context):
+            event = json.loads(raw[6:])
+            if event["type"] == "frame":
+                chips = event["chips"]
+            elif event["type"] == "report":
+                report = event["report"]
+        return chips, report
+
+    def entry(chips, report, key):
+        report = {k: v for k, v in report.items() if k != "cached"}
+        report["run_id"] = "demo-" + hashlib.sha256(key.encode()).hexdigest()[:8]
+        report["notes"] = [n for n in report["notes"] if not n.startswith("SI offline")]
+        return {"chips": chips, "report": report}
+
+    answers: dict[str, dict] = {"guided": {}, "expert": {}}
+    async with httpx.AsyncClient(transport=httpx.MockTransport(offline)) as http:
+        for audience in answers:
+            for _, question in INSIGHTS_CASES:
+                chips, report = await ask(http, question, audience)
+                if report["mode"] != "computed":
+                    raise SystemExit(f"demo use case {question!r} was not answered by code in {audience} mode ({report['mode']})")
+                key = normalise_question(question)
+                answers[audience][key] = entry(chips, report, f"{audience}|{key}")
+                parent = [c["psi"] for c in (chips or []) if c.get("kind") == "about"]
+                for follow in report["followups"]:
+                    f_chips, f_report = await ask(http, follow["question"], audience, parent, report.get("scenario") if audience == "guided" else None)
+                    if f_report["mode"] == "computed":
+                        fkey = f"{key}||{normalise_question(follow['question'])}"
+                        answers[audience][fkey] = entry(f_chips, f_report, f"{audience}|{fkey}")
+    return {"note": "Generated by the full app's own pipeline with the SI model switched off. Every answer is written by code from the PSI tests.",
+            "snapshot_fetched_at": library.catalog.manifest.get("fetched_at"),
+            "cases": [{"label": label, "question": question} for label, question in INSIGHTS_CASES], "answers": answers}
 
 
 async def precompute_explanations() -> dict:

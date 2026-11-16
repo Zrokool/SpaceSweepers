@@ -14,6 +14,9 @@ const DEFAULTS = {
   "/api/sweeper/explain": { family: "droplet_end_state" },
 };
 
+// The key the demo's SI Insights page looks an answer up by. Mirrors normalise_question in app/static_export.py.
+export const normQuestion = (q) => String(q).toLowerCase().replace(/\s+/g, " ").trim().replace(/[?.!]+$/, "").trim();
+
 const slug = (v) => String(v).trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 
 export function staticFile(path, params = {}) {

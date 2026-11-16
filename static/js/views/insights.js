@@ -1,6 +1,7 @@
 // SI Insights: ask questions about all the PSI data. SI writes, Nimbus checks every sentence, sources are shown.
 // All text is set with textContent (through el()), so PSI text and model text can never become HTML.
 import { el, api, fmt, safeHref, METHOD_LABEL, isStatic, README_RUN_URL } from "../ui.js";
+import { normQuestion } from "../staticmap.js";
 import { openDetail, navigate } from "../app.js";
 
 const STAGES = [
@@ -21,7 +22,7 @@ const chat = { mode: storedMode(), turns: [], active: null, selected: null, runn
 
 function save() {
   try {
-    const done = chat.turns.filter((t) => t.report).map((t) => ({ id: t.id, q: t.q, chips: t.chips, report: t.report }));
+    const done = chat.turns.filter((t) => t.report).map((t) => ({ id: t.id, q: t.q, parentQ: t.parentQ || null, chips: t.chips, report: t.report }));
     sessionStorage.setItem(STORE, JSON.stringify(done.slice(-20)));
   } catch { /* storage unavailable: the chat just isn't kept across reloads */ }
 }
@@ -162,9 +163,10 @@ function reportBlock(turn) {
   if (links) kids.push(links);
   kids.push(el("button", { class: "btn-ghost show-sources", type: "button", text: `Sources and verification (${r.sources.length}) →`,
     onclick: () => { chat.active = turn.id; chat.selected = null; renderSources(); renderAll(false); document.querySelector(".chat-sources")?.scrollIntoView({ block: "start", behavior: "smooth" }); } }));
-  if (r.followups.length) {
+  const next = isStatic ? r.followups.filter((f) => demoFor(f.question, turn.q)) : r.followups;
+  if (next.length) {
     kids.push(el("div", { class: "chips followups" }, el("span", { class: "muted", text: "Try next:" }),
-      ...r.followups.map((f) => el("button", { class: "chip", type: "button", text: f.label, onclick: () => send(f.question) }))));
+      ...next.map((f) => el("button", { class: "chip", type: "button", text: f.label, onclick: () => send(f.question, null, turn) }))));
   }
   return kids;
 }
@@ -189,7 +191,8 @@ function renderAll(scroll = true) {
   if (!ui.log) return;
   ui.log.replaceChildren(...(chat.turns.length ? chat.turns.flatMap(turnView) : [introView()]));
   if (scroll) ui.log.scrollTop = ui.log.scrollHeight;
-  ui.send.disabled = !!chat.running;
+  ui.send.disabled = isStatic || !!chat.running;
+  if (ui.cases && !chat.turns.length) ui.cases.open = true;
   ui.stop.hidden = !chat.running;
   ui.exportBtn.disabled = !chat.turns.some((t) => t.report);
 }
@@ -218,7 +221,7 @@ function scenarioForm() {
   f.unit = el("select", { "aria-label": "Pressure unit" }, ...["psi", "atm", "kpa"].map((u) => el("option", { value: u, text: u })));
   f.want = el("select", { "aria-label": "What do you want to know" }, ...WANTS.map((w) => el("option", { value: w.key, text: w.label })));
   f.note = el("p", { class: "tiny", role: "status" });
-  api("/api/insights/scenario-options").then((o) => {
+  if (!isStatic) api("/api/insights/scenario-options").then((o) => {          // the demo has no scenario form, so nothing to fill
     f.fuel.append(...o.fuels.map((x) => el("option", { value: x.name, text: `${x.name} (${x.tests} tests)` })));
     f.gas.append(...o.diluents.map((x) => el("option", { value: x.name, text: `${x.name} (${x.tests} tests)` })));
     f.o2.placeholder = `${o.o2_percent[0]} to ${o.o2_percent[1]}`; f.p.placeholder = `${o.pressure_psi[0]} to ${o.pressure_psi[1]} psi`;
@@ -239,6 +242,7 @@ function scenarioForm() {
 }
 
 function introView() {
+  if (isStatic) return demoIntro();
   if (chat.mode === "guided") return guidedIntro();
   return el("div", { class: "intro" }, el("h2", { text: "Ask the PSI combustion research" }),
     el("p", { class: "muted", text: "Short answers with PSI's own words and sources. Every sentence is checked by code against the data." }),
@@ -259,7 +263,7 @@ function renderStatus() {
 function sourceCard(s, turn) {
   const card = el("div", { class: `src${chat.selected === s.n && chat.active === turn?.id ? " selected" : ""}`, id: `src-${s.n}` });
   const detail = el("div", { class: "src-detail", hidden: true });
-  const more = el("button", { class: "btn-ghost", type: "button", text: "Show surrounding text", hidden: s.computed,
+  const more = el("button", { class: "btn-ghost", type: "button", text: "Show surrounding text", hidden: s.computed || isStatic,
     onclick: async () => {
       if (!detail.hidden) { detail.hidden = true; more.textContent = "Show surrounding text"; return; }
       more.textContent = "Loading…";
@@ -299,7 +303,8 @@ function renderSources() {
 }
 
 // ---------- asking ----------
-async function send(question, scenario = null) {
+async function send(question, scenario = null, parent = null) {
+  if (isStatic) return sendDemo(question, parent);
   question = (question || ui.input.value).trim();
   if (!question || chat.running) return;
   const turn = { id: chat.nextId++, q: question, chips: null, stages: {}, evidence: null, report: null, error: null };
@@ -353,14 +358,63 @@ function download() {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-// The static copy (GitHub Pages) has no server and no local model, so the chat can't run there.
-function staticNotice() {
+// ---------- the static demo (GitHub Pages) ----------
+// There is no server and no SI model there, so the answers were generated once by the full app's own pipeline, with the model switched off,
+// for both modes (see app/static_export.py). This page shows them with the same code that shows a live answer.
+let demo = null;      // { cases: [{label, question}], answers: { guided: {key: {chips, report}}, expert: {...} } }
+
+// A stored answer for the current mode. A follow-up is stored under "<parent question>||<question>".
+function demoFor(question, parentQ) {
+  const bucket = demo?.answers?.[chat.mode];
+  if (!bucket) return null;
+  return (parentQ && bucket[`${normQuestion(parentQ)}||${normQuestion(question)}`]) || bucket[normQuestion(question)] || null;
+}
+
+// Switching mode swaps each answer for the stored one in the other mode, as a live chat shows the same question in either mode.
+function rehydrate() {
+  for (const t of chat.turns) { const a = demoFor(t.q, t.parentQ); if (a) { t.report = a.report; t.chips = a.chips; } }
+}
+
+async function sendDemo(question, parent) {
+  question = (question || "").trim();
+  if (!question || chat.running) return;
+  const before = parent || [...chat.turns].reverse().find((t) => t.report) || null;
+  const turn = { id: chat.nextId++, q: question, parentQ: before?.q || null, chips: null, stages: {}, evidence: null, report: null, error: null };
+  chat.turns.push(turn);
+  chat.active = turn.id; chat.selected = null;
+  chat.running = { turn, controller: new AbortController() };
+  renderAll(); renderSources();
+  await new Promise((done) => setTimeout(done, 350));              // a short pause, so the answer arrives the way a live one does
+  const found = demoFor(question, turn.parentQ);
+  if (found) { turn.chips = found.chips; turn.report = found.report; }
+  else turn.error = "This is the demo, so only the use cases above have answers. To ask your own question, run the full app: the steps are at the bottom of this page.";
+  chat.running = null;
+  save(); renderAll(); renderSources();
+}
+
+const demoBanner = () => el("div", { class: "demo-banner", role: "note" }, el("strong", { text: "Demo Mode: SI Not Enabled" }),
+  el("span", { class: "muted", text: "Answers are pre-generated by the full app, in Guided and in Expert. Steps to run it yourself are at the bottom." }));
+
+function demoIntro() {
+  return el("div", { class: "intro" }, el("h2", { text: "Ask the PSI combustion research" }),
+    el("p", { class: "muted", text: "Choose a use case below to see the answer, then switch between Guided and Expert to see how the same answer is shown." }));
+}
+
+function casesPanel() {
+  const cases = demo?.cases || [];
+  return el("details", { class: "demo-cases", open: true }, el("summary", { text: `Use cases (${cases.length})` }),
+    cases.length ? el("div", { class: "chips" }, ...cases.map((c) => el("button", { class: "chip", type: "button", title: c.question, text: c.label, onclick: () => send(c.question) })))
+      : el("p", { class: "muted", text: "The demo answers could not be loaded." }));
+}
+
+// The steps to run the full app, at the foot of the page.
+function runItYourself() {
   const cmd = (text) => el("pre", { class: "code" }, text);
   const readme = el("a", { class: "btn", href: README_RUN_URL, target: "_blank", rel: "noopener noreferrer", text: "Follow the README: Deploy with Docker" });
-  return el("div", { class: "card static-note" },
-    el("p", { class: "eyebrow", text: "SI Insights" }),
-    el("h1", { text: "Install and run the SI on your computer" }),
-    el("p", { text: "SI Insights needs a Python server and a local SI model (IBM Granite 3.3 2B, run through Ollama), and a static web page can run neither. Everything else on this site is the same data and the same calculations as the full app: Rank, Envelope, the Flame Sweeper, Correlation, Fire Safety and PSI Source." }),
+  return el("section", { class: "card static-note run-it", id: "run-it" },
+    el("p", { class: "eyebrow", text: "Run it yourself" }),
+    el("h2", { text: "Install and run the SI on your computer" }),
+    el("p", { text: "SI Insights needs a Python server and a local SI model (IBM Granite 3.3 2B, run through Ollama), and a static web page can run neither. With the model on, you can ask your own questions, and the SI writes short answers that Nimbus checks." }),
     el("p", { text: "To use the SI, follow the README in the repository (it is the source of truth for the steps). In short:" }),
     el("ol", { class: "steps" },
       el("li", {}, "Install Docker and Ollama (ollama.com), then pull the SI model:", cmd("ollama pull granite3.3:2b")),
@@ -368,36 +422,40 @@ function staticNotice() {
       el("li", {}, "Build and run it with Docker:", cmd("docker build -t spacesweepers .\ndocker run --rm -p 8000:8000 -e 'SS_ALLOWED_HOSTS=[\"localhost\",\"127.0.0.1\",\"your.domain\"]' -e SS_OLLAMA_URL=http://host.docker.internal:11434 spacesweepers")),
       el("li", { text: "Open http://localhost:8000 and choose SI Insights. The Flame Sweeper's \"Explain these patterns (SI)\" button works there too." })),
     el("p", { class: "muted", text: "SS_OLLAMA_URL lets the container reach the Ollama on your computer; without it the dashboard works and the SI shows as offline. On Linux, also add --add-host=host.docker.internal:host-gateway and start Ollama with OLLAMA_HOST=0.0.0.0." }),
-    el("p", {}, readme),
-    el("p", { class: "muted", text: "Every answer there is written from PSI evidence with numbered citations, and Nimbus removes any sentence the evidence doesn't support." }));
+    el("p", {}, readme));
 }
 
 export async function render(root, state) {
-  if (isStatic) { root.append(staticNotice()); return; }
+  if (isStatic && !demo) { try { demo = await api("/api/insights/demo"); } catch { demo = null; } }
   restore();
+  if (isStatic) rehydrate();
   ui = {};
   ui.log = el("div", { class: "chat-log", role: "log", "aria-live": "polite" });
   ui.sources = el("aside", { class: "chat-sources", "aria-label": "Sources" });
   ui.status = el("span", { class: "pill" });
-  ui.input = el("textarea", { class: "chat-input", rows: 2, maxlength: MAX_QUESTION, "aria-label": "Your question",
-    placeholder: "Ask about the PSI data, e.g. “What did FLEX find about extinction?”" });
+  ui.input = el("textarea", { class: "chat-input", rows: 2, maxlength: MAX_QUESTION, "aria-label": "Your question", disabled: isStatic,
+    placeholder: isStatic ? "Demo mode: pick a use case above. To ask your own question, run the full app (steps at the bottom)."
+      : "Ask about the PSI data, e.g. “What did FLEX find about extinction?”" });
   ui.count = el("span", { class: "muted count", text: `0 / ${MAX_QUESTION}` });
   ui.send = el("button", { class: "btn-primary", type: "button", text: "Ask", onclick: () => send() });
   ui.stop = el("button", { class: "btn", type: "button", text: "Stop", hidden: true, onclick: () => chat.running?.controller.abort() });
   ui.exportBtn = el("button", { class: "btn-ghost", type: "button", text: "Export chat", onclick: download });
   ui.starters = el("div", { class: "chips starters" });
   ui.scenario = scenarioForm();
+  if (isStatic) ui.cases = casesPanel();
   ui.input.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } });
   ui.input.addEventListener("input", () => { ui.count.textContent = `${ui.input.value.length} / ${MAX_QUESTION}`; });
 
-  root.append(
+  root.append(...[
     el("div", { class: "insights-head" }, el("div", {}, el("p", { class: "eyebrow", text: "SI Insights" }),
-      el("h1", { text: "Ask the PSI combustion data" })), el("div", { class: "head-actions" }, modeSwitch(), ui.status,
+      el("h1", { text: "Ask the PSI combustion data" })), el("div", { class: "head-actions" }, modeSwitch(), !isStatic && ui.status,
       el("button", { class: "btn-ghost", type: "button", text: "New chat", onclick: () => { if (!chat.running) { chat.turns = []; chat.active = chat.selected = null; save(); renderAll(); renderSources(); } } }), ui.exportBtn)),
+    isStatic && demoBanner(),
     (ui.notice = el("div", { class: "notice", text: EXPERT_NOTICE })),
-    (ui.modeHint = el("p", { class: "tiny mode-hint" }, "You are in Guided mode: a plain chat with the PSI evidence beside it. ", el("button", { class: "btn-ghost", type: "button", text: "Switch to Expert for tables, checks and the Scenario form", onclick: () => setMode("expert") }))),
+    (ui.modeHint = el("p", { class: "tiny mode-hint" }, "You are in Guided mode: a plain chat with the PSI evidence beside it. ", el("button", { class: "btn-ghost", type: "button", text: isStatic ? "Switch to Expert for tables and checks" : "Switch to Expert for tables, checks and the Scenario form", onclick: () => setMode("expert") }))),
     (ui.insights = el("div", { class: "insights" }, el("div", { class: "chat" }, ui.log,
-      el("div", { class: "composer" }, ui.scenario, ui.starters, ui.input, el("div", { class: "composer-row" }, ui.count, el("span", { class: "grow" }), ui.stop, ui.send))), ui.sources)));
+      el("div", { class: "composer" }, ui.cases, ui.scenario, ui.starters, ui.input, el("div", { class: "composer-row" }, ui.count, el("span", { class: "grow" }), ui.stop, ui.send))), ui.sources)),
+    isStatic && runItYourself()].filter(Boolean));
   applyMode();
   renderAll(); renderSources(); renderStatus();
 
@@ -405,7 +463,8 @@ export async function render(root, state) {
   const linked = (state.params.get("q") || "").slice(0, MAX_QUESTION).trim();
   if (linked && !chat.turns.some((x) => x.q === linked) && !chat.running) send(linked);
 
-  // Starter questions, the SI status, and a warm-up so the first question isn't slow (a cold model can take minutes).
+  // Starter questions, the SI status, and a warm-up so the first question isn't slow (a cold model can take minutes). The demo has none of these.
+  if (isStatic) return;
   api("/api/insights/suggestions").then((s) => ui.starters.replaceChildren(...s.starters.slice(0, 3).map((q) =>
     el("button", { class: "chip", type: "button", text: q, onclick: () => send(q) })))).catch(() => {});
   api("/api/si/status").then((s) => { chat.status = s; renderStatus(); if (s.available && chat.warm === "idle") warm(); }).catch(() => { chat.status = { available: false, message: "Couldn't reach the server." }; renderStatus(); });
@@ -427,6 +486,7 @@ const GUIDED_STARTERS = [
 ];
 
 function guidedIntro() {
+  if (isStatic) return demoIntro();
   return el("div", { class: "intro" }, el("h2", { text: "Ask the PSI combustion research" }),
     el("p", { class: "muted", text: "Answers come only from NASA's PSI data. The evidence behind each answer appears on the right." }),
     el("div", { class: "examples" }, ...GUIDED_STARTERS.map((q) => el("button", { class: "example", type: "button", onclick: () => send(q) }, el("span", { text: q })))));
@@ -453,9 +513,10 @@ function guidedAnswer(turn) {
       : el("p", { class: "sentence" }, x.text, " ", ...citeButtons(turn, x.cites)))));
   }
   if (r.mode === "sources_only") kids.push(el("p", { class: "muted", text: "SI is not available right now. The PSI details on the right show what was found for your question." }));
-  if (r.followups.length) {
+  const next = isStatic ? r.followups.filter((f) => demoFor(f.question, turn.q)) : r.followups;
+  if (next.length) {
     kids.push(el("div", { class: "chips followups" }, el("span", { class: "muted", text: "You could ask:" }),
-      ...r.followups.slice(0, 3).map((f) => el("button", { class: "chip", type: "button", text: f.label, onclick: () => send(f.question) }))));
+      ...next.slice(0, 3).map((f) => el("button", { class: "chip", type: "button", text: f.label, onclick: () => send(f.question, null, turn) }))));
   }
   return kids;
 }
@@ -471,7 +532,7 @@ function guidedTests(a) {
 
 function guidedSource(s) {
   const detail = el("div", { class: "src-detail", hidden: true });
-  const more = el("button", { class: "btn-ghost", type: "button", text: "Show surrounding text", hidden: s.computed, onclick: async () => {
+  const more = el("button", { class: "btn-ghost", type: "button", text: "Show surrounding text", hidden: s.computed || isStatic, onclick: async () => {
     if (!detail.hidden) { detail.hidden = true; more.textContent = "Show surrounding text"; return; }
     more.textContent = "Loading…";
     try {
@@ -510,13 +571,14 @@ function renderGuidedDetails() {
 function setMode(mode) {
   chat.mode = mode;
   try { localStorage.setItem(MODE_KEY, mode); } catch { /* the choice just is not remembered */ }
+  if (isStatic) rehydrate();
   applyMode();
   renderAll(false); renderSources(); renderStatus();
 }
 
 function applyMode() {
   const guided = chat.mode === "guided";
-  if (ui.scenario) ui.scenario.hidden = guided;
+  if (ui.scenario) ui.scenario.hidden = guided || isStatic;           // the demo has no scenario form: its answers are the use cases
   if (ui.starters) ui.starters.hidden = guided;
   if (ui.modeHint) ui.modeHint.hidden = !guided;
   if (ui.notice) ui.notice.textContent = guided ? "Answers come only from NASA PSI data. Research context only: this does not replace spacecraft emergency procedures." : EXPERT_NOTICE;

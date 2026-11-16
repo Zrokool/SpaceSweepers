@@ -502,3 +502,13 @@ th.hab-h { color: var(--ember-soft); }
 .audit > summary:hover { color: var(--ember-soft); }
 .audit[open] > summary { margin-bottom: 8px; }
 .funnel ul { margin: 8px 0 4px; padding-left: 20px; display: grid; gap: 4px; color: var(--muted); }
+
+/* SI Insights on the static demo: the banner, the use-case picker and the run-it-yourself card at the foot. */
+.demo-banner { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; margin: 14px 0 14px; padding: 8px 14px; border: 1px solid rgba(255, 178, 122, 0.4);
+  border-left: 2px solid var(--ember); border-radius: 10px; background: rgba(255, 107, 44, 0.07); font-size: 14.5px; }
+.demo-banner strong { font-family: var(--mono); font-size: 12.5px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ember-soft); }
+.demo-cases { margin: 0 0 12px; }
+.demo-cases > summary { cursor: pointer; font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.demo-cases .chips { margin-top: 10px; }
+.run-it { margin-top: 28px; }
+.run-it h2 { margin: 6px 0 10px; font-size: 22px; font-weight: 400; }
