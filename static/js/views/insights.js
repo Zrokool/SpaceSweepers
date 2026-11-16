@@ -360,7 +360,7 @@ function staticNotice() {
   return el("div", { class: "card static-note" },
     el("p", { class: "eyebrow", text: "SI Insights" }),
     el("h1", { text: "Install and run the SI on your computer" }),
-    el("p", { text: "SI Insights needs a Python server and a local SI model (IBM Granite 3.3 2B, run through Ollama), and a static web page can run neither. Everything else on this site is the same data and the same calculations as the full app: Rank, Envelope, the Flame Sweeper, Correlation, Fire Safety and References." }),
+    el("p", { text: "SI Insights needs a Python server and a local SI model (IBM Granite 3.3 2B, run through Ollama), and a static web page can run neither. Everything else on this site is the same data and the same calculations as the full app: Rank, Envelope, the Flame Sweeper, Correlation, Fire Safety and PSI Source." }),
     el("p", { text: "To use the SI, follow the README in the repository (it is the source of truth for the steps). In short:" }),
     el("ol", { class: "steps" },
       el("li", {}, "Install Docker and Ollama (ollama.com), then pull the SI model:", cmd("ollama pull granite3.3:2b")),

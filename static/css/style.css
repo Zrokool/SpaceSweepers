@@ -496,3 +496,9 @@ th.hab-h { color: var(--ember-soft); }
 .method-note dd { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.6; }
 .method-note ul { margin: 8px 0 0; padding-left: 18px; }
 @media (max-width: 640px) { .method-note dl { grid-template-columns: 1fr; gap: 4px; } .method-note dd { margin-bottom: 12px; } }
+
+/* PSI Source: the collapsible table-by-table audit, and the nested reasons in the funnel. */
+.audit > summary { cursor: pointer; font-size: 17px; color: var(--text); }
+.audit > summary:hover { color: var(--ember-soft); }
+.audit[open] > summary { margin-bottom: 8px; }
+.funnel ul { margin: 8px 0 4px; padding-left: 20px; display: grid; gap: 4px; color: var(--muted); }
