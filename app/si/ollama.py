@@ -33,6 +33,21 @@ def is_installed(model: str, installed: list[str]) -> bool:
     return model in installed or f"{model}:latest" in installed
 
 
+async def startup_report(http: httpx.AsyncClient, url: str, model: str) -> tuple[str, str]:
+    """(log level, message) for the start-up log: is Ollama reachable, and is the SI model pulled? Never raises for a missing Ollama.
+
+    The dashboard works without the model, so this only informs; it never stops the server.
+    """
+    installed = await installed_models(http, url)
+    if installed is None:
+        return "warning", (f"Ollama is not reachable at {url}. The dashboard works without it; SI Insights will show the evidence only. "
+                           f"Start Ollama and run: ollama pull {model}. In Docker, set SS_OLLAMA_URL=http://host.docker.internal:11434.")
+    if not is_installed(model, installed):
+        return "warning", (f"SI model {model} is not installed in Ollama (installed: {', '.join(installed) or 'none'}). "
+                           f"Run: ollama pull {model}")
+    return "info", f"SI model {model} is installed and Ollama is reachable at {url}."
+
+
 async def warm_up(http: httpx.AsyncClient, url: str, model: str, keep_alive: str, timeout: float = 300) -> float:
     """Load the model into memory (and keep it there) with a tiny call. Returns the seconds it took."""
     import time

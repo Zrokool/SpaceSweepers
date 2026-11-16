@@ -17,6 +17,7 @@ from slowapi.errors import RateLimitExceeded
 from app.config import ROOT, get_settings
 from app.deps import limiter
 from app.routes import dashboard, insights
+from app.si import ollama
 from app.warm import warm
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
@@ -56,6 +57,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         await asyncio.to_thread(warm)        # build the catalog and search library now, not on the first visitor's request
     except RuntimeError:
         log.exception("packaged data failed its start-up check")
+    try:                                                      # say at start-up if the SI model is missing; the dashboard runs either way
+        level, message = await ollama.startup_report(app.state.http, settings.ollama_url, settings.si_model)
+        getattr(log, level)(message)
+    except Exception:
+        log.exception("could not check the SI model at start-up")
     try:
         yield
     finally:
