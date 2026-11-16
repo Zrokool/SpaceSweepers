@@ -170,3 +170,13 @@ def test_the_demo_page_has_the_banner_and_puts_the_run_it_yourself_steps_after_t
     render = source[source.index("export async function render"):]
     assert render.index("ui.insights = el(") < render.index("isStatic && runItYourself()")           # the steps are the last thing on the page
     assert "/api/insights/ask" in source                                                              # the live app still asks the server
+
+
+def test_the_demo_readme_warns_visitors_off_this_branch_and_points_them_to_production():
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    top = readme[:readme.index("SpaceSweepers is an SI-powered dashboard")]                          # before the introduction
+    assert "This is the `demo` branch. Do not use it to run SpaceSweepers." in top
+    assert "git clone -b production https://github.com/Zrokool/SpaceSweepers" in top
+    run_it = readme[readme.index("## Run it"):readme.index("**Refresh the PSI data**")]
+    assert "git clone -b production https://github.com/Zrokool/SpaceSweepers" in run_it             # the steps start from the right branch
+    assert "git clone https://github.com/Zrokool/SpaceSweepers" not in readme                       # no instruction that would clone the demo

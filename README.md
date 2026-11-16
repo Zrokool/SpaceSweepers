@@ -1,5 +1,15 @@
 # SpaceSweepers: fire-safety insights from microgravity combustion data
 
+> **This is the `demo` branch. Do not use it to run SpaceSweepers.**
+> It is a static copy of the dashboard for GitHub Pages, with no SI model. SI Insights here only plays 15 pre-generated answers.
+> To get the full app with the working SI Insights, clone the `production` branch:
+>
+> ```bash
+> git clone -b production https://github.com/Zrokool/SpaceSweepers
+> ```
+>
+> A plain `git clone` gets the default branch, which is this demo.
+
 SpaceSweepers is an SI-powered dashboard for the NASA Space Apps 2026 challenge **Flame in Freefall**. It summarises, ranks and interprets NASA's microgravity combustion research for crewed habitats: spacecraft, space stations, Moon and Mars bases, and pressurized rovers. ("SI", Super Intelligence, is the challenge's term for what was formerly called AI.)
 
 The idea in one line: **SI proposes, PSI data decides.** A local SI model reads and suggests; fixed rules check every suggestion against NASA's data before it's shown as fact. Scores, counts and ranges are computed by code, never by SI.
@@ -10,8 +20,8 @@ Data: NASA Physical Sciences Informatics (PSI). SpaceSweepers is not affiliated 
 
 | Branch | What it is |
 |---|---|
-| `demo` (default) | The static GitHub Pages demo. This branch. Merge `production` into it to refresh the demo. |
-| `production` | The full app: the dashboard plus the SI chat, run locally with the SI model. |
+| `demo` (default) | The static GitHub Pages demo. This branch. Not for running the app. Merge `production` into it to refresh the demo. |
+| `production` | The full app: the dashboard plus the SI chat, run locally with the SI model. Clone this one: `git clone -b production https://github.com/Zrokool/SpaceSweepers` |
 
 ---
 
@@ -43,6 +53,8 @@ Not built yet: predictive models and the full-dataset export.
 Requirements: Python 3.14, and optionally [Ollama](https://ollama.com) for the SI parts.
 
 ```bash
+git clone -b production https://github.com/Zrokool/SpaceSweepers
+cd SpaceSweepers
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 .venv/bin/uvicorn app.main:app --port 8000
