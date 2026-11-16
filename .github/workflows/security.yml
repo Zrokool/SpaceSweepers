@@ -206,4 +206,8 @@ jobs:
       - name: Write high-level overview
         env:
           NEEDS_JSON: ${{ toJSON(needs) }}
-        run: python "$REPORT" summarize results/*.json
+        run: |
+          # An artifact that holds a single file is extracted without its folder (secrets.json lands in the workspace root, not in
+          # results/), so look for the three result files wherever they land. A glob on results/ alone reported the secrets check
+          # as "no results" and failed this job even when every scan passed.
+          python "$REPORT" summarize $(find . -maxdepth 2 \( -name sast.json -o -name sca.json -o -name secrets.json \))
