@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="static/brand/spacesweepers-logo-dark.png" alt="SpaceSweepers: fire-safety learning from reduced-gravity experiments" width="560">
+</p>
+
 # SpaceSweepers: fire-safety insights from microgravity combustion data
 
 **Try it now, no install: [the live demo](https://zrokool.github.io/SpaceSweepers/).** It is a static copy of the dashboard on GitHub Pages. SI Insights there shows 15 pre-generated use cases; to use the live SI, run the full app ([Run it](#run-it)).
