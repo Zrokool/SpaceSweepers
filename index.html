@@ -57,6 +57,25 @@
 
   <footer class="page-foot"><p id="snapshot" class="context-note"></p></footer>
 
+  <section class="method-note" aria-label="Method and limits">
+    <details>
+      <summary>Method and limits: how the numbers are calculated</summary>
+      <dl>
+        <dt>Data</dt>
+        <dd>Test values come from NASA's Physical Sciences Informatics (PSI) repository. Each value keeps its raw text, parsed number, unit, quality flag, source file and row. Only investigations whose table columns have been mapped and reviewed contribute tests; the others contribute records, documents and publications. Four kinds of evidence (table tests, outcomes read from documents, the PSI-117 simulation list and analysis figures) are never combined in one count.</dd>
+        <dt>Habitat atmospheres</dt>
+        <dd>Each reference atmosphere is a point taken from the challenge text: ISS 21% O₂ at 14.7 psi, spacesuit 100% O₂ at 4.3 psi, Moon base at least 30% O₂ at no more than 10.2 psi. A test lies inside a habitat's box when its oxygen mole fraction and its pressure both fall within the band below. The band widths are the team's assumption, not NASA values, and the counts change if the bands change. Only oxygen measured in the chamber atmosphere is compared; oxygen in a burner stream is excluded.
+          <ul id="method-habitats"></ul></dd>
+        <dt>Mission Fit (Rank)</dt>
+        <dd>Four parts, each scored 0 to 1, are combined with weights: condition match 40, fuel 25, pillar evidence 20 and data richness 15 by default. The weights are adjustable and are our judgement. Condition match counts a test inside the box as 1 and a test within 0.05 oxygen mole fraction and 2 psi of it as 0.5; 20 such tests give full marks. Fuel scores solid 1.0, liquid 0.6 and gas 0.4. Pillar evidence is points from a quoted sentence in the record plus measured results. Data richness uses table lines, publications and documents read. A part that cannot be computed is unknown: the ranking counts it as 0 (the proven fit), and the row shows an upper bound with it counted as 1.</dd>
+        <dt>Flame Sweeper</dt>
+        <dd>Outcomes are counted in cells of 0.02 oxygen mole fraction by 0.25 atm. A cell with no test is estimated only if a logistic regression on oxygen and pressure, checked by 10-fold cross-validation, beats always guessing the commoner outcome by at least 5 percentage points with an AUC of at least 0.70, and only inside the tested range. Estimates are hatched and carry a 90% interval. Shares quoted in chat answers carry 95% Wilson intervals.</dd>
+        <dt>Limits</dt>
+        <dd>These are patterns in the tests NASA ran, not safety ratings or predictions for a real fire. PSI holds no partial-gravity (Moon or Mars) combustion data, so results for those gravities are bounded only by microgravity and normal-gravity tests. Scores, counts and ranges are computed by code; the SI model never produces a number.</dd>
+      </dl>
+    </details>
+  </section>
+
   <aside id="drawer" class="drawer" hidden aria-label="Investigation detail">
     <button id="drawer-close" class="btn-ghost drawer-close" aria-label="Close detail">Close</button>
     <div id="drawer-body"></div>
