@@ -225,7 +225,7 @@ def auc(scores: list[tuple[float, int]]) -> float:
 def cross_validate(X: list[list[float]], y: list[int]) -> dict:
     """10-fold cross-validation with a fixed seed: accuracy, AUC and the accuracy of always guessing the commoner outcome."""
     idx = list(range(len(y)))
-    random.Random(SEED).shuffle(idx)
+    random.Random(SEED).shuffle(idx)  # nosec B311 - a seeded shuffle for a statistical check, not a security use
     folds = [idx[i::FOLDS] for i in range(FOLDS)]
     correct, scores = 0, []
     for fold in folds:

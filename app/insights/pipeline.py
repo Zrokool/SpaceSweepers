@@ -279,7 +279,7 @@ async def _run(*, question: str, previous: list[str], http: httpx.AsyncClient, s
                audience: str = "expert", context: dict | None = None) -> AsyncIterator[bytes]:
     started = time.time()
     now = datetime.now(UTC)
-    run_id = f"{now:%Y%m%d-%H%M%S}-{hashlib.sha1(question.encode()).hexdigest()[:6]}"
+    run_id = f"{now:%Y%m%d-%H%M%S}-{hashlib.sha256(question.encode()).hexdigest()[:6]}"
     reader = reader_for(library.catalog)
     names = {i["id"]: i["name"] for i in library.catalog.ordered()}
     record: dict = {"run_id": run_id, "question": question, "origin": settings.run_origin, "model": settings.si_model,

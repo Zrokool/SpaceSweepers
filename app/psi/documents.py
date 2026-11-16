@@ -16,7 +16,7 @@ import re
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
-from xml.etree import ElementTree
+from xml.etree import ElementTree  # nosec B405 - only parsed through _parse_xml below, which refuses DTDs
 
 from pypdf import PdfReader
 from pypdf.errors import PdfReadError
@@ -104,6 +104,17 @@ def _local(tag: str) -> str:
     return tag.rsplit("}", 1)[-1]
 
 
+def _parse_xml(data: bytes) -> ElementTree.Element:
+    """Parse one XML part of a Word or Excel file.
+
+    These parts never need a DTD, and a DTD or entity declaration is how XML entity-expansion attacks are built, so a part that
+    declares one is refused. Parts are UTF-8; a UTF-16 byte-order mark would hide the markers from this check, so it is refused too.
+    """
+    if data[:2] in (b"\xff\xfe", b"\xfe\xff") or b"<!DOCTYPE" in data.upper() or b"<!ENTITY" in data.upper():
+        raise ElementTree.ParseError("the XML part declares a DTD or is not UTF-8, which Word and Excel files do not need")
+    return ElementTree.fromstring(data)  # nosec B314 - DTDs and entities are refused above
+
+
 def extract_pdf(data: bytes) -> Extracted:
     try:
         reader = PdfReader(io.BytesIO(data))
@@ -132,8 +143,12 @@ def extract_docx(data: bytes) -> Extracted:
         return Extracted("", 0, f"not read: the Word file couldn't be opened ({e})")
     if xml is None:
         return Extracted("", 0, "not read: no document text inside the Word file")
+    try:
+        root = _parse_xml(xml)
+    except ElementTree.ParseError as e:
+        return Extracted("", 0, f"not read: the Word file's text couldn't be parsed ({e})")
     paragraphs = []
-    for p in ElementTree.fromstring(xml).iter():
+    for p in root.iter():
         if _local(p.tag) != "p":
             continue
         line = "".join(t.text or "" for t in p.iter() if _local(t.tag) == "t").strip()
@@ -163,15 +178,15 @@ def read_sheets(data: bytes, max_rows: int = MAX_SHEET_ROWS) -> list[tuple[str, 
             rels = _zip_member(z, "xl/_rels/workbook.xml.rels")
             shared = []
             if shared_xml:
-                for si in ElementTree.fromstring(shared_xml):
+                for si in _parse_xml(shared_xml):
                     shared.append("".join(t.text or "" for t in si.iter() if _local(t.tag) == "t"))
             targets = {}
             if rels:
-                for rel in ElementTree.fromstring(rels):
+                for rel in _parse_xml(rels):
                     targets[rel.get("Id")] = rel.get("Target", "").lstrip("/")
             sheets = []
             if workbook:
-                for s in ElementTree.fromstring(workbook).iter():
+                for s in _parse_xml(workbook).iter():
                     if _local(s.tag) == "sheet":
                         rid = next((v for k, v in s.attrib.items() if k.endswith("}id")), None)
                         target = targets.get(rid, "")
@@ -182,7 +197,7 @@ def read_sheets(data: bytes, max_rows: int = MAX_SHEET_ROWS) -> list[tuple[str, 
                 if xml is None:
                     continue
                 grid: dict[int, dict[int, str]] = {}
-                for row in ElementTree.fromstring(xml).iter():
+                for row in _parse_xml(xml).iter():
                     if _local(row.tag) != "row":
                         continue
                     cells: dict[int, str] = {}
