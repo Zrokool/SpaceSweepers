@@ -394,7 +394,7 @@ function runItYourself() {
     el("p", { text: "To use the SI, follow the README in the repository (it is the source of truth for the steps). In short:" }),
     el("ol", { class: "steps" },
       el("li", {}, "Install Docker and Ollama (ollama.com), then pull the SI model:", cmd("ollama pull granite3.3:2b")),
-      el("li", {}, "Get the code:", cmd("git clone https://github.com/Zrokool/SpaceSweepers\ncd SpaceSweepers")),
+      el("li", {}, "Get the code:", cmd("git clone -b production https://github.com/Zrokool/SpaceSweepers\ncd SpaceSweepers")),
       el("li", {}, "Build and run it with Docker:", cmd("docker build -t spacesweepers .\ndocker run --rm -p 8000:8000 -e 'SS_ALLOWED_HOSTS=[\"localhost\",\"127.0.0.1\",\"your.domain\"]' -e SS_OLLAMA_URL=http://host.docker.internal:11434 spacesweepers")),
       el("li", { text: "Open http://localhost:8000 and choose SI Insights. The Flame Sweeper's \"Explain these patterns (SI)\" button works there too." })),
     el("p", { class: "muted", text: "SS_OLLAMA_URL lets the container reach the Ollama on your computer; without it the dashboard works and the SI shows as offline. On Linux, also add --add-host=host.docker.internal:host-gateway and start Ollama with OLLAMA_HOST=0.0.0.0." }),
