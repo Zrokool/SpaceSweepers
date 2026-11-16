@@ -1,17 +1,17 @@
 # SpaceSweepers: fire-safety insights from microgravity combustion data
 
+**Try it now, no install: [the live demo](https://zrokool.github.io/SpaceSweepers/).** It is a static copy of the dashboard on GitHub Pages. SI Insights there shows 15 pre-generated use cases; to use the live SI, run the full app ([Run it](#run-it)).
+
 SpaceSweepers is an SI-powered dashboard for the NASA Space Apps 2026 challenge **Flame in Freefall**. It summarises, ranks and interprets NASA's microgravity combustion research for crewed habitats: spacecraft, space stations, Moon and Mars bases, and pressurized rovers. ("SI", Super Intelligence, is the challenge's term for what was formerly called AI.)
 
 The idea in one line: **SI proposes, PSI data decides.** A local SI model reads and suggests; fixed rules check every suggestion against NASA's data before it's shown as fact. Scores, counts and ranges are computed by code, never by SI.
 
 Data: NASA Physical Sciences Informatics (PSI). SpaceSweepers is not affiliated with or endorsed by NASA.
 
-**Live demo:** <https://zrokool.github.io/SpaceSweepers/>, a static copy of the dashboard on GitHub Pages (no SI model).
-
 | Branch | What it is |
 |---|---|
-| `production` | The full app: the dashboard plus the SI chat, run locally with the SI model. This branch. |
-| `demo` (default) | The static GitHub Pages demo. Merge `production` into it to refresh the demo. |
+| `production` (default) | The full app: the dashboard plus the SI chat, run locally with the SI model. This branch. |
+| `demo` | The static GitHub Pages demo, served at the live demo link above. Not for running the app. Merge `production` into it to refresh the demo. |
 
 ---
 
@@ -43,6 +43,8 @@ Not built yet: predictive models and the full-dataset export.
 Requirements: Python 3.14, and optionally [Ollama](https://ollama.com) for the SI parts.
 
 ```bash
+git clone -b production https://github.com/Zrokool/SpaceSweepers
+cd SpaceSweepers
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 .venv/bin/uvicorn app.main:app --port 8000
