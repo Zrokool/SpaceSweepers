@@ -11,10 +11,10 @@
 > To get the full app with the working SI Insights, use the default branch, `main`:
 >
 > ```bash
-> git clone -b main https://github.com/Zrokool/SpaceSweepers
+> git clone https://github.com/Zrokool/SpaceSweepers
 > ```
 >
-> A plain `git clone` gets `main` too; `-b main` just makes it explicit.
+> `main` is the default branch, so a plain `git clone` gets the full app.
 
 SpaceSweepers is an SI-powered dashboard for the NASA Space Apps 2026 challenge **Flame in Freefall**. It summarises, ranks and interprets NASA's microgravity combustion research for crewed habitats: spacecraft, space stations, Moon and Mars bases, and pressurized rovers. ("SI", Super Intelligence, is the challenge's term for what was formerly called AI.)
 
@@ -24,7 +24,7 @@ Data: NASA Physical Sciences Informatics (PSI). SpaceSweepers is not affiliated 
 
 | Branch | What it is |
 |---|---|
-| `main` (default) | The full app: the dashboard plus the SI chat, run locally with the SI model. Clone this one: `git clone -b main https://github.com/Zrokool/SpaceSweepers` |
+| `main` (default) | The full app: the dashboard plus the SI chat, run locally with the SI model. Clone this one: `git clone https://github.com/Zrokool/SpaceSweepers` |
 | `demo` | The static GitHub Pages demo, served at the live demo link above. This branch. Not for running the app. Merge `main` into it to refresh the demo. |
 
 ---
@@ -57,7 +57,7 @@ Not built yet: predictive models and the full-dataset export.
 Requirements: Python 3.14, and optionally [Ollama](https://ollama.com) for the SI parts.
 
 ```bash
-git clone -b main https://github.com/Zrokool/SpaceSweepers
+git clone https://github.com/Zrokool/SpaceSweepers
 cd SpaceSweepers
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
