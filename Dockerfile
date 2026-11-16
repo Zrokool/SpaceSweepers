@@ -11,6 +11,9 @@ FROM python:3.14-slim
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     SS_CACHE_DIR=/tmp/spacesweepers
+# Pick up Debian security fixes published after the base image was built. The image scan (Grype) blocks on fixable high findings;
+# this cleared two in zlib1g (CVE-2026-76844, CVE-2026-85091). The apt lists are removed so the layer stays small.
+RUN apt-get update && apt-get upgrade -y --no-install-recommends && rm -rf /var/lib/apt/lists/*
 RUN useradd --uid 10001 --no-create-home --shell /usr/sbin/nologin spacesweepers
 WORKDIR /app
 COPY --from=build /install /usr/local
