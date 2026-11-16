@@ -1,6 +1,6 @@
 // SI Insights: ask questions about all the PSI data. SI writes, Nimbus checks every sentence, sources are shown.
 // All text is set with textContent (through el()), so PSI text and model text can never become HTML.
-import { el, api, fmt, safeHref, METHOD_LABEL } from "../ui.js";
+import { el, api, fmt, METHOD_LABEL } from "../ui.js";
 import { openDetail, navigate } from "../app.js";
 
 const STAGES = [
@@ -191,7 +191,6 @@ function renderAll(scroll = true) {
   if (scroll) ui.log.scrollTop = ui.log.scrollHeight;
   ui.send.disabled = !!chat.running;
   ui.stop.hidden = !chat.running;
-  ui.exportBtn.disabled = !chat.turns.some((t) => t.report);
 }
 
 const EXAMPLES = [
@@ -330,29 +329,6 @@ async function send(question, scenario = null) {
   }
 }
 
-// The exported file is opened in other programs: neutralise anything that would become a link, image or markup there.
-const md = (t) => String(t ?? "").replace(/[\\`*_{}\[\]<>()#+!|~]/g, (c) => `\\${c}`).replace(/\s+/g, " ").trim();
-
-function toMarkdown() {
-  const lines = ["# SI Insights chat", "", `Exported from SpaceSweepers on ${new Date().toISOString().slice(0, 10)}. Answers were written by SI and checked by Nimbus against PSI data. NASA does not endorse SpaceSweepers.`, ""];
-  for (const t of chat.turns.filter((x) => x.report)) {
-    const r = t.report;
-    lines.push(`## ${md(t.q)}`, "");
-    for (const s of r.answer) lines.push(s.note ? `_${md(s.text)}_` : `${md(s.text)} ${s.cites.map((n) => `[${n}]`).join("")}`, "");
-    if (r.sources.length) { lines.push("**Sources**", ""); for (const s of r.sources) lines.push(`${s.n}. ${md(s.label)} (${md(s.kind)})${s.doi ? ` DOI ${md(s.doi)}` : ""}${s.url && safeHref(s.url) ? ` <${safeHref(s.url)}>` : ""}`); lines.push(""); }
-    if (r.removed.length) { lines.push("**Removed by Nimbus**", ""); for (const x of r.removed) lines.push(`- ~~${md(x.text)}~~ (${x.rules[0]}: ${md(x.reason)})`); lines.push(""); }
-    if (r.not_covered.length) { lines.push("**What the data doesn't cover**", ""); for (const g of r.not_covered) lines.push(`- ${md(g)}`); lines.push(""); }
-  }
-  return lines.join("\n");
-}
-
-function download() {
-  const url = URL.createObjectURL(new Blob([toMarkdown()], { type: "text/markdown" }));
-  const a = el("a", { href: url, download: "si-insights-chat.md" });
-  document.body.append(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
 export async function render(root, state) {
   restore();
   ui = {};
@@ -364,7 +340,6 @@ export async function render(root, state) {
   ui.count = el("span", { class: "muted count", text: `0 / ${MAX_QUESTION}` });
   ui.send = el("button", { class: "btn-primary", type: "button", text: "Ask", onclick: () => send() });
   ui.stop = el("button", { class: "btn", type: "button", text: "Stop", hidden: true, onclick: () => chat.running?.controller.abort() });
-  ui.exportBtn = el("button", { class: "btn-ghost", type: "button", text: "Export chat", onclick: download });
   ui.starters = el("div", { class: "chips starters" });
   ui.scenario = scenarioForm();
   ui.input.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } });
@@ -373,7 +348,7 @@ export async function render(root, state) {
   root.append(
     el("div", { class: "insights-head" }, el("div", {}, el("p", { class: "eyebrow", text: "SI Insights" }),
       el("h1", { text: "Ask the PSI combustion data" })), el("div", { class: "head-actions" }, modeSwitch(), ui.status,
-      el("button", { class: "btn-ghost", type: "button", text: "New chat", onclick: () => { if (!chat.running) { chat.turns = []; chat.active = chat.selected = null; save(); renderAll(); renderSources(); } } }), ui.exportBtn)),
+      el("button", { class: "btn-ghost", type: "button", text: "New chat", onclick: () => { if (!chat.running) { chat.turns = []; chat.active = chat.selected = null; save(); renderAll(); renderSources(); } } }))),
     (ui.notice = el("div", { class: "notice", text: EXPERT_NOTICE })),
     (ui.modeHint = el("p", { class: "tiny mode-hint" }, "You are in Guided mode: a plain chat with the PSI evidence beside it. ", el("button", { class: "btn-ghost", type: "button", text: "Switch to Expert for tables, checks and the Scenario form", onclick: () => setMode("expert") }))),
     (ui.insights = el("div", { class: "insights" }, el("div", { class: "chat" }, ui.log,
