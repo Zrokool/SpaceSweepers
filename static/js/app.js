@@ -59,7 +59,7 @@ function readHash() {
   if (hv === "off" || hv === "on") storeHabitatView(state.habitatView);   // a link that sets it is remembered too
 }
 
-// Which of the habitat and pillar controls change a view's numbers. Compare and References use neither.
+// Which of the habitat and pillar controls change a view's numbers. Compare and PSI Source use neither.
 const CONTROLS_USED = {
   overview: { habitat: true, pillar: true },
   rank: { habitat: true, pillar: true },
