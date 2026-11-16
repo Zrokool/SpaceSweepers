@@ -14,8 +14,8 @@ Data: NASA Physical Sciences Informatics (PSI). SpaceSweepers is not affiliated 
 
 | Branch | What it is |
 |---|---|
-| `production` (default) | The full app: the dashboard plus the SI chat, run locally with the SI model. This branch. |
-| `demo` | The static GitHub Pages demo, served at the live demo link above. Not for running the app. Merge `production` into it to refresh the demo. |
+| `main` (default) | The full app: the dashboard plus the SI chat, run locally with the SI model. This branch. |
+| `demo` | The static GitHub Pages demo, served at the live demo link above. Not for running the app. Merge `main` into it to refresh the demo. |
 
 ---
 
@@ -47,7 +47,7 @@ Not built yet: predictive models and the full-dataset export.
 Requirements: Python 3.14, and optionally [Ollama](https://ollama.com) for the SI parts.
 
 ```bash
-git clone -b production https://github.com/Zrokool/SpaceSweepers
+git clone -b main https://github.com/Zrokool/SpaceSweepers
 cd SpaceSweepers
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
