@@ -179,4 +179,5 @@ def test_the_demo_readme_warns_visitors_off_this_branch_and_points_them_to_produ
     assert "git clone -b production https://github.com/Zrokool/SpaceSweepers" in top
     run_it = readme[readme.index("## Run it"):readme.index("**Refresh the PSI data**")]
     assert "git clone -b production https://github.com/Zrokool/SpaceSweepers" in run_it             # the steps start from the right branch
-    assert "git clone https://github.com/Zrokool/SpaceSweepers" not in readme                       # no instruction that would clone the demo
+    assert "https://zrokool.github.io/SpaceSweepers/" in top and "(default)" not in top.split("| Branch")[0]   # the live demo link comes first
+    assert "| `production` (default) |" in readme and "| `demo` |" in readme                          # production is the default branch now
