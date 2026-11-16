@@ -1,0 +1,11 @@
+# Exceptions for the image scan (Grype, in .github/workflows/deploy.yml: block on fixable high or critical findings).
+#
+# Keep this list short, each entry explained, and remove an entry as soon as its fix can be installed.
+ignore:
+  # Python 3.14.10 in the base image python:3.14-slim. The fix is in 3.14.11, but no python:3.14.11-slim image is published yet
+  # (checked on Docker Hub), so the image cannot be upgraded. Accepted for now by the project owner. REMOVE this entry when
+  # python:3.14.11-slim (or a later 3.14.x) is published and the image is rebuilt, and run the scan again.
+  - vulnerability: CVE-2026-119170
+    package:
+      name: python
+      type: binary
