@@ -146,7 +146,7 @@ def stability(results: dict[str, dict], parts: tuple[str, ...] = tuple(DEFAULT_W
 
     Shows how much of the ranking depends on our weights. Deterministic: the same seed gives the same answer.
     """
-    rng, counts = random.Random(seed), Counter()
+    rng, counts = random.Random(seed), Counter()  # nosec B311 - a seeded shuffle for a statistical check, not a security use
     for _ in range(runs):
         w = {k: rng.uniform(5, 50) for k in parts}
         ranked = sorted(results, key=lambda i: (-_blend(results[i], w, 0.0), i))

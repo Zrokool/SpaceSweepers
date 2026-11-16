@@ -129,7 +129,7 @@ def build(frame: Frame, catalog: Catalog, habitat: dict | None, structured: dict
         guided = audience == "guided"
         if guided:
             card["context_note"] = scenario.context_note(sc)
-        item = computed(f"scenario:{card['goal']}:{hashlib.sha1(card['title'].encode()).hexdigest()[:8]}", " ".join(card["headline"]))        # a stable id: the same question gives the same id in every run
+        item = computed(f"scenario:{card['goal']}:{hashlib.sha256(card['title'].encode()).hexdigest()[:8]}", " ".join(card["headline"]))        # a stable id: the same question gives the same id in every run
         return Special([item], [{"text": h, "cites": [1]} for h in card["headline"]], analysis=card, slots=scenario.slots(sc),
                        suggestions=scenario.suggest(catalog, sc) if guided and card["goal"] != "none" else [])
     items: list[Item] = []
