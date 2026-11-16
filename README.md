@@ -8,13 +8,13 @@
 
 > **This is the `demo` branch. Do not use it to run SpaceSweepers.**
 > It is the code behind the live demo: a static copy of the dashboard for GitHub Pages, with no SI model. SI Insights here only shows 15 pre-generated use cases.
-> To get the full app with the working SI Insights, use the default branch, `production`:
+> To get the full app with the working SI Insights, use the default branch, `main`:
 >
 > ```bash
-> git clone -b production https://github.com/Zrokool/SpaceSweepers
+> git clone -b main https://github.com/Zrokool/SpaceSweepers
 > ```
 >
-> A plain `git clone` gets `production` too; `-b production` just makes it explicit.
+> A plain `git clone` gets `main` too; `-b main` just makes it explicit.
 
 SpaceSweepers is an SI-powered dashboard for the NASA Space Apps 2026 challenge **Flame in Freefall**. It summarises, ranks and interprets NASA's microgravity combustion research for crewed habitats: spacecraft, space stations, Moon and Mars bases, and pressurized rovers. ("SI", Super Intelligence, is the challenge's term for what was formerly called AI.)
 
@@ -24,8 +24,8 @@ Data: NASA Physical Sciences Informatics (PSI). SpaceSweepers is not affiliated 
 
 | Branch | What it is |
 |---|---|
-| `production` (default) | The full app: the dashboard plus the SI chat, run locally with the SI model. Clone this one: `git clone -b production https://github.com/Zrokool/SpaceSweepers` |
-| `demo` | The static GitHub Pages demo, served at the live demo link above. This branch. Not for running the app. Merge `production` into it to refresh the demo. |
+| `main` (default) | The full app: the dashboard plus the SI chat, run locally with the SI model. Clone this one: `git clone -b main https://github.com/Zrokool/SpaceSweepers` |
+| `demo` | The static GitHub Pages demo, served at the live demo link above. This branch. Not for running the app. Merge `main` into it to refresh the demo. |
 
 ---
 
@@ -57,7 +57,7 @@ Not built yet: predictive models and the full-dataset export.
 Requirements: Python 3.14, and optionally [Ollama](https://ollama.com) for the SI parts.
 
 ```bash
-git clone -b production https://github.com/Zrokool/SpaceSweepers
+git clone -b main https://github.com/Zrokool/SpaceSweepers
 cd SpaceSweepers
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
@@ -102,7 +102,7 @@ The image has no Ollama. To use the SI from the container, add `-e SS_OLLAMA_URL
 - **Updating the data:** run `python -m app.psi.sync` (and `python -m app.nimbus.method`, `app.nimbus.tables`, `app.nimbus.pillars` as needed), review the tables it prints, commit `data/`, push. The pipeline rebuilds the image from the committed data. The SI parts that need Granite (chat, Micro-Flame explanations) work only where Ollama is reachable at `SS_OLLAMA_URL`; everything else works without it.
 
 ### GitHub Pages (static demo, `demo` branch)
-The static demo lives on the **`demo` branch**. `production` is the full app that runs locally with the SI model and contains none of this. Merge `production` into `demo` to refresh the demo after a change.
+The static demo lives on the **`demo` branch**. `main` is the full app that runs locally with the SI model and contains none of this. Merge `main` into `demo` to refresh the demo after a change.
 
 GitHub Pages serves files only, so it can't run the Python server or the local SI model. The exporter therefore runs the app once, in-process, and writes every answer of its API to a file. `python -m app.static_export --publish` writes `index.html`, `api/` and `.nojekyll` at the repository root, next to `static/` (which the page uses as is). Pages set to **Deploy from a branch → `demo` → `/ (root)`** serves them; no workflow or environment setting is needed. A test fails if those files are out of date, so run `--publish` and commit after any change to the data or the dashboard. The dashboard views (Overview, Fire Safety, Rank, Correlation, Flame Sweeper, PSI Source, the investigation panels, and Envelope, which is hidden from the navigation as in the full app) are the same data and the same calculations as the live app, for each habitat, pillar and Flame Sweeper selection the page offers. Two things differ:
 

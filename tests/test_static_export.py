@@ -172,12 +172,12 @@ def test_the_demo_page_has_the_banner_and_puts_the_run_it_yourself_steps_after_t
     assert "/api/insights/ask" in source                                                              # the live app still asks the server
 
 
-def test_the_demo_readme_warns_visitors_off_this_branch_and_points_them_to_production():
+def test_the_demo_readme_warns_visitors_off_this_branch_and_points_them_to_main():
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     top = readme[:readme.index("SpaceSweepers is an SI-powered dashboard")]                          # before the introduction
     assert "This is the `demo` branch. Do not use it to run SpaceSweepers." in top
-    assert "git clone -b production https://github.com/Zrokool/SpaceSweepers" in top
+    assert "git clone -b main https://github.com/Zrokool/SpaceSweepers" in top
     run_it = readme[readme.index("## Run it"):readme.index("**Refresh the PSI data**")]
-    assert "git clone -b production https://github.com/Zrokool/SpaceSweepers" in run_it             # the steps start from the right branch
+    assert "git clone -b main https://github.com/Zrokool/SpaceSweepers" in run_it             # the steps start from the right branch
     assert "https://zrokool.github.io/SpaceSweepers/" in top and "(default)" not in top.split("| Branch")[0]   # the live demo link comes first
-    assert "| `production` (default) |" in readme and "| `demo` |" in readme                          # production is the default branch now
+    assert "| `main` (default) |" in readme and "| `demo` |" in readme                          # main is the default branch

@@ -3,20 +3,17 @@ version: 2
 updates:
   - package-ecosystem: pip
     directory: /
-    target-branch: production   # the app; the default branch is the static demo
     schedule: { interval: weekly }
     cooldown: { default-days: 7 }  # let brand-new releases age before adopting them
     groups:
       python: { patterns: ["*"] }
   - package-ecosystem: github-actions
     directory: /
-    target-branch: production   # the app; the default branch is the static demo
     schedule: { interval: weekly }
     cooldown: { default-days: 7 }  # let brand-new releases age before adopting them
     groups:
       actions: { patterns: ["*"] }
   - package-ecosystem: docker
     directory: /
-    target-branch: production   # the app; the default branch is the static demo
     schedule: { interval: weekly }
     cooldown: { default-days: 7 }  # let brand-new releases age before adopting them
