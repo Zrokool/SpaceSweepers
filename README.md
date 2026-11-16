@@ -47,7 +47,7 @@ Not built yet: predictive models and the full-dataset export.
 Requirements: Python 3.14, and optionally [Ollama](https://ollama.com) for the SI parts.
 
 ```bash
-git clone -b main https://github.com/Zrokool/SpaceSweepers
+git clone https://github.com/Zrokool/SpaceSweepers
 cd SpaceSweepers
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
