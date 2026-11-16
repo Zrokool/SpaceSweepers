@@ -482,3 +482,14 @@ th.hab-h { color: var(--ember-soft); }
 .audience-list li { padding: 7px 16px; border: 1px solid rgba(255, 178, 122, 0.45); border-radius: 999px; background: rgba(255, 107, 44, 0.08);
   font-size: 16.5px; font-weight: 400; color: var(--text); }
 .audience-note { margin: 14px 0 0; font-size: 15.5px; line-height: 1.5; color: var(--muted); }
+
+/* The method note at the foot of every page: how the numbers are calculated. */
+.method-note { padding: 0 clamp(16px, 3.2vw, 56px) 36px; }
+.method-note details { max-width: 920px; border-top: 1px solid var(--line-soft); padding-top: 16px; }
+.method-note summary { cursor: pointer; font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.method-note summary:hover { color: var(--text); }
+.method-note dl { margin: 16px 0 0; display: grid; grid-template-columns: minmax(130px, 190px) 1fr; gap: 14px 24px; }
+.method-note dt { font-weight: 500; color: var(--text); font-size: 15px; }
+.method-note dd { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.6; }
+.method-note ul { margin: 8px 0 0; padding-left: 18px; }
+@media (max-width: 640px) { .method-note dl { grid-template-columns: 1fr; gap: 4px; } .method-note dd { margin-bottom: 12px; } }

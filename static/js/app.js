@@ -134,6 +134,10 @@ function buildControls() {
   note.replaceChildren(...(stale.length ? [el("strong", { text: "Data refresh needed. " }),
     `${stale.length} test table${stale.length === 1 ? " has" : "s have"} changed since ${stale.length === 1 ? "it was" : "they were"} mapped, so ${stale.length === 1 ? "its" : "their"} data is hidden until re-mapped: ${stale.map((s) => `${s.name} (${s.file})`).join(", ")}. Run python -m app.nimbus.tables.`] : []));
   note.hidden = stale.length === 0;
+  // The habitat bands in the method note are read from the same table the calculations use, so the note cannot drift from the code.
+  const pc = (x) => String(Math.round(x * 1000) / 10);
+  $("method-habitats").replaceChildren(...state.meta.habitats.map((h) =>
+    el("li", { text: `${h.label}: oxygen ${pc(h.o2[0])} to ${pc(h.o2[1])}%, pressure ${h.pressure_psi[0]} to ${h.pressure_psi[1]} psi` })));
   $("snapshot").textContent = `PSI snapshot ${s.fetched_at.slice(0, 10)} · ${c.investigations} investigations · ${c.tests} tests`;
   $("drawer-close").addEventListener("click", closeDrawer);
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDrawer(); });
