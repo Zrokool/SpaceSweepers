@@ -24,7 +24,7 @@ Rules that apply to every agent:
 | Spec | Status | Job |
 |---|---|---|
 | [10-investigator.md](agents/10-investigator.md) | built | (1) Points at the sentences in each investigation's Approach and Objective that show a physical test or a computer model; code decides Experimental, Simulation, both or Not classified. (2) In SI Insights, chooses which read-only tools to call for a question |
-| [12-analyst.md](agents/12-analyst.md) | built | In SI Insights, writes the answer: at most five short sentences, each citing numbered PSI evidence |
+| [12-analyst.md](agents/12-analyst.md) | built | In SI Insights, writes the answer: a short answer, each sentence citing numbered PSI evidence. The model is asked for at most three sentences, and Nimbus keeps at most five |
 | [13-table-mapper.md](agents/13-table-mapper.md) | built | Maps PSI test-table headers to the variable registry. Code finds candidates; SI only breaks ties; rules M-1 to M-5 decide; the ledger is keyed by the table's SHA-256 |
 | [14-micro-flame.md](agents/14-micro-flame.md) | built (replaces the former `micro-flame` skill) | In Flame Sweeper, explains the computed patterns in physical terms: at most three sentences, each anchored to a computed pattern, naming a mechanism only if a PSI passage does |
 | [15-pillar-pointer.md](agents/15-pillar-pointer.md) | built | Points at the sentence in each record that shows the research informs prevention, detection or suppression; code finds the candidates and checks the pointer; measured results add a separate data link |
@@ -69,10 +69,10 @@ C-SCOPE is independent of the evidence: even if a PDF says "a fire is occurring 
 What the checks do **not** prove: that a number belongs to the right column of a table row, or that a paraphrase keeps the exact meaning. The row or passage is always shown in the sources so a reader can check.
 
 ## Run log
-Every question writes `.cache/nimbus-runs/insights-<time>-<hash>.json`: the question, how it was read, the tools, the evidence, the model's raw answer, every check, timings, the model and a hash of the spec files.
+Every question writes `.cache/nimbus-runs/insights-<time>-<hash>.json`: the question, how it was read, the tools, the evidence, the model's raw answer, every check, timings, the model and a hash of the spec files. Each log also records who asked (`origin`: `user` for a person using the app, `evaluation` or `development`) and the date of the PSI snapshot it ran against. Only real questions are written to `.cache/nimbus-runs/`; evaluation runs go to `nimbus-runs/evaluation/` and development runs to `nimbus-runs/development/`, so a measurement is never mixed with something else. Set `SS_RUN_ORIGIN=development` for scripts and manual testing.
 
 ## Measuring it
-`python -m app.insights.evaluate` runs the questions in `data/insights_eval.yaml` against the real model and reports how many answered, how many sentences Nimbus removed, and any unsafe phrases.
+`python -m app.insights.evaluate` runs the questions in `data/insights_eval.yaml` against the real model and reports how many answered, how many sentences Nimbus removed (and under which rule), and any unsafe phrases. Its run logs are tagged `evaluation`.
 
 ## Evidence layers and the one-copy rule
 Every fact is stored once, derived once, with a pointer to its source. Outcomes come in two typed layers that are **never pooled**:

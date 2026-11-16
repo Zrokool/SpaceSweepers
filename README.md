@@ -24,9 +24,9 @@ Working now:
 | **PSI sync** | Fetches the 26 investigations returned by the [PSI "combustion" search](https://psi.nasa.gov/physci/repo/search?q=combustion&data_source=psi&data_type=investigation) into a committed snapshot |
 | **Overview** | The mission brief for a habitat: what we know, what we don't, how sure we are |
 | **Rank** | Mission Fit score per investigation, with adjustable weights and the reason for every part |
-| **Compare** | 2–4 investigations side by side, plus a graph of how all 26 relate |
+| **Correlation** | 2–4 investigations side by side (the page is titled Compare), plus a graph of how all 26 relate |
 | **Flame Sweeper** | An oxygen × pressure field for one experiment family at a time (FLEX droplets: how flames ended; CFI-G: did a hot flame light; CFI: did the flame reignite; BASS solid samples: did it burn, read from the lab's notes). Tested cells are revealed with their test count and the share where the flame kept burning; untested cells stay hidden. A model estimate appears in an untested cell only if the model beat guessing in cross-validation (FLEX yes, CFI-G no) and only inside the tested range. "What to test next" and "Explain these patterns" (Micro-Flame, checked by Nimbus) are included |
-| **Envelope** | Every harmonised test plotted by oxygen and pressure against the habitat's atmosphere |
+| **Envelope** | Every harmonised test plotted by oxygen and pressure against the habitat's atmosphere. It is hidden from the navigation for now; the page still opens at `#/envelope` |
 | **Fire Safety** | NASA spinoffs and each investigation's own Earth-benefits statement |
 | **PSI Source** | Where the data comes from and how far it goes: the snapshot, what PSI holds, what could be charted and why, how the numbers are kept honest and how SI is used, and each investigation's DOI and license |
 | **SI Insights** | A chat over all the PSI data. Scenario questions ("lowest oxygen where methanol burned", "CO2 vs helium", "closest tested conditions to my cabin") are answered by code from the 1,411 tests in under a second, with a table of the tests behind each number and a Scenario form for choosing conditions; concept questions quote PSI's own sentence. Other questions are answered by Granite from retrieved passages and every sentence is checked by Nimbus. **Two modes** (switch at the top of the page, remembered in the browser): **Guided** (the default) is a plain chat on the left with the PSI details behind each answer on the right (PSI's own words, the tests with file and row, things to keep in mind, sources) and follow-ups that build on your last question ("what about heptane?"); **Expert** is the full screen with the Scenario form, answer cards, per-source checks and the Nimbus verification panel |
@@ -49,7 +49,7 @@ python3 -m venv .venv
 ```
 Open http://localhost:8000. API docs are at http://localhost:8000/docs.
 
-The dashboard works from the committed snapshot in `data/`, so it runs offline and without Ollama.
+The dashboard works from the committed snapshot in `data/`, so it runs offline and without Ollama. At start-up the server logs one line saying whether Ollama is reachable and the SI model is installed (for example `Run: ollama pull granite3.3:2b`). It only informs: the dashboard starts either way.
 
 **Refresh the PSI data** (needs PSI to be up):
 ```bash
@@ -79,8 +79,10 @@ docker build -t spacesweepers .
 docker run --rm -p 8000:8000 -e 'SS_ALLOWED_HOSTS=["localhost","127.0.0.1","your.domain"]' spacesweepers
 ```
 
+The image has no Ollama. To use the SI from the container, add `-e SS_OLLAMA_URL=http://host.docker.internal:11434` so it can reach the Ollama on your computer (without it the dashboard works and the SI shows as offline). On Linux, also add `--add-host=host.docker.internal:host-gateway` and start Ollama with `OLLAMA_HOST=0.0.0.0`.
+
 - **`python -m app.warm`** loads the packaged data and fails if it is incomplete (not 26 investigations, no tests) or a mapped table changed after it was mapped (the "Data refresh needed" state). It runs in the Docker build, in CI, and at start-up, so the first visitor never waits for the catalog and a broken snapshot never ships.
-- **CI** (`.github/workflows/deploy.yml`): security gate (SAST, SCA, secrets) → unit tests and the packaged-data check → build the image → smoke-test the running container (`/api/meta`, `/api/sweeper`) → Grype scan → push to GHCR with SBOM and provenance → cosign signature. A weekly security scan runs on its own.
+- **CI** (`.github/workflows/deploy.yml`): security gate (SAST, SCA, secrets) → unit tests and the packaged-data check → build the image → smoke-test the running container (`/api/meta`, `/api/sweeper`) → Grype scan (blocks fixable high or critical findings; the one accepted exception is documented in `.grype.yaml`) → push to GHCR with SBOM and provenance → cosign signature. A weekly security scan runs on its own.
 - **Updating the data:** run `python -m app.psi.sync` (and `python -m app.nimbus.method`, `app.nimbus.tables`, `app.nimbus.pillars` as needed), review the tables it prints, commit `data/`, push. The pipeline rebuilds the image from the committed data. The SI parts that need Granite (chat, Micro-Flame explanations) work only where Ollama is reachable at `SS_OLLAMA_URL`; everything else works without it.
 
 ---
@@ -94,12 +96,12 @@ FastAPI   app/main.py            security headers, trusted hosts, rate limits
           app/routes/dashboard.py   the read-only API
           app/catalog.py         loads the snapshot into memory: investigations, tests, lineage
           app/psi/               client.py · sync.py · harmonise.py · units.py
-          app/analysis/          attributes.py · habitats.py · rank.py · compare.py · envelope.py · sweeper.py (Flame Sweeper) · taxonomy.py (table families and tiers) · outcome_layer.py (BASS outcomes read from lab notes) · complexity.py (why only part of PSI can be charted) · extinction.py and figures.py (figure data from stored Analyzed Data files)
+          app/analysis/          attributes.py · habitats.py · rank.py · compare.py · envelope.py · sweeper.py (Flame Sweeper) · taxonomy.py (table families and tiers) · outcome_layer.py (BASS outcomes read from lab notes) · complexity.py (why only part of PSI can be charted) · queries.py (the deterministic analyses behind scenario answers: nearest conditions, outcomes, thresholds, comparisons, profiles) · extinction.py and figures.py (figure data from stored Analyzed Data files)
           app/nimbus/            spec.py (loads agent specs) · runtime.py (one model call at a time, cache fingerprint) · method.py (Investigator + its checks) · tables.py (Table mapper + its checks) · pillars.py (Pillar pointer + its checks) · outcomes.py (Outcome pointer + its checks)
           app/psi/analyzed.py    stores the few PSI Analyzed Data files listed in data/analyzed.yaml, with SHA-256 · data/figures.yaml the reviewed figure specs
           app/psi/ledger.py      the variable registry loader and the table-mapping ledger (SHA-256 keyed)
           app/psi/workbooks.py   turns a lab workbook into one data table, once, at sync · data/workbooks.yaml the reviewed recipes
-          app/insights/          SI Insights: library.py · frame.py · tools.py · pipeline.py · verify.py (Nimbus checks) · hygiene.py (holds back instruction-like PSI passages) · answers.py (answers written by code) · report.py · evaluate.py · micro_flame.py (Micro-Flame agent)
+          app/insights/          SI Insights: library.py · frame.py · tools.py · pipeline.py · verify.py (Nimbus checks) · hygiene.py (holds back instruction-like PSI passages) · answers.py (answers written by code) · scenario.py (reads a scenario question and writes the answer card) · concepts.py (concept questions answered with PSI's own sentence) · report.py · evaluate.py · micro_flame.py (Micro-Flame agent)
           app/si/ollama.py       the local SI runtime
           app/routes/insights.py the chat API (streamed) and the Flame Sweeper explanation (/api/sweeper/explain)
 Data      data/snapshot/         records, test tables and manifest from PSI (committed)
@@ -129,7 +131,7 @@ Four parts, each 0–1, weighted in the browser (defaults 40 / 25 / 20 / 15):
 |---|---|
 | Condition match | Tests inside or near the habitat's oxygen and pressure box (room-air oxygen only) |
 | Fuel relevance | Fuels named in the record text and in each test table's own Fuel/Material column: solid 1.0, liquid 0.6, gas 0.4; a gas burner that emulates solids (ACME BRE) 0.8 |
-| Pillar match | Mentions of prevention, detection or suppression terms |
+| Pillar match | Points from the record's own quoted sentence (Research Impacts 3, Objective or Hypothesis 2, Approach 1) plus 2 if measured results bear on the pillar; 5 points is full marks |
 | Data richness | Test-table rows downloaded (mapped or not, full marks at 100), publications (10) and documents read (5); stored Analyzed Data figures add up to 20% extra (full at 5). Figures are data we hold, never condition evidence |
 
 Investigations outside Combustion Science are multiplied by 0.25. The Rank page has a "How the score works" panel written from the same constants, and shows how often each investigation stays in the top five when the weights are varied at random (400 seeded runs).
@@ -138,12 +140,13 @@ Investigations outside Combustion Science are multiplied by 0.25. The Rank page 
 Open the **SI Insights** tab and ask a question, for example "What did FLEX find about extinction?", "Compare BASS and BASS-II" or "Which BASS-II tests recorded carbon monoxide?".
 
 - **What it searches:** 8,077 evidence items built from the snapshot: record text, method labels, related investigations, test summaries, all 2,353 test-table rows, 4,977 passages of 47 documents (with page numbers), 367 publications, the file lists and the PSI-117 simulated-data list (9 entries).
-- **How it answers:** code reads the question and gathers evidence; the Investigator (SI) can add tool calls; the Analyst (SI) writes at most five sentences that cite numbered evidence; **Nimbus checks every sentence** and removes any it can't support. You see the answer with its sources, the removed sentences and why, what the data doesn't cover, and a computed table or list for comparisons and counts.
+- **How it answers:** code reads the question and gathers evidence; the Investigator (SI) can add tool calls; the Analyst (SI) writes a short answer that cites numbered evidence (it is asked for at most three sentences, and Nimbus keeps at most five); **Nimbus checks every sentence** and removes any it can't support. You see the answer with its sources, the removed sentences and why, what the data doesn't cover, and a computed table or list for comparisons and counts.
+- **Two modes, for two kinds of user:** a switch at the top of the page, remembered in the browser. **Guided** (the default) is for undergraduate students and anyone new to combustion research: a plain chat with starter questions, follow-ups that remember your last question, and the quotes, tests, cautions and sources beside each answer. **Expert** is for researchers, engineers and graduate students: the Nimbus verification panel (what was checked, what was removed and why), the tests with file and row, per-source checks and a Scenario form where you enter your own oxygen and pressure. Both modes give the same checked answers; only the way they are shown changes.
 - **Rules and limits:** see [Nimbus/README.md](Nimbus/README.md). It gives research context only: it never says a fire is occurring, predicts an outcome or gives instructions.
 - **Speed:** the model runs on your computer's CPU. With the model loaded an answer takes about 40 to 70 seconds; the first question after a long pause can take minutes while the model loads (the tab warms it up when it opens).
 - **Without Ollama:** the tab still shows the evidence found, labelled "SI offline".
 - **Share a question:** a link like `#/insights?q=What did FLEX find about extinction?` asks it on load.
-- **Measure it:** `python -m app.insights.evaluate` runs 15 questions against the real model.
+- **Measure it:** `python -m app.insights.evaluate` runs the 16 general questions in `data/insights_eval.yaml` against the real model and prints how many sentences Nimbus removed under each rule; `--scenarios` runs the 20 audience questions in `data/scenario_eval.yaml`. Its run logs are tagged `evaluation`, so they never mix with real questions.
 
 ### Test-table mapping (registry and ledger)
 PSI test tables use different headers. Three files say what each column means:
@@ -177,13 +180,24 @@ Environment variables with the prefix `SS_`, or lines in `.env`.
 | `SS_ALLOWED_HOSTS` | `["localhost","127.0.0.1"]` | Add your domain when deploying |
 | `SS_DATA_DIR` | `data` | Snapshot, mappings, vocabulary |
 | `SS_API_RATE_LIMIT` | `120/minute` | Per IP |
+| `SS_ASK_RATE_LIMIT` | `10/minute` | Questions to SI Insights, per IP |
+| `SS_SI_TIMEOUT_SECONDS` | `300` | How long one model call may take |
+| `SS_SI_QUEUE_WAIT_SECONDS` | `90` | How long a question may wait for the one model before it is answered from evidence alone |
+| `SS_SI_MAX_WAITING` | `4` | How many questions may wait for the model at once |
+| `SS_CACHE_DIR` | `.cache` | Run logs and the development cache |
+| `SS_RUN_ORIGIN` | `user` | Who a run log belongs to: `user`, `evaluation` or `development`. Set `development` for scripts and manual testing so measurements are never mixed with real questions |
 
 ## Security
 - The browser only calls this app. Every PSI URL is built by the server from fixed hosts; download links are followed only to PSI's own bucket.
 - Strict Content-Security-Policy: scripts from this origin only, no inline scripts or styles, no `eval`.
 - All text is rendered with `textContent`, so record or SI text can never become HTML.
 - Trusted-host check, per-IP rate limits, `nosniff`, `frame-ancestors 'none'`, `no-referrer`.
-- CI runs SAST, dependency and secret scanning (`.github/workflows/`).
+- Inputs are checked by strict request schemas that reject unknown fields; questions are capped at 500 characters; rate limits are 120 requests a minute per IP, and 10 questions a minute for SI Insights.
+- Privacy: contact details and username-password pairs are removed from PSI text by pattern before anything is saved (a pair becomes `[credential removed]`; the rule is in `app/psi/documents.py`). Raw data and video are never downloaded, and the SI only sees evidence that code has selected.
+- Word and Excel files are parsed only if their XML declares no DTD or entity, which blocks XML entity-expansion attacks.
+- Supply chain: all 30 dependencies are pinned to exact versions, GitHub Actions are pinned to commits, the container runs as a non-root user with a health check, and the published image is signed (cosign) with an SBOM and build provenance.
+- CI runs four scans on every deploy and weekly (`.github/workflows/`): code (Semgrep, Bandit), dependencies (pip-audit, OSV-Scanner), secrets across the full git history (Gitleaks, TruffleHog) and the container image (Grype, blocking fixable high or critical findings). One finding is accepted and documented in `.grype.yaml` (Python 3.14.10, fixed in 3.14.11, with no base image yet); remove it when an image with 3.14.11 exists.
+- At start-up the server logs whether the SI model is installed (see Run it).
 - SI Insights is reviewed against the OWASP Top 10 for LLM Applications (2025) in [Nimbus/README.md](Nimbus/README.md#security-review-owasp-top-10-for-llm-applications-2025): instruction-like PSI passages are held back from the prompt, answers cannot add links or commands, link addresses from data are checked, and a wait limit keeps a flood of questions from piling up. No SI is used to guard SI.
 
 ## SI use, sources and licenses

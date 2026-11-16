@@ -19,7 +19,7 @@ Closes #
 - [ ] 🔥 PSI data change (snapshot refresh, table mapping, evidence quote, vocabulary, taxonomy)
 - [ ] 🧠 SI / model change (Ollama model, an agent spec in `Nimbus/agents/`, prompt, schema or options)
 - [ ] 📐 Nimbus rule change (`Nimbus/README.md`, check rules C-*, mapping rules M-*, definition rules D-*)
-- [ ] 🎨 UI change (Overview, Fire Safety, Rank, Correlation, Envelope, Flame Sweeper, SI Insights, References)
+- [ ] 🎨 UI change (Overview, Fire Safety, Rank, Correlation, Flame Sweeper, SI Insights, PSI Source; Envelope is hidden from the nav)
 - [ ] 🔒 Security fix or hardening
 - [ ] 📦 Dependency update
 - [ ] ⚙️ CI/CD or build change (Dockerfile, GitHub Actions)

@@ -13,7 +13,7 @@ Both, at different layers.
 | **Fetch from PSI** | On demand, by running `python -m app.psi.sync`. It is not called on every page view. The last fetch is stamped in the page footer (**2026-11-14**). |
 | **Store** | The fetched records, tables and document text are saved with a SHA-256 fingerprint each, so any change is detectable. |
 | **Deconstruct** | Once per fetch: tables become tests, text becomes labelled evidence. |
-| **Calculate** | **Every time you use the app.** Rank, Envelope, Flame Sweeper, Compare and the chat's scenario answers are computed from the stored pieces for the habitat, pillar and weights you choose. |
+| **Calculate** | **Every time you use the app.** Rank, Envelope, Flame Sweeper, Correlation and the chat's scenario answers are computed from the stored pieces for the habitat, pillar and weights you choose. |
 
 So the source is a stored copy of PSI, but the results are never stored answers. Change a weight or a habitat and the numbers are recomputed.
 
@@ -45,11 +45,12 @@ Quality flags: `ok`, `approx`, `range`, `multi`, `missing`, `implausible`, `unpa
 |---|---|---|
 | **Overview** | Counts and the top Rank result | What we know, what we don't, what we're sure of. |
 | **Rank** | Tests, fuels, pillar quotes, documents | Four scores, weighted. Unknown parts are shown, not guessed. |
-| **Envelope** | Tests with oxygen and pressure | One dot per test (1,270), checked against the habitat box. |
+| **Envelope** (hidden from the navigation for now) | Tests with oxygen and pressure | One dot per test (1,270), checked against the habitat box. |
 | **Flame Sweeper** | Tests with an outcome, one family at a time | Counts per oxygen and pressure cell. A model estimates gaps only if it beats guessing. |
 | **Correlation** | Each investigation's profile | Shared and different conditions, fuels, hardware, methods. |
 | **Fire Safety** | Checked pillar quotes | Points for the record's own words. |
 | **SI Insights** | All 8,077 evidence items | Code finds evidence and computes numbers; the SI phrases it; Nimbus checks every sentence. |
+| **PSI Source** | The manifest, table statuses, DOIs and licenses | The funnel from 26 investigations to the tables to the comparable tests, and the reason each unusable table was left out. |
 
 The habitat atmospheres come from the challenge text, not PSI, and are labelled that way.
 
